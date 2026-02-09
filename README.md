@@ -2,97 +2,97 @@
 
 ![Naruto MMORPG Banner](template/topo.png)
 
-> **A feature-rich browser migration of the classic Naruto game engine, now updated for modern PHP 8 environments.**
+> **Uma migração completa do clássico jogo de navegador de Naruto, agora atualizado para ambientes modernos com PHP 8.**
 
-## 📖 About the Project
+## 📖 Sobre o Projeto
 
-This is a **browser-based MMORPG** set in the universe of **Naruto**. Players create their own ninja, choose a village, and embark on a journey to become the strongest shinobi. The game features a robust RPG system with leveling, missions, battles, and community interaction.
+Este é um **MMORPG baseado em navegador** ambientado no universo de **Naruto**. Os jogadores criam seu próprio ninja, escolhem uma vila e embarcam em uma jornada para se tornarem os shinobis mais fortes. O jogo possui um sistema de RPG robusto com níveis, missões, batalhas e interação com a comunidade.
 
-Recently, this project has undergone a significant **modernization effort** to ensure compatibility with **PHP 8.x**, fixing deprecated functions, optimizing database interactions, and resolving frontend issues.
-
----
-
-## ✨ Key Features
-
-*   **🥋 Character Progression:** detailed stat system (Ninjutsu, Taijutsu, Genjutsu), leveling, and rank exams (Gennin, Chuunin, Jounin, ANBU, Kage).
-*   **🏘️ Village System:** Join one of the iconic villages (Leaf, Sand, Mist, Stone, etc.) or become a **Renegade (Akatsuki)**.
-*   **⚔️ Combat System:**
-    *   **PvE:** Hunt wild beasts, complete missions, and fight NPCs.
-    *   **PvP:** Challenge other players in the arena or open world.
-    *   **War:** Large scale village wars and territory control.
-*   **📜 Mission System:** Hundreds of ranked missions (D to S rank) and special tasks.
-*   **🛡️ Items & Equipment:** Shop system, blacksmithing, and rare drops (Legendary Weapons).
-*   **🦅 Organizations:** Create or join clans/organizations with exclusive bases and benefits.
-*   **🎓 Academy & Jutsus:** Learn hundreds of jutsus from the anime/manga.
-*   **🐶 Pet/Summoning System:** Tamable animals and summons to aid in battle.
+Recentemente, este projeto passou por um significativo **esforço de modernização** para garantir compatibilidade com **PHP 8.x**, corrigindo funções obsoletas, otimizando interações com o banco de dados e resolvendo problemas de frontend.
 
 ---
 
-## 🛠️ Technology Stack
+## ✨ Principais Recursos
 
-*   **Backend:** PHP (Originally 5.x, now **PHP 8.2+ Compatible**)
-*   **Database:** MySQL / MariaDB
+*   **🥋 Progressão de Personagem:** Sistema detalhado de estatísticas (Ninjutsu, Taijutsu, Genjutsu), níveis e exames de graduação (Gennin, Chuunin, Jounin, ANBU, Kage).
+*   **🏘️ Sistema de Vilas:** Junte-se a uma das vilas icônicas (Folha, Areia, Névoa, Pedra, etc.) ou torne-se um **Renegado (Akatsuki)**.
+*   **⚔️ Sistema de Combate:**
+    *   **PvE:** Caçe bestas selvagens, complete missões e lute contra NPCs.
+    *   **PvP:** Desafie outros jogadores na arena ou no mundo aberto.
+    *   **Guerra:** Guerras de vilas em grande escala e controle de território.
+*   **📜 Sistema de Missões:** Centenas de missões classificadas (Rank D a S) e tarefas especiais.
+*   **🛡️ Itens e Equipamentos:** Loja, ferreiro e drops raros (Armas Lendárias).
+*   **🦅 Organizações:** Crie ou junte-se a clãs/organizações com bases exclusivas e benefícios.
+*   **🎓 Academia e Jutsus:** Aprenda centenas de jutsus do anime/mangá.
+*   **🐶 Sistema de Pets/Invocação:** Animais domáveis e invocações para ajudar na batalha.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+*   **Backend:** PHP (Originalmente 5.x, agora **Compatível com PHP 8.2+**)
+*   **Banco de Dados:** MySQL / MariaDB
 *   **Frontend:** HTML5, CSS3, JavaScript (jQuery 1.9.0)
-*   **Server:** Apache/Nginx (WAMP/XAMPP ready)
+*   **Servidor:** Apache/Nginx (Pronto para WAMP/XAMPP)
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Instalação e Configuração
 
-### Prerequisites
-*   A web server (Apache/Nginx)
-*   PHP 8.0 or higher
-*   MySQL Database
+### Pré-requisitos
+*   Um servidor web (Apache/Nginx)
+*   PHP 8.0 ou superior
+*   Banco de Dados MySQL
 
-### Steps
+### Passos
 
-1.  **Clone the Repository**
+1.  **Clonar o Repositório**
     ```bash
     git clone https://github.com/gbernichpro/naruto-browser.git
     ```
 
-2.  **Database Setup**
-    *   Create a database usually named `naruto` or `naruto_game`.
-    *   Import the SQL dump file provided in the `_sql/` or root directory (if available).
+2.  **Configuração do Banco de Dados**
+    *   Crie um banco de dados, geralmente chamado `naruto` ou `naruto_game`.
+    *   Importe o arquivo SQL fornecido na pasta `_sql/` ou na raiz (se disponível).
 
-3.  **Configuration**
-    *   Navigate to the `_inc/` directory.
-    *   Edit `conexao.php` with your database credentials:
+3.  **Configuração**
+    *   Navegue até o diretório `_inc/`.
+    *   Edite o arquivo `conexao.php` com as credenciais do seu banco de dados:
         ```php
-        $db = mysqli_connect("localhost", "root", "password", "database_name");
+        $db = mysqli_connect("localhost", "root", "senha", "nome_do_banco");
         ```
 
-4.  **Run the Game**
-    *   Place the project folder in your web server's root (e.g., `www` or `htdocs`).
-    *   Access via browser: `http://localhost/Naruto`
+4.  **Rodar o Jogo**
+    *   Coloque a pasta do projeto na raiz do seu servidor web (ex: `www` ou `htdocs`).
+    *   Acesse pelo navegador: `http://localhost/Naruto`
 
 ---
 
-## 🔧 Recent Updates (Refactoring)
+## 🔧 Atualizações Recentes (Refatoração)
 
-We have successfully revived this legacy codebase with the following fixes:
+Revivemos este código legado com as seguintes correções:
 
-*   ✅ **PHP 8 Migration:** Replaced deprecated `mysql_*` functions with a custom `mysqli` shim (`_inc/mysqli_shim.php`) and updated `ereg` to `preg_match`.
-*   ✅ **Security:** Implemented `anti_sql_injection` and safer session handling.
-*   ✅ **Frontend Modernization:** Updated jQuery to v1.9.0, fixed conflicting libraries, and resolved JS syntax errors.
-*   ✅ **Asset Fixes:** Restored missing paths and suppressed 404 errors for lost assets.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to check the [Issues](https://github.com/gbernichpro/naruto-browser/issues) tab or submit a Pull Request.
-
-1.  Fork the project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+*   ✅ **Migração para PHP 8:** Substituição de funções `mysql_*` obsoletas por um shim `mysqli` personalizado (`_inc/mysqli_shim.php`) e atualização de `ereg` para `preg_match`.
+*   ✅ **Segurança:** Implementação de `anti_sql_injection` e manipulação de sessão mais segura.
+*   ✅ **Modernização do Frontend:** Atualização do jQuery para v1.9.0, correção de bibliotecas conflitantes e resolução de erros de sintaxe JS.
+*   ✅ **Correção de Assets:** Restauração de caminhos perdidos e supressão de erros 404 para arquivos ausentes.
 
 ---
 
-## 📜 License
+## 🤝 Contribuição
 
-This project is intended for educational purposes. All Naruto characters and assets are copyright **Masashi Kishimoto**.
+Contribuições são bem-vindas! Sinta-se à vontade para verificar a aba [Issues](https://github.com/gbernichpro/naruto-browser/issues) ou enviar um Pull Request.
 
-**Maintained by [G. Bernich](https://github.com/gbernichpro)**
+1.  Faça um Fork do projeto
+2.  Crie sua Branch de Feature (`git checkout -b feature/MinhaFeatureIncrivel`)
+3.  Faça o Commit de suas mudanças (`git commit -m 'Adiciona alguma Feature Incrível'`)
+4.  Faça o Push para a Branch (`git push origin feature/MinhaFeatureIncrivel`)
+5.  Abra um Pull Request
+
+---
+
+## 📜 Licença
+
+Este projeto é destinado a fins educacionais. Todos os personagens e ativos de Naruto são direitos autorais de **Masashi Kishimoto**.
+
+**Mantido por [G. Bernich](https://github.com/gbernichpro)**
