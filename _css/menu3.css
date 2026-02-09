@@ -1,0 +1,141 @@
+/*
+
+HOW TO CREATE A CSS3 DROPDOWN benu [TUTORIAL]
+
+"How to create a CSS3 Dropdown benu [Tutorial]" was specially made for DesignModo by our friend Valeriu Timbuc.
+
+Links:
+http://vtimbuc.net/
+https://twitter.com/vtimbuc
+http://designmodo.com
+http://vladimirkudinov.com
+
+*/
+
+/* Reset */
+.benu,
+.benu ul,
+.benu li,
+.benu a {
+	margin: 0px;
+	padding: 0;
+	border: none;
+	outline: none;
+}
+
+/* benu */
+.benu {	
+	height: 40px;
+	width: 700px;
+
+	background: #800000;
+	background: -webkit-linear-gradient(top, #800000 0%,#FF0000 100%);
+	background: -moz-linear-gradient(top, #800000 0%,#FF0000 100%);
+	background: -o-linear-gradient(top, ##800000 0%,#FF0000 100%);
+	background: -ms-linear-gradient(top, #800000 0%,#FF0000 100%);
+	background: linear-gradient(top, ##800000 0%,#FF0000 100%);
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.benu li {
+	position: relative;
+	list-style: none;
+	float: left;
+	display: block;
+	height: 40px;
+}
+
+/* Links */
+
+.benu li a {
+	display: block;
+	padding: 0 14px;
+	margin: 6px 0;
+	line-height: 28px;
+	text-decoration: none;
+	
+	border-left: 1px solid #800000;
+	border-right: 0px solid #FF0000;
+
+	font-family: Helvetica, Arial, sans-serif;
+	font-weight: bold;
+	font-size: 13px;
+
+	color: #f3f3f3;
+	text-shadow: 1px 1px 1px rgba(0,0,0,.6);
+
+	-webkit-transition: color .2s ease-in-out;
+	-moz-transition: color .2s ease-in-out;
+	-o-transition: color .2s ease-in-out;
+	-ms-transition: color .2s ease-in-out;
+	transition: color .2s ease-in-out;
+}
+
+.benu li:first-child a { border-left: none; }
+.benu li:last-child a{ border-right: none; }
+
+.benu li:hover > a { color: #8fde62; }
+
+/* Sub benu */
+
+.benu ul {
+	position: absolute;
+	top: 40px;
+	left: 0;
+
+	opacity: 0;
+	
+	background: #FF0000;
+
+	-webkit-border-radius: 0 0 5px 5px;
+	-moz-border-radius: 0 0 5px 5px;
+	border-radius: 0 0 5px 5px;
+
+	-webkit-transition: opacity .25s ease .1s;
+	-moz-transition: opacity .25s ease .1s;
+	-o-transition: opacity .25s ease .1s;
+	-ms-transition: opacity .25s ease .1s;
+	transition: opacity .25s ease .1s;
+}
+
+.benu li:hover > ul { opacity: 1; }
+
+.benu ul li {
+	height: 0;
+	overflow: hidden;
+	padding: 0;
+
+	-webkit-transition: height .25s ease .1s;
+	-moz-transition: height .25s ease .1s;
+	-o-transition: height .25s ease .1s;
+	-ms-transition: height .25s ease .1s;
+	transition: height .25s ease .1s;
+}
+
+.benu li:hover > ul li {
+	height: 36px;
+	overflow: visible;
+	padding: 0;
+}
+
+.benu ul li a {
+	width: 100px;
+	padding: 4px 0 4px 40px;
+	margin: 0;
+
+	border: none;
+	border-bottom: 1px solid #800000;
+}
+
+.benu ul li:last-child a { border: none; }
+
+/* Icons */
+
+.benu a.documents { background: url(../img/docs.png) no-repeat 6px center; }
+.benu a.messages { background: url(../img/bubble.png) no-repeat 6px center; }
+.benu a.signout { background: url(../img/arrow.png) no-repeat 6px center; }
+</div>
+<div class="box_bottomxx"></div>
