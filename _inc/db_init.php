@@ -35,6 +35,16 @@ function db_auto_init($link, $db_name) {
             }
         }
         
+        // Insere admin padrao se a tabela usuarios estiver vazia
+        $res_u = mysqli_query($link, "SELECT COUNT(*) FROM `usuarios`") or die(mysqli_error($link));
+        $row_u = mysqli_fetch_row($res_u);
+        if ($row_u[0] == 0) {
+            $admin_pass = password_hash('admin', PASSWORD_DEFAULT);
+            $sql_admin = "INSERT INTO `usuarios` (`usuario`, `senha`, `email`, `personagem`, `vila`, `reg`, `vip_inicio`, `vip`, `hunt_fim`, `missao_fim`, `treino_fim`, `penalidade_fim`, `tipodeconta`, `status`) 
+                          VALUES ('admin', '$admin_pass', 'admin@admin.com', 'naruto', 1, NOW(), '1970-01-01', '1970-01-01', '1970-01-01', '1970-01-01', '1970-01-01', '1970-01-01', 'admin', 'ativo')";
+            mysqli_query($link, $sql_admin) or file_put_contents(dirname(__DIR__) . '/_inc/db_errors.log', "Admin Inserter Error: " . mysqli_error($link), FILE_APPEND);
+        }
+
         if (!empty($errors)) {
             file_put_content(dirname(__DIR__) . '/_inc/db_errors.log', implode("\n", $errors));
         }
