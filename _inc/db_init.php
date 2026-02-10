@@ -25,11 +25,18 @@ function db_auto_init($link, $db_name) {
         
         // Split por ; para rodar multiplos comandos
         $queries = explode(';', $sql);
+        $errors = [];
         foreach ($queries as $q) {
             $q = trim($q);
             if (!empty($q)) {
-                mysqli_query($link, $q);
+                if (!mysqli_query($link, $q)) {
+                    $errors[] = "Error running: " . substr($q, 0, 100) . "... | Error: " . mysqli_error($link);
+                }
             }
+        }
+        
+        if (!empty($errors)) {
+            file_put_content(dirname(__DIR__) . '/_inc/db_errors.log', implode("\n", $errors));
         }
         return true;
     }

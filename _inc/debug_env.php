@@ -71,6 +71,14 @@ if ($db_name !== 'MISSING' && $db_user !== 'MISSING' && $db_host !== 'MISSING') 
     }
 }
 
+echo "<h2>Database Errors (Last Attempt)</h2>";
+$error_log = __DIR__ . '/db_errors.log';
+if (file_exists($error_log)) {
+    echo "<pre style='background: #fee; padding: 10px; border: 1px solid #faa;'>" . htmlspecialchars(file_get_contents($error_log)) . "</pre>";
+} else {
+    echo "✅ No errors recorded in db_errors.log";
+}
+
 echo "<h2>Image Audit</h2>";
 $img_dir = __DIR__ . '/../_img';
 if (is_dir($img_dir)) {
