@@ -4,8 +4,15 @@
  */
 
 $cache_dir = __DIR__ . '/../_cache';
+
+// Fallback for production systems (like Coolify/Docker) where the root may be read-only
 if (!is_dir($cache_dir)) {
-    mkdir($cache_dir, 0777, true);
+    if (!@mkdir($cache_dir, 0777, true)) {
+        $cache_dir = sys_get_temp_dir() . '/naruto_cache';
+        if (!is_dir($cache_dir)) {
+            @mkdir($cache_dir, 0777, true);
+        }
+    }
 }
 
 /**
