@@ -10,7 +10,7 @@ if($dbc['conta']>=$vagas){ echo "<script>self.location='?p=login'</script>"; ret
 if(isset($_POST['reg_submit'])){
 	$erro=0;
     if(!validate_csrf_token(@$_POST['csrf_token'])) $erro=17; // New error code for CSRF
-    if($erro==0 && !validate_turnstile(@$_POST['cf-turnstile-response'])) $erro=18; // Turnstile failure
+    // if($erro==0 && !validate_turnstile(@$_POST['cf-turnstile-response'])) $erro=18; // Turnstile failure
 	if(@$_POST['reg_termos']=='') $erro=11;
 	if(!isset($_POST['reg_termos'])) $erro=8;
 	if($_POST['reg_senha']<>$_POST['reg_senha2']) $erro=7;
@@ -251,7 +251,7 @@ function Cvila(obj){
     <input type="checkbox" id="reg_termos" name="reg_termos" /> Declaro que <b>li</b> e <b>aceito</b> os termos propostos, e que estou ciente das regras do jogo.
     <div class="sep"></div>
     <div align="center">
-        <div class="cf-turnstile" data-sitekey="<?php echo $_ENV['TURNSTILE_SITE_KEY']; ?>" data-size="compact"></div>
+        <!-- <div class="cf-turnstile" data-sitekey="<?php echo $_ENV['TURNSTILE_SITE_KEY']; ?>" data-size="compact"></div> -->
         <input type="submit" class="botao" id="subm" name="subm" value="Registrar" />
     </div>
 </fieldset>
