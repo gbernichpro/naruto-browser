@@ -2,89 +2,55 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-echo "<h1>Diagnostic Naruto RPG</h1>";
+echo "<h1>Advanced Diagnostic Naruto RPG</h1>";
 
-echo "<h2>Environment</h2>";
-echo "PHP Version: " . phpversion() . "<br>";
-echo "Current Dir: " . __DIR__ . "<br>";
-echo "Document Root: " . $_SERVER['DOCUMENT_ROOT'] . "<br>";
-
-echo "<h2>Vendor/Autoload</h2>";
-$vendor = __DIR__ . '/../vendor/autoload.php';
-if (file_exists($vendor)) {
-    echo "✅ vendor/autoload.php exists<br>";
-    require_once $vendor;
-} else {
-    echo "❌ vendor/autoload.php MISSING<br>";
-}
-
-echo "<h2>.env Loading</h2>";
-if (class_exists('Dotenv\Dotenv')) {
-    echo "✅ Dotenv class found<br>";
-    try {
-        $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
-        if (file_exists(dirname(__DIR__) . '/.env')) {
-            echo "✅ .env file exists<br>";
-            $dotenv->load();
+// 1. Recursive Image Scan
+function count_files_recursive($dir) {
+    $count = 0;
+    if (!is_dir($dir)) return 0;
+    $files = scandir($dir);
+    foreach ($files as $file) {
+        if ($file === '.' || $file === '..') continue;
+        $path = $dir . '/' . $file;
+        if (is_dir($path)) {
+            $count += count_files_recursive($path);
         } else {
-            echo "⚠️ .env file MISSING (might use system env)<br>";
-            $dotenv->safeLoad();
+            $count++;
         }
-        echo "✅ Dotenv loaded successfully<br>";
-    } catch (Exception $e) {
-        echo "❌ Dotenv failed: " . $e->getMessage() . "<br>";
     }
-} else {
-    echo "❌ Dotenv class NOT FOUND<br>";
+    return $count;
 }
 
-echo "<h2>Database Connection</h2>";
-$db_name = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?? 'MISSING';
-$db_user = $_ENV['DB_USER'] ?? getenv('DB_USER') ?? 'MISSING';
-$db_host = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?? 'MISSING';
-$db_pass = isset($_ENV['DB_PASS']) ? 'EXISTS' : (getenv('DB_PASS') ? 'EXISTS' : 'MISSING');
+echo "<h2>A ativos (Imagens/Template)</h2>";
+$img_count = count_files_recursive(__DIR__ . '/../_img');
+$template_count = count_files_recursive(__DIR__ . '/../template');
+echo "Total files in _img (recursive): $img_count<br>";
+echo "Total files in template: $template_count<br>";
 
-echo "DB_NAME: $db_name<br>";
-echo "DB_USER: $db_user<br>";
-echo "DB_HOST: $db_host<br>";
-echo "DB_PASS: $db_pass<br>";
-
-if ($db_name !== 'MISSING' && $db_user !== 'MISSING' && $db_host !== 'MISSING') {
-    $conn = @mysqli_connect($db_host, $db_user, $_ENV['DB_PASS'] ?? getenv('DB_PASS') ?? '');
-    if ($conn) {
-        echo "✅ MySQLi Connection Success<br>";
-        if (mysqli_select_db($conn, $db_name)) {
-            echo "✅ Database Selection Success<br>";
-            $res = mysqli_query($conn, "SHOW TABLES");
-            echo "Tables found: " . mysqli_num_rows($res) . "<br>";
-            echo "<ul>";
-            while($row = mysqli_fetch_row($res)) {
-                echo "<li>" . $row[0] . "</li>";
-            }
-            echo "</ul>";
-        } else {
-            echo "❌ Database Selection Failed: " . mysqli_error($conn) . "<br>";
-        }
-        mysqli_close($conn);
-    } else {
-        echo "❌ MySQLi Connection Failed: " . mysqli_connect_error() . "<br>";
-    }
+if ($template_count === 0) {
+    echo "❌ CRITICAL: 'template' folder is EMPTY or MISSING in production!<br>";
 }
 
-echo "<h2>Database Errors (Last Attempt)</h2>";
-$error_log = __DIR__ . '/db_errors.log';
-if (file_exists($error_log)) {
-    echo "<pre style='background: #fee; padding: 10px; border: 1px solid #faa;'>" . htmlspecialchars(file_get_contents($error_log)) . "</pre>";
-} else {
-    echo "✅ No errors recorded in db_errors.log";
+// 2. Database Row Check
+require_once 'conexao.php';
+echo "<h2>Database Records</h2>";
+$tables_to_check = ['settings', 'usuarios', 'table_itens', 'organizacoes'];
+foreach ($tables_to_check as $table) {
+    $res = mysqli_query($mysqli_link, "SELECT COUNT(*) FROM `$table`") or die(mysqli_error($mysqli_link));
+    $row = mysqli_fetch_row($res);
+    echo "Table `$table`: " . $row[0] . " rows<br>";
 }
 
-echo "<h2>Image Audit</h2>";
-$img_dir = __DIR__ . '/../_img';
-if (is_dir($img_dir)) {
-    echo "✅ _img directory exists<br>";
-    $files = array_diff(scandir($img_dir), ['.', '..']);
-    echo "Files in _img: " . count($files) . "<br>";
-} else {
-    echo "❌ _img directory MISSING<br>";
+echo "<h2>Check Critical Files</h2>";
+$critical = ['_inc/menu_off.php', '_inc/menu_on.php', '_inc/top.php', 'index.php'];
+foreach ($critical as $f) {
+    $exists = file_exists(__DIR__ . '/../' . $f) ? "✅" : "❌ MISSING";
+    echo "$f: $exists<br>";
 }
+
+echo "<h2>Session/Cookie Status</h2>";
+echo "Session Status: " . session_status() . "<br>";
+echo "PHPSESSID: " . ($_COOKIE['PHPSESSID'] ?? 'MISSING') . "<br>";
+echo "logado (cookie): " . ($_COOKIE['logado'] ?? 'MISSING') . "<br>";
+
+?>
