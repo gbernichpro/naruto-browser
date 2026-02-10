@@ -44,6 +44,7 @@ foreach ($tables_to_check as $table) {
 echo "<h2>Security Keys Check</h2>";
 echo "TURNSTILE_SITE_KEY: " . (isset($_ENV['TURNSTILE_SITE_KEY']) ? "✅ EXISTS (" . substr($_ENV['TURNSTILE_SITE_KEY'], 0, 6) . "...)" : "❌ MISSING") . "<br>";
 echo "TURNSTILE_SECRET_KEY: " . (isset($_ENV['TURNSTILE_SECRET_KEY']) ? "✅ EXISTS (" . substr($_ENV['TURNSTILE_SECRET_KEY'], 0, 6) . "...)" : "❌ MISSING") . "<br>";
+echo "CURL Extension: " . (function_exists('curl_init') ? "✅ ENABLED" : "❌ DISABLED (Wait, Turnstile needs this!)") . "<br>";
 
 echo "<h2>Check Critical Files</h2>";
 $critical = ['_inc/menu_off.php', '_inc/menu_on.php', '_inc/top.php', 'index.php'];
