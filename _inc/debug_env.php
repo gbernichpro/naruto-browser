@@ -57,6 +57,11 @@ if ($db_name !== 'MISSING' && $db_user !== 'MISSING' && $db_host !== 'MISSING') 
             echo "✅ Database Selection Success<br>";
             $res = mysqli_query($conn, "SHOW TABLES");
             echo "Tables found: " . mysqli_num_rows($res) . "<br>";
+            echo "<ul>";
+            while($row = mysqli_fetch_row($res)) {
+                echo "<li>" . $row[0] . "</li>";
+            }
+            echo "</ul>";
         } else {
             echo "❌ Database Selection Failed: " . mysqli_error($conn) . "<br>";
         }
