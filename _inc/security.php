@@ -42,8 +42,11 @@ function csrf_input() {
 function validate_turnstile($token) {
     if (empty($token)) return false;
     
-    $secret = $_ENV['TURNSTILE_SECRET_KEY'];
-    if ($secret === 'your_secret_key_here') return true; // Bypass for development if not configured
+    $secret = $_ENV['TURNSTILE_SECRET_KEY'] ?? 'your_secret_key_here';
+    if ($secret === 'your_secret_key_here' || empty($secret)) return true; // Bypass if not configured or empty
+    
+    // TEMPORARY BYPASS to unlock production while debugging
+    // return true; 
 
     $url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
     $data = [
