@@ -161,7 +161,7 @@ CREATE TABLE `chat` (
   `from` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
   `to` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
   `message` text COLLATE utf8_bin NOT NULL,
-  `sent` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `sent` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   `recd` int(10) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `to` (`to`),
@@ -403,7 +403,7 @@ CREATE TABLE `invasor` (
 -- ----------------------------
 -- Records of invasor
 -- ----------------------------
-INSERT INTO `invasor` VALUES ('1', '', '0', '0', '0', '0', 't', '', '0', '0', '1', '0', '0', '', '0000-00-00 00:00:00');
+INSERT INTO `invasor` VALUES ('1', '', '0', '0', '0', '0', 't', '', '0', '0', '1', '0', '0', '', '1970-01-01 00:00:00');
 
 -- ----------------------------
 -- Table structure for `invcla`
@@ -1080,25 +1080,25 @@ CREATE TABLE `salas` (
 -- Records of salas
 -- ----------------------------
 INSERT INTO `salas` VALUES ('1', '6', '2013-09-01 12:24:51');
-INSERT INTO `salas` VALUES ('2', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('3', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('4', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('5', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('6', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('7', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('8', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('9', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('10', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('11', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('12', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('13', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('14', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('15', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('16', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('17', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('18', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('19', '0', '0000-00-00 00:00:00');
-INSERT INTO `salas` VALUES ('20', '0', '0000-00-00 00:00:00');
+INSERT INTO `salas` VALUES ('2', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('3', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('4', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('5', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('6', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('7', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('8', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('9', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('10', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('11', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('12', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('13', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('14', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('15', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('16', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('17', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('18', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('19', '0', '1970-01-01 00:00:00');
+INSERT INTO `salas` VALUES ('20', '0', '1970-01-01 00:00:00');
 
 -- ----------------------------
 -- Table structure for `seguranca`
