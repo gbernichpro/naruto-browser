@@ -51,5 +51,5 @@ return req;
 alert("XmlHttp Objects not supported by client browser");
 }
 var http = getHTTPObject();
-// Logo após fazer a verificação, é chamada a função e passada
-// o valor à variável global http.
+// Logo apÃ³s fazer a verificaÃ§Ã£o, Ã© chamada a funÃ§Ã£o e passada
+// o valor Ã  variÃ¡vel global http.

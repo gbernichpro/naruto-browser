@@ -1,4 +1,4 @@
-﻿jQuery.fn.modal = function(options){
+jQuery.fn.modal = function(options){
 	
 	// VERIFICANDO O HREF
 	if(!options){

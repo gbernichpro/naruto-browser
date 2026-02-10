@@ -716,7 +716,7 @@ APE.MmoClient = new Class({
 				}
 			}.bind(this));
 
-			//console.log('Différence', now - this.last_tick);
+			//console.log('DiffÃ©rence', now - this.last_tick);
 
 			if(this.perso.playing && this.perso.anim == 0){
 				var add = this.perso.parseDir(this.perso.dir);

@@ -37,11 +37,11 @@
  *   - Armenian Eastern and Western keyboard layouts by Hayastan Project (www.hayastan.co.uk)
  *   - Pinyin keyboard layout from a collaboration with Lou Winklemann
  *   - Kazakh keyboard layout by Alex Madyankin
- *   - Danish keyboard layout by Verner Kjærsgaard
+ *   - Danish keyboard layout by Verner KjÃ¦rsgaard
  *   - Slovak keyboard layout by Daniel Lara (www.learningslovak.com)
  *   - Belarusian and Serbian Cyrillic keyboard layouts by Evgeniy Titov
  *   - Bulgarian Phonetic keyboard layout by Samuil Gospodinov
- *   - Swedish keyboard layout by Håkan Sandberg
+ *   - Swedish keyboard layout by HÃ¥kan Sandberg
  *   - Romanian keyboard layout by Aurel
  *   - Farsi (Persian) keyboard layout by Kaveh Bakhtiyari (www.bakhtiyari.com)
  *   - Burmese keyboard layout by Cetanapa
@@ -90,7 +90,7 @@ var VKI_attach, VKI_close;
 
   /* ***** i18n text strings ************************************* */
   this.VKI_i18n = {
-    '00': "Exibir teclado numérico",
+    '00': "Exibir teclado numÃ©rico",
     '01': "Clique para exibir o teclado virtual",
     '02': "Selecionar layout do teclado",
     '03': "Dead keys",
@@ -99,7 +99,7 @@ var VKI_attach, VKI_close;
     '06': "Fechar o teclado",
     '07': "Limpar",
     '08': "Limpar campo",
-    '09': "Versão",
+    '09': "VersÃ£o",
     '10': "Diminuir tamanho do teclado",
     '11': "Aumentar tamanho do teclado"
   };
