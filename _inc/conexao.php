@@ -24,8 +24,8 @@ if (!$conexao) {
     die("Database Connection Failed. Check your DB credentials. " . mysqli_connect_error());
 }
 mysql_select_db($mysql_banco);
-if (mysqli_error($mysqli_link)) {
-    die("Database Selection Failed: " . mysqli_error($mysqli_link));
+if (mysql_error()) {
+    die("Database Selection Failed: " . mysql_error());
 }
 mysql_query("SET NAMES 'utf8'");
 db_auto_init($mysqli_link, $mysql_banco);

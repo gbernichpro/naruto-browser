@@ -53,6 +53,7 @@ if (!function_exists('mysql_connect')) {
     function mysql_error($link_identifier = null) {
         global $mysqli_link;
         $link = ($link_identifier === null) ? $mysqli_link : $link_identifier;
+        if (!$link) return mysqli_connect_error();
         return mysqli_error($link);
     }
 
