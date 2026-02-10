@@ -38,19 +38,21 @@ $sqlo = mysqli_query($mysqli_link, $query);
         </div>
 
         <!-- Navegação Topo -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;">
-            <div>
-                <?php if($pagina > 0){
-                    $menos = $pagina - 1;
-                    echo "<a href='?p=rankorg&pagina=$menos' class='modern-btn'>&laquo; Anterior</a>";
-                } ?>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid #333;">
+            <div style="width: 100px;">
+                <?php if($pagina > 0): 
+                    $menos = $pagina - 1; ?>
+                    <a href="?p=rankorg&pagina=<?php echo $menos; ?>" class="modern-btn" style="padding: 5px 15px; font-size: 12px;">&laquo; Anterior</a>
+                <?php endif; ?>
             </div>
-            <div style="color: #aaa; font-size: 12px;">Página <?php echo $PaginaCorrente; ?> de <?php echo $Paginas; ?></div>
-            <div>
-                <?php if(($pagina + 1) < $Paginas) {
-                    $mais = $pagina + 1;
-                    echo "<a href='?p=rankorg&pagina=$mais' class='modern-btn'>Próxima &raquo;</a>";
-                } ?>
+            <div style="color: #aaa; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+                Ninja Page <span style="color: gold;"><?php echo $PaginaCorrente; ?></span> / <?php echo $Paginas; ?>
+            </div>
+            <div style="width: 100px; text-align: right;">
+                <?php if(($pagina + 1) < $Paginas): 
+                    $mais = $pagina + 1; ?>
+                    <a href="?p=rankorg&pagina=<?php echo $mais; ?>" class="modern-btn" style="padding: 5px 15px; font-size: 12px;">Próxima &raquo;</a>
+                <?php endif; ?>
             </div>
         </div>
 

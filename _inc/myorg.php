@@ -3,11 +3,12 @@
 if($db['missao']>0){ echo "<script>self.location='?p=busymission'</script>"; exit(); }
 if($db['orgid']==0){ echo "<script>self.location='?p=home'</script>"; exit(); }
 
-$id_org = $db['orgid']; // orgid já é inteiro vindo do $db
+$id_org = $db['orgid']; 
 
 // --- AUTO-REPAIR LOGIC ---
 // Verifica se a organização existe
-$check_org_exist = mysqli_query($mysqli_link, "SELECT liderid FROM organizacoes WHERE id='".$id_org."'");
+$check_org_exist = mysqli_query($mysqli_link, "SELECT liderid FROM organizacoes WHERE id='".$id_org."'") or die("ERROR Q1: " . mysqli_error($mysqli_link));
+
 if(mysqli_num_rows($check_org_exist) == 0){
     // Org não existe (Phantom ID). Resetar usuário.
     mysqli_query($mysqli_link, "UPDATE usuarios SET orgid=0 WHERE id='".$db['id']."'");
@@ -15,20 +16,21 @@ if(mysqli_num_rows($check_org_exist) == 0){
 }
 
 // Verifica se o usuário está na tabela membros
-$check_member = mysqli_query($mysqli_link, "SELECT id FROM membros WHERE usuarioid='".$db['id']."' AND orgid='".$id_org."'");
+$check_member = mysqli_query($mysqli_link, "SELECT id FROM membros WHERE usuarioid='".$db['id']."' AND orgid='".$id_org."'") or die("ERROR Q_MBR: " . mysqli_error($mysqli_link));
+
 if(mysqli_num_rows($check_member) == 0){
     // Inconsistência detectada! Reparar.
-    $row_org = mysqli_fetch_assoc($check_org_exist);
+    $row_org_c = mysqli_fetch_assoc($check_org_exist);
     
     $cargo = 'Membro';
     $posicao = 3;
     // Se ele é o dono da org, vira Líder
-    if($row_org['liderid'] == $db['id']){
+    if($row_org_c['liderid'] == $db['id']){
         $cargo = 'Lider'; 
         $posicao = 1;
     }
     
-    $insert_q = "INSERT INTO membros (orgid,usuarioid,posicao,rank,doado,status) VALUES ('$id_org','".$db['id']."','$posicao','$cargo',0,'sim')";
+    $insert_q = "INSERT INTO membros (orgid,usuarioid,posicao,`rank`,doado,status) VALUES ('$id_org','".$db['id']."','$posicao','$cargo',0,'sim')";
     if(!mysqli_query($mysqli_link, $insert_q)){
         die("ERRO AO REPARAR MEMBRO: " . mysqli_error($mysqli_link) . "<br>Contate o administrador.");
     }
@@ -37,32 +39,25 @@ if(mysqli_num_rows($check_member) == 0){
     echo "<script>self.location='?p=myorg&msg=repair'</script>"; exit();
 } else {
     // Usuário já está na tabela membros. Verificar se ele é o Líder real mas está com cargo errado.
-    $check_org = mysqli_query($mysqli_link, "SELECT liderid FROM organizacoes WHERE id='".$id_org."'");
-    $row_org = mysqli_fetch_assoc($check_org);
+    $check_org_l = mysqli_query($mysqli_link, "SELECT liderid FROM organizacoes WHERE id='".$id_org."'");
+    $row_org_l = mysqli_fetch_assoc($check_org_l);
     
-    if($row_org['liderid'] == $db['id']){
-        // É o dono! Verificar se está como líder na tabela membros
-        $row_member = mysqli_fetch_assoc($check_member);
-        // Reiniciar ponteiro se necessário, mas aqui só pegamos uma row.
-        
-        // Se a posição não for 1, FORÇAR ser 1.
-        // Nota: Precisamos checar se 'posicao' está no $row_member? Não selecionamos *..
-        // Vamos fazer um update cego para garantir.
-        mysqli_query($mysqli_link, "UPDATE membros SET posicao=1, rank='Lider' WHERE usuarioid='".$db['id']."' AND orgid='".$id_org."'");
-        // Se mudou algo, update. Se não mudou, sucesso.
+    if($row_org_l['liderid'] == $db['id']){
+        // É o dono! Forçar posição 1 na tabela membros.
+        mysqli_query($mysqli_link, "UPDATE membros SET posicao=1, `rank`='Lider' WHERE usuarioid='".$db['id']."' AND orgid='".$id_org."'");
     }
 }
 // -------------------------
 
 // Query Principal Org
-$sqlo = mysqli_query($mysqli_link, "SELECT * FROM organizacoes WHERE id=".$id_org);
+$sqlo = mysqli_query($mysqli_link, "SELECT * FROM organizacoes WHERE id=".$id_org) or die("ERROR Q_ORG: " . mysqli_error($mysqli_link));
 if(mysqli_num_rows($sqlo)==0){ echo "<script>self.location='?p=home'</script>"; exit(); }
 $dbo = mysqli_fetch_assoc($sqlo);
 
 // FIX MANUAL
 if(isset($_GET['fix']) && $_GET['fix']=='leader'){
     if($dbo['liderid'] == $db['id']){
-        mysqli_query($mysqli_link, "UPDATE membros SET posicao=1, rank='Lider' WHERE usuarioid='".$db['id']."' AND orgid='".$id_org."'");
+        mysqli_query($mysqli_link, "UPDATE membros SET posicao=1, `rank`='Lider' WHERE usuarioid='".$db['id']."' AND orgid='".$id_org."'");
         echo "<script>alert('Liderança Forçada com Sucesso! Agora você deve ter acesso.'); self.location='?p=myorg';</script>"; exit();
     } else {
         echo "<script>alert('ERRO: Você não consta como Líder na tabela de Organizações (ID atual do Líder: ".$dbo['liderid'].").'); self.location='?p=myorg';</script>"; exit();
@@ -87,7 +82,7 @@ if($dbo['exp']>=$dbo['expmax']){
 // Processar Saída/Deletar (Logica simplificada get)
 if(isset($_GET['del'])){
 	$id_del = isset($_GET['del']) ? (int)$c->decode($_GET['del'],$chaveuniversal) : 0;
-	$sqld = mysqli_query($mysqli_link, "SELECT usuarioid, orgid FROM membros WHERE id=".$id_del);
+	$sqld = mysqli_query($mysqli_link, "SELECT usuarioid, orgid FROM membros WHERE id=".$id_del) or die("ERROR Q_DEL_CHECK: " . mysqli_error($mysqli_link));
     if(mysqli_num_rows($sqld) > 0){
     	$dbd = mysqli_fetch_assoc($sqld);
     	// Validações de segurança
@@ -119,14 +114,71 @@ if(isset($_POST['donate'])){
 	}
 }
 
+// --- LÓGICA DE INVESTIMENTOS ---
+// Evoluir Investimento Existente
+if(isset($_GET['evolve'])){
+    // Pegar posição atual antes de tudo
+    $sqle_c = mysqli_query($mysqli_link, "SELECT posicao FROM membros WHERE usuarioid=".$db['id']." AND orgid=".$id_org);
+    $dbe_c = mysqli_fetch_assoc($sqle_c);
+    $mypos_c = $dbe_c ? $dbe_c['posicao'] : 3;
+
+    if($mypos_c == 3){ echo "<script>alert('Apenas Líder e Conselheiros podem evoluir investimentos.'); self.location='?p=investimentos'</script>"; exit(); }
+    
+    $id_evolve = (int)$_GET['evolve'];
+    $sql_e = mysqli_query($mysqli_link, "SELECT i.*, t.custo as custo_base, t.tai, t.nin, t.gen FROM clas_investimentos i JOIN table_investimentos t ON i.invid=t.id WHERE i.id=$id_evolve AND i.orgid=$id_org");
+    
+    if($dbe_v = mysqli_fetch_assoc($sql_e)){
+        $custo_evolve = $dbe_v['custo_base'] + ($dbe_v['nivel'] * 20000);
+        if($dbo['reserva'] >= $custo_evolve){
+            mysqli_query($mysqli_link, "UPDATE organizacoes SET reserva=reserva-$custo_evolve WHERE id=$id_org");
+            mysqli_query($mysqli_link, "UPDATE clas_investimentos SET nivel=nivel+1, taijutsu=taijutsu+".$dbe_v['tai'].", ninjutsu=ninjutsu+".$dbe_v['nin'].", genjutsu=genjutsu+".$dbe_v['gen']." WHERE id=$id_evolve");
+            echo "<script>alert('Investimento aprimorado com sucesso!'); self.location='?p=investimentos'</script>"; exit();
+        } else {
+            echo "<script>alert('Reserva do Clã insuficiente!'); self.location='?p=investimentos'</script>"; exit();
+        }
+    }
+}
+
+// Comprar Novo Investimento
+if(isset($_GET['buy'])){
+    // Pegar posição atual antes de tudo
+    $sqlb_c = mysqli_query($mysqli_link, "SELECT posicao FROM membros WHERE usuarioid=".$db['id']." AND orgid=".$id_org);
+    $dbb_c = mysqli_fetch_assoc($sqlb_c);
+    $mypos_c = $dbb_c ? $dbb_c['posicao'] : 3;
+
+    if($mypos_c == 3){ echo "<script>alert('Apenas Líder e Conselheiros podem comprar investimentos.'); self.location='?p=investimentos'</script>"; exit(); }
+    
+    $id_buy = (int)$_GET['buy'];
+    $sql_b = mysqli_query($mysqli_link, "SELECT * FROM table_investimentos WHERE id=$id_buy");
+    
+    if($dbb_v = mysqli_fetch_assoc($sql_b)){
+        // Verifica se já possui
+        $check_has = mysqli_query($mysqli_link, "SELECT id FROM clas_investimentos WHERE invid=$id_buy AND orgid=$id_org");
+        if(mysqli_num_rows($check_has) > 0){
+             echo "<script>alert('Seu clã já possui este investimento!'); self.location='?p=investimentos'</script>"; exit();
+        }
+        
+        if($dbo['reserva'] >= $dbb_v['custo']){
+            mysqli_query($mysqli_link, "UPDATE organizacoes SET reserva=reserva-".$dbb_v['custo']." WHERE id=$id_org");
+            mysqli_query($mysqli_link, "INSERT INTO clas_investimentos (orgid, invid, nivel, taijutsu, ninjutsu, genjutsu) VALUES ($id_org, $id_buy, 1, ".$dbb_v['tai'].", ".$dbb_v['nin'].", ".$dbb_v['gen'].")");
+            echo "<script>alert('Investimento realizado com sucesso!'); self.location='?p=investimentos'</script>"; exit();
+        } else {
+            echo "<script>alert('Reserva do Clã insuficiente!'); self.location='?p=investimentos'</script>"; exit();
+        }
+    }
+}
+// -------------------------------
+
 // Queries de Exibição
 $order = isset($_GET['order']) ? 'ORDER BY missoes DESC, posicao ASC, niveluser DESC' : 'ORDER BY posicao ASC, niveluser DESC';
-$sqlm = mysqli_query($mysqli_link, "SELECT m.*,u.usuario,u.nivel niveluser,u.pontoscla, u.timestamp FROM membros m LEFT OUTER JOIN usuarios u ON m.usuarioid=u.id WHERE m.status='sim' AND m.orgid=".$id_org." ".$order);
+$sqlm = mysqli_query($mysqli_link, "SELECT m.*,u.usuario,u.nivel niveluser,u.pontoscla, u.timestamp FROM membros m LEFT OUTER JOIN usuarios u ON m.usuarioid=u.id WHERE m.status='sim' AND m.orgid=".$id_org." ".$order) or die("ERROR Q_MEMB: " . mysqli_error($mysqli_link));
 
 // Dados do Usuário na Org
-$sqle = mysqli_query($mysqli_link, "SELECT posicao FROM membros WHERE usuarioid=".$db['id']." AND orgid=".$id_org);
+$sqle = mysqli_query($mysqli_link, "SELECT posicao FROM membros WHERE usuarioid=".$db['id']." AND orgid=".$id_org) or die("ERROR Q_ES: " . mysqli_error($mysqli_link));
 $dbe = mysqli_fetch_assoc($sqle);
 $mypos = $dbe ? $dbe['posicao'] : 3; // Default membro se falhar
+
+// die("DEBUG: Mid-point reached. MyPos: " . $mypos);
 
 $vilas = [
 	1 => 'Vila da Folha', 2 => 'Vila da Areia', 3 => 'Vila do Som', 4 => 'Vila da Chuva',
@@ -142,13 +194,12 @@ $data_fundacao = date('d/m/Y', strtotime($dbo['data']));
         [<?php echo $dbo['sigla']; ?>] <?php echo $dbo['nome']; ?>
     </div>
     
-    <!-- DEBUG INFO -->
-    <div style="background: #222; color: #fff; font-size: 11px; padding: 5px; text-align: center; border-bottom: 1px solid #444;">
-        DEBUG: <b>OrgID:</b> <?php echo $id_org; ?> | <b>LiderOrg:</b> <?php echo $dbo['liderid']; ?> | <b>SeuID:</b> <?php echo $db['id']; ?> | <b>SuaPos:</b> <?php echo $mypos; ?>
-        <?php if($dbo['liderid'] == $db['id'] && $mypos != 1) { ?>
-            <br><div style="margin-top: 5px;"><a href="?p=myorg&fix=leader" class="modern-btn" style="background: red; color: white; padding: 5px 10px;">[CLIQUE AQUI PARA CORRIGIR LIDERANÇA]</a></div>
-        <?php } ?>
-    </div>
+    <!-- DEBUG INFO REMOVED -->
+    <?php if($dbo['liderid'] == $db['id'] && $mypos != 1) { ?>
+        <div style="background: #222; color: #fff; font-size: 11px; padding: 5px; text-align: center; border-bottom: 1px solid #444;">
+            <div style="margin-top: 5px;"><a href="?p=myorg&fix=leader" class="modern-btn" style="background: red; color: white; padding: 5px 10px;">[CLIQUE AQUI PARA CORRIGIR LIDERANÇA]</a></div>
+        </div>
+    <?php } ?>
     
     <!-- MENU SECUNDÁRIO -->
     <div style="background: rgba(0,0,0,0.3); padding: 10px; border-bottom: 1px solid #444; display: flex; gap: 10px; overflow-x: auto;">

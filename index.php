@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 date_default_timezone_set("Brazil/East");
 if(isset($_GET['allowgm'])) setcookie('allowgm',1,time()+900);
 ?>
@@ -148,9 +150,9 @@ if(isset($_SESSION['logado']) || isset($_COOKIE['logado'])){
 	<link type="text/css" href="_css/menu3.css" rel="stylesheet" />
     <link type="text/css" href="_css/sidebar_refined.css" rel="stylesheet" />
     <link type="text/css" href="_css/modern_ui.css" rel="stylesheet" />
-    <script type="text/javascript" src="jquery.js"></script>
-    <script type="text/javascript" src="javascript/zebra_dialog.js"></script>
-    <link rel="stylesheet" href="css/zebra_dialog.css" type="text/css">
+    <script type="text/javascript" src="_js/jquery.min.js"></script>
+    <script type="text/javascript" src="_js/zebra_dialog.js"></script>
+    <link rel="stylesheet" href="_css/zebra_dialog.css" type="text/css">
     <script type="text/javascript">
         window.onTurnstileSuccess = function(token) {
             console.log("Turnstile Success! Token captured.");
@@ -173,8 +175,8 @@ if(isset($_SESSION['logado']) || isset($_COOKIE['logado'])){
     </script>
 <script type="text/javascript" src="_js/jquery-impromptu.4.0.min.js"></script>
 <script type="text/javascript" src="_js/jquery-modal-1.0.pack.js"></script>
-<script type='text/javascript' src='javascripts/jquery.tipsy.js'></script>
-<link rel="stylesheet" href="stylesheets/tipsy.css" type="text/css" />
+<script type='text/javascript' src='_js/jquery.tipsy.js'></script>
+<link rel="stylesheet" href="_css/tipsy.css" type="text/css" />
 <?php if((isset($_GET['p']))&&($_GET['p']=='messages')or(isset($_GET['p']))&&($_GET['p']=='config')or(isset($_GET['p']))&&($_GET['p']=='configorg')){ ?><script type="text/javascript" src="_js/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
 <script type="text/javascript">
 tinyMCE.init({
@@ -236,35 +238,35 @@ return null;
 <style type="text/css">
 <!--
 body {
-	background: url(template/background.png) fixed top center no-repeat #5D5D5D;
+	background: url(_img/background.png) fixed top center no-repeat #5D5D5D;
 }
 .style1 {color: #FFFFFF}
 .Button_Login {
-background:url(template/button_login.png);
+background:url(_img/button_login.png);
 width:91px;
 height:30px;
 border:0;
 }
 .Button_Logout {
-background:url(template/button_logout.png);
+background:url(_img/button_logout.png);
 width:91px;
 height:30px;
 border:0;
 }
 .Button_Painel {
-background:url(template/button_painel.png);
+background:url(_img/button_painel.png);
 width:91px;
 height:30px;
 border:0;
 }
 .Button_Login:hover {
-background:url(template/button_login_hover.png);
+background:url(_img/button_login_hover.png);
 }
 .Button_Logout:hover {
-background:url(template/button_logout_hover.png);
+background:url(_img/button_logout_hover.png);
 }
 .Button_Painel:hover {
-background:url(template/button_painel_hover.png);
+background:url(_img/button_painel_hover.png);
 }
 
 -->

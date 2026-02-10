@@ -2,299 +2,259 @@
 require_once('trava.php');
 require_once('verificar.php');
 
+if(!isset($_GET['id'])){ echo "<script>self.location='?p=home'</script>"; exit(); }
 
-if(!isset($_GET['id'])){ echo "<script>self.location='?p=home'</script>"; return; }
-$pegaid=$_GET['id'];
-$sqli=mysql_query("SELECT i.id,i.status,i.upgrade,i.usuarioid,t.categoria,t.descricao,i.taijutsu,i.ninjutsu,i.genjutsu,t.nome,t.imagem,t.valor,t.maxtai,t.maxnin,t.maxgen FROM animais i LEFT OUTER JOIN table_animais t ON i.itemid=t.id WHERE  i.id=".antiinjection($_GET['id'])." ORDER BY status ASC");
-$dbi=mysql_fetch_assoc($sqli);
-if(mysql_num_rows($sqli)==0){ echo "<script>self.location='?p=home'</script>"; return; }
-if($dbi['usuarioid']<>$db['id']){ echo "<script>self.location='?p=home'</script>"; return; }
-?>
- <div class="box_top">Animal Atual</div>
-<div class="box_middle">Aqui é onde você irá treinar seu pet para ele adicionando taijutsu , ninjutsu ou genjutsu.<div class="sep"></div>
+$pegaid = (int)$_GET['id'];
 
+// Query Principal com mysqli
+$stmt = mysqli_prepare($mysqli_link, "
+    SELECT i.id, i.status, i.upgrade, i.usuarioid, t.categoria, t.descricao, 
+           i.taijutsu, i.ninjutsu, i.genjutsu, t.nome, t.imagem, t.valor, 
+           t.maxtai, t.maxnin, t.maxgen 
+    FROM animais i 
+    LEFT JOIN table_animais t ON i.itemid=t.id 
+    WHERE i.id=? 
+    LIMIT 1
+");
+mysqli_stmt_bind_param($stmt, "i", $pegaid);
+mysqli_stmt_execute($stmt);
+$sqli = mysqli_stmt_get_result($stmt);
+$dbi = mysqli_fetch_assoc($sqli);
 
-	<table width="100%" cellpading="0" cellspacing="1">
-    <tr class="table_dados" style="background:#323232;" onmouseover="style.background='#2C2C2C'" onmouseout="style.background='#323232'">
-    	<td align="center" width="140" valign="top"><img src="_img/equipamentos/<?php echo $dbi['imagem']; ?>.png" /></td>
-        <td style="padding:5px;">
-        	<b><?php echo $dbi['nome']; ?><?php if($dbi['upgrade']>0) echo ' +'.$dbi['upgrade']; ?></b><br />
-            <span class="sub2"><?php echo $dbi['descricao']; ?></span><br />
-            <b><?php if($dbi['taijutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.($dbi['taijutsu']+$dbi['upgrade']).'] em Taijutsu<br />'; ?>
-            <?php if($dbi['ninjutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.($dbi['ninjutsu']+$dbi['upgrade']).'] em Ninjutsu<br />'; ?>
-            <?php if($dbi['genjutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.($dbi['genjutsu']+$dbi['upgrade']).'] em Genjutsu<br />'; ?></b>
-            <br />
+if(!$dbi || mysqli_num_rows($sqli) == 0){ echo "<script>self.location='?p=home'</script>"; exit(); }
+if($dbi['usuarioid'] != $db['id']){ echo "<script>self.location='?p=home'</script>"; exit(); }
 
-
-                <?php
-            $tai=$dbi['maxtai'];
-            $nin=$dbi['maxnin'];
-            $gen=$dbi['maxgen'];
-            ?>
-
-
-            <div align="center">
-            <div style="float:left;width:150px;color:#FFFFFF;text-align:center;font-size:13px;font-weight:bold;">
-            <div style="background:url(_img/skins/naruto/shop/atributo<?php if($tai<0) echo '_r'; if($tai==0) echo '_a'; ?>.png) no-repeat center;line-height:42px;width:50px;float:left;"><?php if($tai>0) echo ''.$tai; else echo $tai; ?></div>
-            <div style="background:url(_img/skins/naruto/shop/atributo<?php if($nin<0) echo '_r'; if($nin==0) echo '_a'; ?>.png) no-repeat center;line-height:42px;width:50px;float:left;"><?php if($nin>0) echo ''.$nin; else echo $nin; ?></div>
-            <div style="background:url(_img/skins/naruto/shop/atributo<?php if($gen<0) echo '_r'; if($gen==0) echo '_a'; ?>.png) no-repeat center;line-height:42px;width:50px;float:left;"><?php if($gen>0) echo ''.$gen; else echo $gen; ?></div>
-            <br />
-            <div style="font-size:8px;font-weight:normal;font-family:Arial;">
-
-                <div style="width:50px;float:left;">*MAXAP TAIJUTSU.</div>
-                <div style="width:50px;float:left;">*MAXAP NINJUTSU</div>
-                <div style="width:50px;float:left;">*MAXAP GENJUTSU</div>
-                <div style="width:250px;color:#FF00FF;float:center;"> *MAXAP=ATRIBUTOS MAXIMOS QUE O ANIMAL PODERÁ SER APRIMORADO.</div>
-
-               </div>
-                </div>
-            <div class="clear"></div>
-            <div class="sep2"></div>
-                  </td>
-
-
-            <br />
-
-
-          </td>
-  	</tr>
-    </table>
-</div>
-<div class="box_bottom"></div>
-<?php
+// Processamento de Treino
 if(isset($_POST['train_taijutsu'])){
-	if($_POST['restante']<0){ echo "<script>self.location='?p=home'</script>"; return; }
-	$taijutsu = antiinjection((int)$_POST['train_taijutsu']);
-	$ninjutsu = antiinjection((int)$_POST['train_ninjutsu']);
-	$genjutsu = antiinjection((int)$_POST['train_genjutsu']);
-	$iddoitem = antiinjection((int)$_POST['id']);
-	if(($taijutsu<=0)or($ninjutsu<=0)or($genjutsu<=0)){ echo "<script>self.location='?p=home'</script>"; return; }
-	if(($taijutsu>$dbi['maxtai'])or($ninjutsu>$dbi['maxnin'])or($genjutsu>$dbi['maxgen'])){ echo "<script>self.location='?p=treinarpet&id={$pegaid}&msg=3'</script>"; return; }
-	$total=0;
-	if($taijutsu>$dbi['taijutsu']) do{
-		$total=$total+round(($dbi['taijutsu']*2)+($dbi['taijutsu']*$dbi['taijutsu'])+($dbi['taijutsu']*0.2));
-		$dbi['taijutsu']=$dbi['taijutsu']+1;
-	} while($taijutsu>$dbi['taijutsu']);
-	if($ninjutsu>$dbi['ninjutsu']) do{
-		$total=$total+round(($dbi['ninjutsu']*2)+($dbi['ninjutsu']*$dbi['ninjutsu'])+($dbi['ninjutsu']*0.2));
-		$dbi['ninjutsu']=$dbi['ninjutsu']+1;
-	} while($ninjutsu>$dbi['ninjutsu']);
-	if($genjutsu>$dbi['genjutsu']) do{
-		$total=$total+round(($dbi['genjutsu']*2)+($dbi['genjutsu']*$dbi['genjutsu'])+($dbi['genjutsu']*0.2));
-		$dbi['genjutsu']=$dbi['genjutsu']+1;
-	} while($genjutsu>$dbi['genjutsu']);
-	if($total>$db['yens']){ echo "<script>self.location='?p=treinarpet&id={$_GET['id']}&msg=2'</script>"; return; }
-    mysql_query("UPDATE usuarios SET yens=yens-$total WHERE id=".$db['id']);
-	mysql_query("UPDATE animais SET taijutsu=$taijutsu, ninjutsu=$ninjutsu, genjutsu=$genjutsu WHERE id='".$iddoitem."' and usuarioid='".$db['id']."'");
-	echo "<script>self.location='?p=treinarpet&id={$pegaid}&msg=1&yens=".$total."'</script>";
+	$taijutsu = (int)$_POST['train_taijutsu'];
+	$ninjutsu = (int)$_POST['train_ninjutsu'];
+	$genjutsu = (int)$_POST['train_genjutsu'];
+	$iddoitem = (int)$_POST['id'];
+
+	if($taijutsu < $dbi['taijutsu'] || $ninjutsu < $dbi['ninjutsu'] || $genjutsu < $dbi['genjutsu']){ 
+        echo "<script>self.location='?p=home'</script>"; 
+        exit(); 
+    }
+
+	if($taijutsu > $dbi['maxtai'] || $ninjutsu > $dbi['maxnin'] || $genjutsu > $dbi['maxgen']){ 
+        echo "<script>self.location='?p=treinarpet&id=$pegaid&msg=3'</script>"; 
+        exit(); 
+    }
+
+	$total = 0;
+    // Cálculo seguro de yens (cópia local para não afetar $dbi na exibição)
+    $temp_tai = $dbi['taijutsu'];
+    $temp_nin = $dbi['ninjutsu'];
+    $temp_gen = $dbi['genjutsu'];
+
+	while($taijutsu > $temp_tai){
+		$total += round(($temp_tai * 2) + ($temp_tai * $temp_tai) + ($temp_tai * 0.2));
+		$temp_tai++;
+	}
+	while($ninjutsu > $temp_nin){
+		$total += round(($temp_nin * 2) + ($temp_nin * $temp_nin) + ($temp_nin * 0.2));
+		$temp_nin++;
+	}
+	while($genjutsu > $temp_gen){
+		$total += round(($temp_gen * 2) + ($temp_gen * $temp_gen) + ($temp_gen * 0.2));
+		$temp_gen++;
+	}
+
+	if($total > $db['yens']){ 
+        echo "<script>self.location='?p=treinarpet&id=$pegaid&msg=2'</script>"; 
+        exit(); 
+    }
+
+    // Inicia Transação para segurança
+    mysqli_begin_transaction($mysqli_link);
+    try {
+        $stmt_u = mysqli_prepare($mysqli_link, "UPDATE usuarios SET yens=yens-? WHERE id=?");
+        mysqli_stmt_bind_param($stmt_u, "di", $total, $db['id']);
+        mysqli_stmt_execute($stmt_u);
+
+        $stmt_i = mysqli_prepare($mysqli_link, "UPDATE animais SET taijutsu=?, ninjutsu=?, genjutsu=? WHERE id=? AND usuarioid=?");
+        mysqli_stmt_bind_param($stmt_i, "iiiii", $taijutsu, $ninjutsu, $genjutsu, $iddoitem, $db['id']);
+        mysqli_stmt_execute($stmt_i);
+
+        mysqli_commit($mysqli_link);
+        echo "<script>self.location='?p=treinarpet&id=$pegaid&msg=1&yens=$total'</script>";
+        exit();
+    } catch (Exception $e) {
+        mysqli_rollback($mysqli_link);
+        die("Erro ao treinar pet: " . $e->getMessage());
+    }
 }
 ?>
+
+<div class="modern-card">
+    <div class="modern-card-header">🐾 Treinamento de Pet: <?php echo $dbi['nome']; ?></div>
+    <div class="modern-card-body">
+        
+        <div style="display: flex; gap: 20px; align-items: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px;">
+            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border: 1px solid #444;">
+                <img src="_img/equipamentos/<?php echo $dbi['imagem']; ?>.png" style="width: 120px; filter: drop-shadow(0 0 10px rgba(255,165,0,0.3));">
+            </div>
+            <div style="flex: 1;">
+                <h3 style="color: gold; margin: 0 0 5px 0; font-family: 'Impact', sans-serif; letter-spacing: 1px;">
+                    <?php echo $dbi['nome']; ?><?php if($dbi['upgrade'] > 0) echo ' <span style="color:#0f0;">+'.$dbi['upgrade'].'</span>'; ?>
+                </h3>
+                <p style="color: #ccc; font-size: 13px; line-height: 1.5; margin: 0 0 10px 0;">
+                    <?php echo $dbi['descricao']; ?>
+                </p>
+                <div style="display: flex; gap: 10px;">
+                    <span class="nivel-badge" style="background: #a00;">Tai: <?php echo $dbi['taijutsu'] + $dbi['upgrade']; ?></span>
+                    <span class="nivel-badge" style="background: #00a;">Nin: <?php echo $dbi['ninjutsu'] + $dbi['upgrade']; ?></span>
+                    <span class="nivel-badge" style="background: #70a;">Gen: <?php echo $dbi['genjutsu'] + $dbi['upgrade']; ?></span>
+                </div>
+            </div>
+        </div>
+
+        <?php if(isset($_GET['msg'])): 
+            $msg_txt = '';
+            $msg_class = 'aviso';
+            switch($_GET['msg']){
+                case 1: 
+                    $y_spent = isset($_GET['yens']) ? $_GET['yens'] : 0;
+                    $msg_txt = 'Treino realizado com sucesso! Foram gastos <b>'.number_format($y_spent,2,',','.').' yens</b>.';
+                    $msg_class = 'sucesso';
+                    break;
+                case 2: $msg_txt = 'Yens insuficientes!'; break;
+                case 3: $msg_txt = 'Limite de atributos do animal atingido!'; break;
+            }
+            if($msg_txt) echo '<div class="'.$msg_class.'" style="margin-bottom: 20px;">'.$msg_txt.'</div>';
+        endif; ?>
+
+        <div style="background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid #444; padding: 20px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333;">
+                <span style="color: #aaa; font-size: 12px;"><img src="_img/yens.png" width="14" align="absmiddle"> Seus Yens:</span>
+                <b style="color: #fff;"><?php echo number_format($db['yens'],2,',','.'); ?> yens</b>
+            </div>
+
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <?php 
+                $stats = [
+                    ['tai', 'Taijutsu', 'ico_tai.png', $dbi['taijutsu'], $dbi['maxtai'], 'linear-gradient(90deg, #ff4D4D, #ff0000)'],
+                    ['nin', 'Ninjutsu', 'ico_nin.png', $dbi['ninjutsu'], $dbi['maxnin'], 'linear-gradient(90deg, #4D94ff, #0066ff)'],
+                    ['gen', 'Genjutsu', 'ico_gen.png', $dbi['genjutsu'], $dbi['maxgen'], 'linear-gradient(90deg, #b366ff, #8000ff)']
+                ];
+                foreach($stats as $s): 
+                    $percent = ($s[3] / $s[4]) * 100;
+                ?>
+                <tr style="height: 60px;">
+                    <td width="30"><img src="template/<?php echo $s[2]; ?>" width="18" style="opacity: 0.8;"></td>
+                    <td width="100"><b style="color: #eee; font-size: 13px;"><?php echo $s[1]; ?>:</b></td>
+                    <td style="padding: 0 15px;">
+                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                            <div id="<?php echo $s[0]; ?>bar" style="height: 100%; transition: width 0.3s ease; background: <?php echo $s[5]; ?>; width: <?php echo $percent; ?>%;"></div>
+                        </div>
+                        <div style="font-size: 10px; color: #666; margin-top: 4px; text-transform: uppercase;">Máximo: <?php echo $s[4]; ?></div>
+                    </td>
+                    <td width="60">
+                        <div style="display: flex; gap: 5px; justify-content: center;">
+                            <img src="_img/foda/up.png" style="cursor:pointer;" onclick="change('<?php echo $s[0]; ?>', 1);">
+                            <img id="<?php echo $s[0]; ?>down" src="_img/foda/down.png" style="cursor:pointer; visibility:hidden;" onclick="change('<?php echo $s[0]; ?>', -1);">
+                        </div>
+                    </td>
+                    <td width="80" align="center"><b style="color: #fff; font-size: 16px;">| <span id="<?php echo $s[0]; ?>"><?php echo $s[3]; ?></span> |</b></td>
+                    <td width="120" align="right"><b style="color: #f44; font-size: 12px;"><div id="<?php echo $s[0]; ?>value"><?php echo number_format(round(($s[3]*2)+($s[3]*$s[3])+($s[3]*0.2)),2,',','.'); ?> yens</div></b></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 25px;">
+            <div style="padding: 12px; background: rgba(255,0,0,0.05); border-radius: 6px; border: 1px solid rgba(255,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #aaa; font-size: 12px;">Custo Total:</span>
+                <b style="color: #f44; font-size: 15px;"><img src="_img/yens_neg.png" align="absmiddle"> <span id="totaltrain">0,00</span> yens</b>
+            </div>
+            <div style="padding: 12px; background: rgba(0,255,0,0.03); border-radius: 6px; border: 1px solid rgba(0,255,0,0.05); display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #aaa; font-size: 12px;">Saldo Restante:</span>
+                <b style="color: #0f0; font-size: 15px;"><img src="_img/yens.png" width="14" align="absmiddle"> <span id="resttrain"><?php echo number_format($db['yens'],2,',','.'); ?></span> yens</b>
+            </div>
+        </div>
+
+        <div id="train_button" style="display:none; text-align: center;">
+            <form method="post" action="?p=treinarpet&id=<?php echo $pegaid; ?>" id="form_train">
+                <input type="hidden" name="id" value="<?php echo $pegaid; ?>" />
+                <input type="hidden" name="train_taijutsu" value="<?php echo $dbi['taijutsu']; ?>" />
+                <input type="hidden" name="train_ninjutsu" value="<?php echo $dbi['ninjutsu']; ?>" />
+                <input type="hidden" name="train_genjutsu" value="<?php echo $dbi['genjutsu']; ?>" />
+                <input type="hidden" name="restante" value="" />
+                <input type="submit" class="modern-btn" style="padding: 12px 50px; font-size: 16px; min-width: 220px;" value="Confirmar Treino" />
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-var taijutsu=<?php echo $dbi['taijutsu']; ?>;
-var taipadrao=taijutsu;
-var ninjutsu=<?php echo $dbi['ninjutsu']; ?>;
-var ninpadrao=ninjutsu;
-var genjutsu=<?php echo $dbi['genjutsu']; ?>;
-var genpadrao=genjutsu;
-var total=0;
-var yens=<?php echo $db['yens']; ?>;
-function visibility(){
-	setataijutsu=document.getElementById('taidown');
-	setaninjutsu=document.getElementById('nindown');
-	setagenjutsu=document.getElementById('gendown');
-	if(taijutsu<=taipadrao) setataijutsu.style.visibility='hidden'; else setataijutsu.style.visibility='visible';
-	if(ninjutsu<=ninpadrao) setaninjutsu.style.visibility='hidden'; else setaninjutsu.style.visibility='visible';
-	if(genjutsu<=genpadrao) setagenjutsu.style.visibility='hidden'; else setagenjutsu.style.visibility='visible';
-	if((taijutsu<=taipadrao)&&(ninjutsu<=ninpadrao)&&(genjutsu<=genpadrao)) document.getElementById('train_button').style.display='none'; else document.getElementById('train_button').style.display='block';
-}
+var taijutsu = <?php echo $dbi['taijutsu']; ?>;
+var taipadrao = taijutsu;
+var ninjutsu = <?php echo $dbi['ninjutsu']; ?>;
+var ninpadrao = ninjutsu;
+var genjutsu = <?php echo $dbi['genjutsu']; ?>;
+var genpadrao = genjutsu;
+var total = 0;
+var yens = <?php echo $db['yens']; ?>;
+
+var limits = {
+    tai: <?php echo $dbi['maxtai']; ?>,
+    nin: <?php echo $dbi['maxnin']; ?>,
+    gen: <?php echo $dbi['maxgen']; ?>
+};
+
 function float2moeda(num) {
-   x = 0;
-   if(num<0) {
-      num = Math.abs(num);
-      x = 1;
-   }
-      if(isNaN(num)) num = "0";
-      cents = Math.floor((num*100+0.5)%100);
+   if(isNaN(num)) num = "0";
+   var cents = Math.floor((num*100+0.5)%100);
    num = Math.floor((num*100+0.5)/100).toString();
    if(cents < 10) cents = "0" + cents;
-      for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
-         num = num.substring(0,num.length-(4*i+3))+'.'
-               +num.substring(num.length-(4*i+3));
-			   ret = num + ',' + cents;
-			   if (x == 1) ret = ' - ' + ret;return ret;
+   for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++)
+      num = num.substring(0,num.length-(4*i+3))+'.' + num.substring(num.length-(4*i+3));
+   return num + ',' + cents;
 }
-function soma(ind,direcao){
-	if(ind=='tai'){
-		if(direcao=='up')
-			somar=Math.round((taijutsu*2)+(taijutsu*taijutsu)+(taijutsu*0.2));
-		else {
-			somar=Math.round(((taijutsu-1)*2)+((taijutsu-1)*(taijutsu-1))+((taijutsu-1)*0.2));
-			somar=(somar)*(-1);
-		}
-	}
-	if(ind=='nin'){
-		if(direcao=='up')
-			somar=Math.round((ninjutsu*2)+(ninjutsu*ninjutsu)+(ninjutsu*0.2));
-		else {
-			somar=Math.round(((ninjutsu-1)*2)+((ninjutsu-1)*(ninjutsu-1))+((ninjutsu-1)*0.2));
-			somar=(somar)*(-1);
-		}
-	}
-	if(ind=='gen'){
-		if(direcao=='up')
-			somar=Math.round((genjutsu*2)+(genjutsu*genjutsu)+(genjutsu*0.2));
-		else {
-			somar=Math.round(((genjutsu-1)*2)+((genjutsu-1)*(genjutsu-1))+((genjutsu-1)*0.2));
-			somar=(somar)*(-1);
-		}
-	}
-	total=total+somar;
-	restante=yens-total;
-	document.getElementById('totaltrain').innerHTML=float2moeda(total);
-	document.getElementById('resttrain').innerHTML=float2moeda(restante);
-	document.forms[0].restante.value=restante;
+
+function visibility(){
+	document.getElementById('taidown').style.visibility = (taijutsu <= taipadrao) ? 'hidden' : 'visible';
+	document.getElementById('nindown').style.visibility = (ninjutsu <= ninpadrao) ? 'hidden' : 'visible';
+	document.getElementById('gendown').style.visibility = (genjutsu <= genpadrao) ? 'hidden' : 'visible';
+	
+    var has_changed = (taijutsu > taipadrao || ninjutsu > ninpadrao || genjutsu > genpadrao);
+    document.getElementById('train_button').style.display = (has_changed && (yens - total >= 0)) ? 'block' : 'none';
 }
-function newvalues(att){
-	if(att=='tai'){
-		valor=Math.round((taijutsu*2)+(taijutsu*taijutsu)+(taijutsu*0.2));
-		document.getElementById('taivalue').innerHTML=float2moeda(valor)+' yens';
-	} else
-	if(att=='nin'){
-		valor=Math.round((ninjutsu*2)+(ninjutsu*ninjutsu)+(ninjutsu*0.2));
-		document.getElementById('ninvalue').innerHTML=float2moeda(valor)+' yens';
-	} else
-	if(att=='gen'){
-		valor=Math.round((genjutsu*2)+(genjutsu*genjutsu)+(genjutsu*0.2));
-		document.getElementById('genvalue').innerHTML=float2moeda(valor)+' yens';
-	}
-}
-function sortNumber(a,b){
-	return b - a;
-}
-function atualizabarras(){
-	max=194;
-	array=new Array(taijutsu,ninjutsu,genjutsu);
-	array.sort(sortNumber);
-	array2=new Array(taijutsu,ninjutsu,genjutsu);
-	if(array[0]==array2[0]) document.getElementById('taibar').setAttribute('width',Math.round((max*array[0])/array[0])); else
-	if(array[1]==array2[0]) document.getElementById('taibar').setAttribute('width',Math.round((max*array[1])/array[0])); else
-	if(array[2]==array2[0]) document.getElementById('taibar').setAttribute('width',Math.round((max*array[2])/array[0]));
-	if(array[0]==array2[1]) document.getElementById('ninbar').setAttribute('width',Math.round((max*array[0])/array[0])); else
-	if(array[1]==array2[1]) document.getElementById('ninbar').setAttribute('width',Math.round((max*array[1])/array[0])); else
-	if(array[2]==array2[1]) document.getElementById('ninbar').setAttribute('width',Math.round((max*array[2])/array[0]));
-	if(array[0]==array2[2]) document.getElementById('genbar').setAttribute('width',Math.round((max*array[0])/array[0])); else
-	if(array[1]==array2[2]) document.getElementById('genbar').setAttribute('width',Math.round((max*array[1])/array[0])); else
-	if(array[2]==array2[2]) document.getElementById('genbar').setAttribute('width',Math.round((max*array[2])/array[0]));
-}
-function change(at,dir){
-	if(dir>0)
-		soma(at,'up');
-	else
-		soma(at,'down');
-	if(at=='tai'){
-		el=document.getElementById('tai');
-		el.innerHTML=taijutsu+dir;
-		taijutsu=taijutsu+dir;
-		document.forms[0].train_taijutsu.value=(document.forms[0].train_taijutsu.value*1)+dir;
-		visibility();
-		newvalues('tai');
-	} else
-	if(at=='nin'){
-		el=document.getElementById('nin');
-		el.innerHTML=ninjutsu+dir;
-		ninjutsu=ninjutsu+dir;
-		document.forms[0].train_ninjutsu.value=(document.forms[0].train_ninjutsu.value*1)+dir;
-		visibility();
-		newvalues('nin');
-	} else
-	if(at=='gen'){
-		el=document.getElementById('gen');
-		el.innerHTML=genjutsu+dir;
-		genjutsu=genjutsu+dir;
-		document.forms[0].train_genjutsu.value=(document.forms[0].train_genjutsu.value*1)+dir;
-		visibility();
-		newvalues('gen');
-	}
-	if(restante<0)
-		document.getElementById('train_button').style.display='none';
-	atualizabarras();
+
+function change(at, dir){
+    var current = (at == 'tai') ? taijutsu : (at == 'nin' ? ninjutsu : genjutsu);
+    var padrao = (at == 'tai') ? taipadrao : (at == 'nin' ? ninpadrao : genpadrao);
+    
+    // Validations
+    if(dir > 0 && current >= limits[at]) return;
+    if(dir < 0 && current <= padrao) return;
+
+    var somar = 0;
+    if(dir > 0){
+        somar = Math.round((current * 2) + (current * current) + (current * 0.2));
+    } else {
+        var prev = current - 1;
+        somar = -Math.round((prev * 2) + (prev * prev) + (prev * 0.2));
+    }
+
+    total += somar;
+    if(at == 'tai') taijutsu += dir;
+    else if(at == 'nin') ninjutsu += dir;
+    else if(at == 'gen') genjutsu += dir;
+
+    // Update UI
+    document.getElementById(at).innerHTML = (at == 'tai' ? taijutsu : (at == 'nin' ? ninjutsu : genjutsu));
+    document.getElementById(at + 'value').innerHTML = float2moeda(Math.round(((current+dir)*2) + ((current+dir)*(current+dir)) + ((current+dir)*0.2))) + ' yens';
+    document.getElementById(at + 'bar').style.width = (((current+dir) / limits[at]) * 100) + '%';
+    
+    document.getElementById('totaltrain').innerHTML = float2moeda(total);
+    document.getElementById('resttrain').innerHTML = float2moeda(yens - total);
+    
+    // Update Hidden Form
+    var f = document.getElementById('form_train');
+    f['train_'+at+'jutsu'].value = (at == 'tai' ? taijutsu : (at == 'nin' ? ninjutsu : genjutsu));
+    f['restante'].value = yens - total;
+
+    visibility();
 }
 </script>
-<?php
-$max=194;
-function equacao($atr){
-	$resultado=round(($atr*2)+($atr*$atr)+($atr*0.2));
-	return $resultado;
-}
-$src="_img/bars/bar.png";
-$array=array("t"=>$dbi['taijutsu'],"n"=>$dbi['ninjutsu'],"g"=>$dbi['genjutsu']);
-rsort($array);
-$array2=array("t"=>$dbi['taijutsu'],"n"=>$dbi['ninjutsu'],"g"=>$dbi['genjutsu']);
-arsort($array2);
-?>
-<div class="box_top">Treino</div>
-<form method="post" action="?p=treinarpet&id=<?=$_GET['id']?>" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
-<input type="hidden" id="id" name="id" value="<?php echo $_GET['id']; ?>" />
-<input type="hidden" id="train_taijutsu" name="train_taijutsu" value="<?php echo $dbi['taijutsu']; ?>" />
-<input type="hidden" id="train_ninjutsu" name="train_ninjutsu" value="<?php echo $dbi['ninjutsu']; ?>" />
-<input type="hidden" id="train_genjutsu" name="train_genjutsu" value="<?php echo $dbi['genjutsu']; ?>" />
-<input type="hidden" id="restante" name="restante" value="" />
-<div class="box_middle">Esta é sua área de treino de atributos. Utilize as setas abaixo para aumentar ou diminuir os atributos, e assim que estiver satisfeito, clique no botão Treinar. Os yens só serão gastos após a confirmação do treino.<div class="sep"></div><img src="_img/pets.png" border="0" width="505" height="135">
-	<?php if(isset($_GET['msg'])){
-		switch($_GET['msg']){
-			case 1: if(isset($_GET['yens'])) $yens=$_GET['yens']; else $yens=0; $msg='Treino realizado com sucesso! Foram gastos <b>'.number_format($yens,2,',','.').' yens</b> para realizar o treino.'; return;
-			case 2: $msg='Yens insuficientes!'; break;
-			case 3: $msg='Um dos Atributos do animal alcançado impossivel aprimorar mais!'; break;
-		}
-	echo '<div class="aviso">'.$msg.'</div><div class="sep"></div>';
-	} ?>
-	<div style="padding-left:5px;background:url(_img/gradient.jpg) repeat-y;color:#FFFFAA;"><img src="_img/yens.png" width="14" height="14" align="absmiddle" /> <b>Meus Yens: <?php echo number_format($db['yens'],2,',','.'); ?> yens</b></div>
-    <div class="sep"></div>
-	<table width="100%" cellpadding="0" cellspacing="0">
-  <tr>
-        	<td width="13%" align="right" style="padding-right:10px;"><b>Taijutsu:</b></td>
-          <td><img src="_img/bars/bar_left.jpg" /><?php
-			if($array[0]==$array2["t"]) echo '<img id="taibar" src="'.$src.'" width="'.($max*$array[0])/$array[0].'" height="22" />'; else
-			if($array[1]==$array2["t"]) echo '<img id="taibar" src="'.$src.'" width="'.($max*$array[1])/$array[0].'" height="22" />'; else
-			if($array[2]==$array2["t"]) echo '<img id="taibar" src="'.$src.'" width="'.($max*$array[2])/$array[0].'" height="22" />';
-			?><img src="_img/bars/bar_right.jpg" />
-    		</td>
-            <td width="8%"><img src="_img/up_arrow.png" style="cursor:pointer" onclick="change('tai',1);" /> <img id="taidown" src="_img/down_arrow.png" style="cursor:pointer;visibility:hidden;" onclick="change('tai',-1);" /></td>
-            <td width="12%" align="center"><b>| <span id="tai"><?php echo $dbi['taijutsu']; ?></span> |</b></td>
-          <td width="22%" align="right"><b><div id="taivalue"><?php echo number_format(equacao($dbi['taijutsu']),2,',','.'); ?> yens</div></b></td>
-        </tr>
-        <tr>
-        	<td align="right" style="padding-right:10px;"><b>Ninjutsu:</b></td>
-          <td><img src="_img/bars/bar_left.jpg" /><?php
-			if($array[0]==$array2["n"]) echo '<img id="ninbar" src="'.$src.'" width="'.($max*$array[0])/$array[0].'" height="22" />'; else
-			if($array[1]==$array2["n"]) echo '<img id="ninbar" src="'.$src.'" width="'.($max*$array[1])/$array[0].'" height="22" />'; else
-			if($array[2]==$array2["n"]) echo '<img id="ninbar" src="'.$src.'" width="'.($max*$array[2])/$array[0].'" height="22" />';
-			?><img src="_img/bars/bar_right.jpg" />
-            </td>
-            <td><img src="_img/up_arrow.png" style="cursor:pointer" onclick="change('nin',1);" /> <img id="nindown" src="_img/down_arrow.png" style="cursor:pointer;visibility:hidden;" onclick="change('nin',-1);" /></td>
-            <td align="center"><b>| <span id="nin"><?php echo $dbi['ninjutsu']; ?></span> |</b></td>
-          <td align="right"><b><div id="ninvalue"><?php echo number_format(equacao($dbi['ninjutsu']),2,',','.'); ?> yens</div></b></td>
-        </tr>
-        <tr>
-        	<td align="right" style="padding-right:10px;"><b>Genjutsu:</b></td>
-          <td><img src="_img/bars/bar_left.jpg" /><?php
-			if($array[0]==$array2["g"]) echo '<img id="genbar" src="'.$src.'" width="'.($max*$array[0])/$array[0].'" height="22" />'; else
-			if($array[1]==$array2["g"]) echo '<img id="genbar" src="'.$src.'" width="'.($max*$array[1])/$array[0].'" height="22" />'; else
-			if($array[2]==$array2["g"]) echo '<img id="genbar" src="'.$src.'" width="'.($max*$array[2])/$array[0].'" height="22" />';
-			?><img src="_img/bars/bar_right.jpg" />
-          </td>
-            <td><img src="_img/up_arrow.png" style="cursor:pointer" onclick="change('gen',1);" /> <img id="gendown" src="_img/down_arrow.png" style="cursor:pointer;visibility:hidden;" onclick="change('gen',-1);" /></td>
-            <td align="center"><b>| <span id="gen"><?php echo $dbi['genjutsu']; ?></span> |</b></td>
-          <td align="right"><b><div id="genvalue"><?php echo number_format(equacao($dbi['genjutsu']),2,',','.'); ?> yens</div></b></td>
-        </tr>
-    </table>
-  <div class="sep"></div>
-    <div style="padding-left:5px;background:url(_img/gradient.jpg) repeat-y"><img src="_img/yens_neg.png" align="absmiddle" /> <b>Total: <span id="totaltrain"><?php echo number_format(0,2,',','.'); ?></span> yens</b></div>
-    <div class="sep"></div>
-    <div style="padding-left:5px;background:url(_img/gradient.jpg) repeat-y"><img src="_img/yens.png" width="14" height="14" align="absmiddle" /> <b>Restará: <span id="resttrain"><?php echo number_format($db['yens'],2,',','.'); ?></span> yens</b></div>
-    <div id="train_button" style="display:none;"><div class="sep"></div>
-
-    <div align="center"><input type="submit" id="subm" name="subm" class="botao" value="Treinar" /></div></div>
-</div>
-</form>
-<div class="box_bottom"></div>

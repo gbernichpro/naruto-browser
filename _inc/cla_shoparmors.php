@@ -1,42 +1,49 @@
 <?php
-$categoria = 'armors';
-$dif = $db['nivel']+1;
-$sqls = mysql_query("SELECT * FROM table_itens WHERE categoria='vestimenta' AND clashop='sim' AND reqnivel<$dif ORDER BY reqnivel ASC");
-$dbs = mysql_fetch_assoc($sqls);
-?>
-<table width="100%" cellpadding="0" cellspacing="1">
-  <?php if(mysql_num_rows($sqls)==0) echo '<tr><td colspan="3"><div class="aviso">Nenhum item encontrado.</div></td></tr>'; else do{ if(date('Y-m-d H:i:s')<$db['vip']) $dbs['valor']=$dbs['valor']-($dbs['valor']*0.15); ?>
-      <!--<?php
-    $texto="<table border=0 width=100%><div style='float:left;'><font color='#FFFFFF'><b>".$dbs["nome"]."</b></font></div><div style='float:right;'><font color='#00FF00'><b>Detalhes</b></font></div>";
-    $texto.="<table border=0 width=100%><tr><td valign=top align='left' ><table border=0 width=100%><tr><td width=50 align='left' ><tr><td width=50 align='left'><b>Nivel Requerido</b></td><td>".$dbs["reqnivel"]."</td></tr></table></td><td align='left'><table border=0 width=100%><tr><td width=50 align='left'><b class=add>Taijutsu:</b></td><td align='left'> +".$dbs["taijutsu"]."</td></tr><tr><td width=50 align='left'><b class=add>Ninjutsu:</b></td><td align='left'> +".$dbs["ninjutsu"]."</td></tr><tr><td width=50 align='left'><b class=add>Genjutsu:</b></td><td> +".$dbs["genjutsu"]."</td></tr></table></td></tr></table>";
-    $texto.="<div class=sep></div>";
-    $texto.="<table border=0 width=100%><tr><td width=50 align='left'>Preço:".number_format($dbs['valor'],2,',','.')." Yens.</td></tr>";
-    ?> -->
+// cla_shoparmors.php
+$sql = mysqli_query($mysqli_link, "SELECT * FROM table_itens WHERE clashop='sim' AND categoria='vestimenta' ORDER BY valor ASC");
 
-    <tr style="background:#323232;" onmouseover="style.background='#2C2C2C'" onmouseout="style.background='#323232'">
-    	<td align="center" width="140"><img src="_img/equipamentos/<?php echo $dbs['imagem']; ?>.png" id="tip-direita" original-title="<?=$texto?>"/></td>
-        <td valign="top" style="padding:5px;text-align:center;">
-        	<b><?php echo $dbs['nome']; ?></b><br />
-            <span class="sub2"><?php echo $dbs['descricao']; ?></span><br />
-          <b><?php if($dbs['taijutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.$dbs['taijutsu'].'] em Taijutsu<br />'; ?>
-            <?php if($dbs['ninjutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.$dbs['ninjutsu'].'] em Ninjutsu<br />'; ?>
-            <?php if($dbs['genjutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.$dbs['genjutsu'].'] em Genjutsu<br />'; ?></b>
-      </td>
-        <td align="center" width="20%">
-            <b>Nivel Mínimo</b><br />
-            <span class="sub2"><?php echo $dbs['reqnivel']; ?> </span><br /><br />
-            <b>Valor Unitário</b><br />
-            <span class="sub2"><?php echo $dbs['valor']; ?> Pts</span><br /><br />
-            <form method="post" action="?p=clashops&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
-            <input type="hidden" id="buy_id2" name="buy_id2" value="<?php echo $dbs['id']; ?>" />
-            <input type="hidden" id="buy_page2" name="buy_page2" value="<?php echo $categoria; ?>" />
-            <input type="hidden" id="buy_cat2" name="buy_cat2" value="<?php echo $dbs['categoria']; ?>" />
-            <?php if($dbs['vip']=='nao'){ ?><input type="submit" id="subm" name="subm" class="botao" value="Comprar" /><?php } else { if(date('Y-m-d H:i:s')>=$db['vip']) echo '<span class="sub2">Exclusiva para VIP.</span>'; else { ?><input type="submit" id="subm" name="subm" class="botao" value="Comprar" /><?php }} ?>
+echo '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">';
+while($row = mysqli_fetch_assoc($sql)){
+    $valor = $row['valor'];
+    if(date('Y-m-d H:i:s') < $db['vip']) $valor = floor($valor * 0.8);
+    
+    $req = "";
+    if($row['reqtai'] > 0) $req .= "Tai: " . $row['reqtai'] . " ";
+    if($row['reqnin'] > 0) $req .= "Nin: " . $row['reqnin'] . " ";
+    if($row['reqgen'] > 0) $req .= "Gen: " . $row['reqgen'] . " ";
+    
+    $bonus = "";
+    if($row['tai'] > 0) $bonus .= "Tai: +" . $row['tai'] . " ";
+    if($row['nin'] > 0) $bonus .= "Nin: +" . $row['nin'] . " ";
+    if($row['gen'] > 0) $bonus .= "Gen: +" . $row['gen'] . " ";
+?>
+    <div style="background: rgba(0,0,0,0.2); border: 1px solid #333; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+            <img src="_img/itens/<?php echo $row['id']; ?>.png" onerror="this.src='_img/itens/default_veste.png'" style="width: 60px; height: 60px; border: 1px solid #444; border-radius: 4px; background: #111;">
+            <div style="flex: 1;">
+                <b style="color: #fff; display: block;"><?php echo $row['nome']; ?></b>
+                <span style="font-size: 11px; color: #777;"><?php echo $row['descricao']; ?></span>
+            </div>
+        </div>
+        
+        <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+            <div style="font-size: 10px; color: #ffd700; margin-bottom: 2px;"><b>BÔNUS:</b> <?php echo $bonus ?: 'Nenhum'; ?></div>
+            <div style="font-size: 10px; color: #f55;"><b>REQ:</b> <?php echo $req ?: 'Nenhum'; ?></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: bold; color: #fff; font-size: 14px;">
+                <img src="_img/yens.png" width="12" style="filter: hue-rotate(90deg);"> <?php echo number_format($valor, 0, ',', '.'); ?> Pts
+            </span>
+            <form method="post" action="?p=cla_shop">
+                <input type="hidden" name="buy_id2" value="<?php echo $row['id']; ?>">
+                <input type="hidden" name="buy_cat2" value="vestimenta">
+                <input type="hidden" name="buy_page" value="armors">
+                <input type="submit" class="modern-btn" style="padding: 5px 12px; font-size: 11px; background: #282;" value="Comprar">
             </form>
-        </td>
-  </tr>
-    <?php } while($dbs=mysql_fetch_assoc($sqls)); ?>
-</table>
+        </div>
+    </div>
 <?php
-@mysql_free_result($sqls);
+}
+echo '</div>';
 ?>

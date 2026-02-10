@@ -1,17 +1,15 @@
 <?php
 require_once('trava.php');
 require_once('verificar.php');
-if(isset($_POST['train_taijutsu'])){
-	error_reporting(E_ALL);
-	ini_set('display_errors', 1);
 
+if(isset($_POST['train_taijutsu'])){
 	$taijutsu = (int)$_POST['train_taijutsu'];
 	$ninjutsu = (int)$_POST['train_ninjutsu'];
 	$genjutsu = (int)$_POST['train_genjutsu'];
 	$restante = (isset($_POST['restante']) ? (float)$_POST['restante'] : 0);
 
 	if($restante < 0){ 
-		echo "<script>alert('Saldo insuficiente (JS Check Fail)'); self.location='?p=home'</script>"; 
+		echo "<script>alert('Saldo insuficiente!'); self.location='?p=train'</script>"; 
 		exit(); 
 	}
 
@@ -21,23 +19,19 @@ if(isset($_POST['train_taijutsu'])){
 	}
 
 	$total = 0;
-	$temp_db = $db; // Usar cópia local para evitar mutações inesperadas se index.php usar $db depois
-
-	// Taijutsu Loop
-	if($taijutsu > $temp_db['taijutsu']) {
-		for($i = $temp_db['taijutsu']; $i < $taijutsu; $i++) {
+	// Cálculo seguro no backend
+	if($taijutsu > $db['taijutsu']) {
+		for($i = $db['taijutsu']; $i < $taijutsu; $i++) {
 			$total += round(($i * 2) + ($i * $i) + ($i * 0.2));
 		}
 	}
-	// Ninjutsu Loop
-	if($ninjutsu > $temp_db['ninjutsu']) {
-		for($i = $temp_db['ninjutsu']; $i < $ninjutsu; $i++) {
+	if($ninjutsu > $db['ninjutsu']) {
+		for($i = $db['ninjutsu']; $i < $ninjutsu; $i++) {
 			$total += round(($i * 2) + ($i * $i) + ($i * 0.2));
 		}
 	}
-	// Genjutsu Loop
-	if($genjutsu > $temp_db['genjutsu']) {
-		for($i = $temp_db['genjutsu']; $i < $genjutsu; $i++) {
+	if($genjutsu > $db['genjutsu']) {
+		for($i = $db['genjutsu']; $i < $genjutsu; $i++) {
 			$total += round(($i * 2) + ($i * $i) + ($i * 0.2));
 		}
 	}
@@ -47,9 +41,12 @@ if(isset($_POST['train_taijutsu'])){
 		exit(); 
 	}
 
-	$sql = "UPDATE usuarios SET yens=yens-$total, taijutsu=$taijutsu, ninjutsu=$ninjutsu, genjutsu=$genjutsu WHERE id=".$db['id'];
-	if(!mysql_query($sql)) {
-		die("Erro ao atualizar treino: " . mysql_error());
+    // Usando Prepared Statement para segurança
+    $stmt = mysqli_prepare($mysqli_link, "UPDATE usuarios SET yens=yens-?, taijutsu=?, ninjutsu=?, genjutsu=? WHERE id=?");
+    mysqli_stmt_bind_param($stmt, "ddiii", $total, $taijutsu, $ninjutsu, $genjutsu, $db['id']);
+    
+	if(!mysqli_stmt_execute($stmt)) {
+		die("Erro ao atualizar treino: " . mysqli_error($mysqli_link));
 	}
 
 	echo "<script>self.location='?p=train&msg=1&yens=".$total."'</script>";

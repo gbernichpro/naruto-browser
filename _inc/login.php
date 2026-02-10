@@ -4,17 +4,17 @@
 <div class="modern-card">
     <div class="modern-card-header">Destaque</div>
     <div class="modern-card-body">
-        <link rel="stylesheet" href="_scripts/default.css" type="text/css" media="screen"  />
-        <link rel="stylesheet" href="_scripts/dark.css" type="text/css" media="screen" />
-        <link rel="stylesheet" href="_scripts/bar.css" type="text/css" media="screen"  />
-        <link rel="stylesheet" href="_scripts/nivo-slider.css" type="text/css" media="screen"  />
+        <link rel="stylesheet" href="_css/default.css" type="text/css" media="screen"  />
+        <link rel="stylesheet" href="_css/dark.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="_css/bar.css" type="text/css" media="screen"  />
+        <link rel="stylesheet" href="_css/nivo-slider.css" type="text/css" media="screen"  />
         <div class="slider-wrapper theme-dark">
             <div  id="slider" class="nivoSlider">
-                <img src="img/0.png" data-thumb="images/1.png" alt="" title="<b>Naruto <?php echo NARUTO_NOME; ?></b> Rpg Online - Jogue diretamente do seu navegador" />
-                <img src="img/1.png" data-thumb="images/1.png" alt="" title="<b>Naruto <?php echo NARUTO_NOME; ?></b> Inicie sua aventura" />
+                <img src="_img/0.png" data-thumb="_img/1.png" alt="" title="<b>Naruto <?php echo NARUTO_NOME; ?></b> Rpg Online - Jogue diretamente do seu navegador" />
+                <img src="_img/1.png" data-thumb="_img/1.png" alt="" title="<b>Naruto <?php echo NARUTO_NOME; ?></b> Inicie sua aventura" />
             </div>
         </div>
-        <script type="text/javascript" src="_scripts/jquery.nivo.slider.js"></script>
+        <script type="text/javascript" src="_js/jquery.nivo.slider.js"></script>
         <script type="text/javascript">
         $(window).load(function() {
             $('#slider').nivoSlider();

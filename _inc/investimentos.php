@@ -1,118 +1,138 @@
 <?php
-    if($db['orgid']==0){ echo "<script>self.location='?p=home'</script>"; return; }
-	$sql = mysql_query("SELECT u.config_skin, u.orgid, m.posicao FROM usuarios u LEFT OUTER JOIN membros m ON m.usuarioid=u.id WHERE u.id='".antiinjection($_SESSION['logado'])."'");
-	$db = mysql_fetch_assoc($sql);
-	$sqlc = mysql_query("SELECT reserva FROM organizacoes WHERE id=".$db['orgid']);
-	$dbc = mysql_fetch_assoc($sqlc);
-	$sqli = mysql_query("SELECT i.*, t.*, i.id idinvestimento FROM clas_investimentos i LEFT OUTER JOIN table_investimentos t ON i.invid=t.id WHERE i.orgid=".$db['orgid']);
-	$dbi = mysql_fetch_assoc($sqli);
-	?>
-    <div class="box_top"></div>
-    <div class="box_middle"><div id="menu">
-    <ul class="menu">
-        <li><a href="#" class="parent" align="center"><span>Clãn</span></a>
-            <ul>
+if($db['orgid']==0){ echo "<script>self.location='?p=home'</script>"; exit(); }
 
-                    <ul>
+// Carregar dados necessários (mysqli)
+$id_org = $db['orgid'];
+$sql_org = mysqli_query($mysqli_link, "SELECT reserva, nome, sigla FROM organizacoes WHERE id=$id_org");
+$dbo = mysqli_fetch_assoc($sql_org);
 
-                            <ul>
+// Pegar posição do usuário
+$sql_pos = mysqli_query($mysqli_link, "SELECT posicao FROM membros WHERE usuarioid=".$db['id']." AND orgid=$id_org");
+$dbp = mysqli_fetch_assoc($sql_pos);
+$mypos = $dbp ? $dbp['posicao'] : 3;
 
-                            </ul>
-                        </li>
+// Pegar investimentos ATUAIS
+$sqli = mysqli_query($mysqli_link, "SELECT i.*, t.*, i.id idinvestimento FROM clas_investimentos i LEFT OUTER JOIN table_investimentos t ON i.invid=t.id WHERE i.orgid=$id_org");
 
+// Lista de IDs já investidos para exclusão na lista de novos
+$excluidos = [];
+$investimentos_atuais = [];
+while($row = mysqli_fetch_assoc($sqli)){
+    $investimentos_atuais[] = $row;
+    $excluidos[] = $row['invid'];
+}
 
-                            <ul>
+// Pegar investimentos DISPONÍVEIS (não comprados ainda)
+$query_t = "SELECT * FROM table_investimentos";
+if(!empty($excluidos)) {
+    $query_t .= " WHERE id NOT IN (" . implode(',', $excluidos) . ")";
+}
+$sqlt = mysqli_query($mysqli_link, $query_t);
+?>
 
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li><a href="?p=myorg" class="documents"><span>Informações</span></a></li>
-                <li><a href="?p=configorg" class="documents"><span>Configurar</span></a></li>
-                <li><a href="?p=addorg" class="documents"><span>Recrutar</span></a></li>
-            </ul>
-        </li>
-        <li><a href="#" class="parent"><span>Outros</span></a>
-            <ul>
+<div class="modern-card">
+    <div class="modern-card-header">
+        Investimentos do Clã: [<?php echo $dbo['sigla']; ?>] <?php echo $dbo['nome']; ?>
+    </div>
 
-                  <ul>
+    <!-- MENU SECUNDÁRIO UNIFICADO -->
+    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-bottom: 1px solid #444; display: flex; gap: 10px; overflow-x: auto;">
+        <a href="?p=myorg" class="modern-btn">Info</a>
+        <?php if($mypos < 3) { ?>
+        <a href="?p=configorg" class="modern-btn">Configurar</a>
+        <a href="?p=addorg" class="modern-btn">Recrutar</a>
+        <?php } ?>
+        <a href="?p=donateorg" class="modern-btn">Doar Yens</a>
+        <a href="?p=warorg" class="modern-btn">Guerras</a>
+        <a href="?p=cla_shop" class="modern-btn">Loja</a>
+        <a href="?p=investimentos" class="modern-btn active">Investimentos</a>
+    </div>
 
-                    </ul>
-                </li>
+    <div class="modern-card-body">
+        <!-- RESERVA -->
+        <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+            <span style="font-size: 14px; color: #aaa; display: block; margin-bottom: 5px;">Reserva Atual do Clã</span>
+            <span style="font-size: 24px; color: #ffd700; font-weight: bold;">
+                <img src="_img/yens.png" width="20" style="vertical-align: middle;"> 
+                <?php echo number_format($dbo['reserva'], 2, ',', '.'); ?> Yens
+            </span>
+        </div>
 
-                    <ul>
+        <p style="color: #777; font-size: 13px; margin-bottom: 20px; text-align: center;">Utilize a reserva do clã para aprimorar as instalações e garantir bônus permanentes para todos os membros.</p>
 
-                    </ul>
-                </li>
-                <li><a href="?p=donateorg" class="documents"><span>Doar yens</span></a></li>
-                <li><a href="?p=warorg" class="documents"><span>Guerras do Clã</span></a></li>
-                <li><a href="?p=cla_shop" class="documents"><span>Loja do clã</span></a></li>
-				<li><a href="?p=investimentos" class="documents"><span>Investimentos</span></a></li>
-            </ul>
-        </li>
+        <!-- INVESTIMENTOS ATUAIS -->
+        <h3 style="color: #fff; margin-bottom: 15px; font-size: 18px; border-left: 4px solid #f00; padding-left: 10px;">Aprimoramentos Atuais</h3>
+        
+        <?php if(empty($investimentos_atuais)): ?>
+            <div class="aviso" style="margin-bottom: 30px;">Nenhum investimento realizado até o momento.</div>
+        <?php else: ?>
+            <div style="display: grid; gap: 15px; margin-bottom: 40px;">
+                <?php foreach($investimentos_atuais as $dbi): ?>
+                    <div style="background: rgba(0,0,0,0.2); border: 1px solid #333; padding: 15px; border-radius: 8px; display: flex; gap: 20px; align-items: center;">
+                        <img src="_img/skins/<?php echo $db['config_skin']; ?>/clas/clan0<?php echo $dbi['nivel']; ?>.png" onerror="this.src='_img/org/instalação.png'" style="width: 100px; height: 100px; border-radius: 8px; border: 1px solid #444; background: #111;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <b style="color: #fff; font-size: 16px;"><?php echo $dbi['nome']; ?></b>
+                                <span style="background: #a33; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Nv <?php echo $dbi['nivel']; ?></span>
+                            </div>
+                            <p style="color: #777; font-size: 12px; margin-bottom: 10px;"><?php echo $dbi['descricao']; ?></p>
+                            
+                            <!-- BÔNUS -->
+                            <div style="font-size: 11px; color: #ffd700; display: flex; gap: 10px;">
+                                <?php if($dbi['taijutsu']>0) echo '<span>Taijutsu: +'.$dbi['taijutsu'].'</span>'; ?>
+                                <?php if($dbi['ninjutsu']>0) echo '<span>Ninjutsu: +'.$dbi['ninjutsu'].'</span>'; ?>
+                                <?php if($dbi['genjutsu']>0) echo '<span>Genjutsu: +'.$dbi['genjutsu'].'</span>'; ?>
+                            </div>
 
-    </ul>
-</div><div class="sep"></div>
-    Abaixo estão listados os investimentos de seu clã. Você deve utilizar os yens doados pelos membros para melhorar seu clã.<div class="sep"></div>
-    <div style="padding-left:5px;background:url(_img/skins/<?php echo $db['config_skin']; ?>/gradient2.jpg) repeat-y;height:20px;line-height:20px;color:#FFFFAA;"><img src="_img/yens.png" width="14" height="14" align="absmiddle" /> <b>Reserva do Clã: <?php echo number_format($dbc['reserva'],2,',','.'); ?> yens</b></div>
-    <?php $exclui=''; if(mysql_num_rows($sqli)==0) echo '<div class="aviso">Nenhum investimento foi feito no clã até o momento.</div>'; else do{ if($exclui=='') $exclui.='id<>'.$dbi['invid'].' '; else $exclui.='AND id<>'.$dbi['invid'].' '; ?>
-    <div class="sep"></div>
-    <table width="100%" cellpading="0" cellspacing="1" style="background:url(_img/skins/<?php echo $db['config_skin']; ?>/gradient5.jpg) repeat-x #161616;" onmouseover="style.background='url(_img/skins/<?php echo $db['config_skin']; ?>/gradient4.jpg) repeat-x #310000'" onmouseout="style.background='url(_img/skins/<?php echo $db['config_skin']; ?>/gradient5.jpg) repeat-x #161616'">
-        <tr>
-            <td width="120"><a href="javascript:void(0);" onClick="carregar(2);"><img src="_img/skins/<?php echo $db['config_skin']; ?>/clas/clan0<?php echo $dbi['nivel']; ?>.png" border="0" /></a></td>
-            <td>
-            <div align="center" style="height:20px;line-height:20px;"><b><?php echo $dbi['nome']; ?></b></div>
-            <div class="sep2"></div>
-            <div align="center"><span class="sub2"><?php echo $dbi['descricao']; ?></span></div>
-            <div class="sep2"></div>
-            <div align="center" style="color:#FFFFAA;"><b>
-            <?php if($dbi['taijutsu']>0) echo '+'.$dbi['taijutsu'].' pontos no Taijutsu de todos os membros'; ?>
-            <?php if($dbi['ninjutsu']>0) echo '+'.$dbi['ninjutsu'].' pontos no Ninjutsu de todos os membros'; ?>
-            <?php if($dbi['genjutsu']>0) echo '+'.$dbi['genjutsu'].' pontos no Genjutsu de todos os membros'; ?>
-            </b></div>
-            <div class="sep2"></div>
-            <div align="center"><b>Nível <?php echo $dbi['nivel']; ?></b></div>
-            <div class="sep2"></div>
-            <div align="center" style="color:#FFFFAA;"><b>Custo para Aprimorar:</b> <?php echo number_format(($dbi['custo']+($dbi['nivel']*20000)),2,',','.'); ?> yens</div>
-            <div class="sep2"></div>
-             <div align="center"><?php if($db['posicao']==3) echo '<div class="aviso">Apenas o líder e moderadores podem investir no clã .</div>'; else { ?><input type="button" class="botao" value="Aprimorar" onclick="javascript:location.href='?p=myorg&evolve=<?php echo $dbi['idinvestimento']; ?>'" /><?php } ?></div>
-            </td>
-        </tr>
-    </table>
-    <?php } while($dbi=mysql_fetch_assoc($sqli)); ?>
-     <div class="sep"></div>
-    Crie novos locais de treinamento para os membros de seu clã! Listamos algumas das construções na qual você pode investir. Após construí-los, é possível aprimorar cada um deles, aumentando os benefícios que estes investimentos oferecem.
-    <?php
-	if($exclui<>'')
-		$sqlt=mysql_query("SELECT * FROM table_investimentos WHERE $exclui");
-	else
-		$sqlt=mysql_query("SELECT * FROM table_investimentos");
-	$dbt=mysql_fetch_assoc($sqlt);
-	?>
-    <?php if(mysql_num_rows($sqlt)==0) echo '<div class="aviso">Você já realizou todos os investimentos possíveis em seu clã.</div>'; else do{ ?>
-    <div class="sep"></div>
-    <table width="100%" cellpading="0" cellspacing="1" style="background:url(_img/skins/<?php echo $db['config_skin']; ?>/gradient5.jpg) repeat-x #161616;" onmouseover="style.background='url(_img/skins/<?php echo $db['config_skin']; ?>/gradient4.jpg) repeat-x #310000'" onmouseout="style.background='url(_img/skins/<?php echo $db['config_skin']; ?>/gradient5.jpg) repeat-x #161616'">
-        <tr>
-            <td width="120"><a href="javascript:void(0);" onClick="carregar(2);"><img src="_img/skins/<?php echo $db['config_skin']; ?>/clas/clan0<?php echo $dbt['id']; ?>.png" border="0" /></a></td>
-            <td>
-            <div align="center" style="height:20px;line-height:20px;"><b><?php echo $dbt['nome']; ?></b></div>
-            <div class="sep2"></div>
-            <div align="center"><span class="sub2"><?php echo $dbt['descricao']; ?></span></div>
-            <div class="sep2"></div>
-            <div align="center" style="color:#FFFFAA;"><b>
-            <?php if($dbt['tai']>0) echo '+'.$dbt['tai'].' pontos no Taijutsu de todos os membros'; ?>
-            <?php if($dbt['nin']>0) echo '+'.$dbt['nin'].' pontos no Ninjutsu de todos os membros'; ?>
-            <?php if($dbt['gen']>0) echo '+'.$dbt['gen'].' pontos no Genjutsu de todos os membros'; ?>
-            </b></div>
-            <div class="sep2"></div>
-            <div align="center"><b>Inicia no Nível 1</b></div>
-            <div class="sep2"></div>
-            <div align="center" style="color:#FFFFAA;"><b>Custo:</b> <?php echo number_format($dbt['custo'],2,',','.'); ?> yens</div>
-            <div class="sep2"></div>
-            <div align="center"><?php if($db['posicao']==3) echo '<div class="aviso">Apenas o líder e moderadores podem investir no clã .</div>'; else { ?><input type="button" class="botao" value="Construir" onclick="javascript:location.href='?p=myorg&buy=<?php echo $dbt['id']; ?>'" /><?php } ?></div>
-            </td>
-        </tr>
-    </table>
-    
-    <?php } while($dbt=mysql_fetch_assoc($sqlt)); ?>
-	</div><div class="box_bottom"></div>
+                            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 12px; color: #fff;">
+                                    <b>Próximo Nível:</b> 
+                                    <span style="color: #ffd700;"><?php echo number_format(($dbi['custo']+($dbi['nivel']*20000)), 0, ',', '.'); ?> Yens</span>
+                                </div>
+                                <?php if($mypos < 3): ?>
+                                    <a href="?p=myorg&evolve=<?php echo $dbi['idinvestimento']; ?>" class="modern-btn" style="background: #282; padding: 5px 15px; font-size: 12px;">📈 Aprimorar</a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- DISPONÍVEIS -->
+        <h3 style="color: #fff; margin-bottom: 15px; font-size: 18px; border-left: 4px solid #555; padding-left: 10px;">Novos Investimentos</h3>
+        
+        <?php if(mysqli_num_rows($sqlt) == 0): ?>
+            <div class="aviso">Todos os investimentos possíveis já foram realizados!</div>
+        <?php else: ?>
+            <div style="display: grid; gap: 15px;">
+                <?php while($dbt = mysqli_fetch_assoc($sqlt)): ?>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; padding: 15px; border-radius: 8px; display: flex; gap: 20px; align-items: center;">
+                        <img src="_img/skins/<?php echo $db['config_skin']; ?>/clas/clan01.png" onerror="this.src='_img/org/instalação.png'" style="width: 80px; height: 80px; border-radius: 8px; border: 1px solid #333; opacity: 0.6;">
+                        <div style="flex: 1;">
+                            <b style="color: #ccc; font-size: 15px;"><?php echo $dbt['nome']; ?></b>
+                            <p style="color: #555; font-size: 11px; margin-bottom: 8px;"><?php echo $dbt['descricao']; ?></p>
+                            
+                            <div style="font-size: 10px; color: #666; display: flex; gap: 10px;">
+                                <?php if($dbt['tai']>0) echo '<span>Taijutsu: +'.$dbt['tai'].'</span>'; ?>
+                                <?php if($dbt['nin']>0) echo '<span>Ninjutsu: +'.$dbt['nin'].'</span>'; ?>
+                                <?php if($dbt['gen']>0) echo '<span>Genjutsu: +'.$dbt['gen'].'</span>'; ?>
+                            </div>
+
+                            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 12px; color: #888;"><b>Custo Inicial:</b> <?php echo number_format($dbt['custo'], 0, ',', '.'); ?> Yens</div>
+                                <?php if($mypos < 3): ?>
+                                    <a href="?p=myorg&buy=<?php echo $dbt['id']; ?>" class="modern-btn" style="background: #444; padding: 5px 15px; font-size: 12px;">➕ Construir</a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if($mypos == 3): ?>
+            <div class="aviso" style="margin-top: 20px;">Nota: Apenas o líder e conselheiros podem realizar investimentos.</div>
+        <?php endif; ?>
+    </div>
+</div>

@@ -3,7 +3,7 @@
 /* CSS Document */
 body {
     color: #BBBBBB;
-    background: url(../template/background.png)center top no-repeat #5d5d5d;
+    background: url(../_img/background.png)center top no-repeat #5d5d5d;
     font-size: 12px;
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
@@ -64,7 +64,7 @@ textarea {
 
 .botao {
     color: #000;
-    background: url(../template/bg_button.png) left;
+    background: url(../_img/bg_button.png) left;
     padding-left: 17px;
     border: 1px solid #4c4c4c;
     -moz-border-radius: 2px;

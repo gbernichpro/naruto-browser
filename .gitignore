@@ -1,0 +1,9 @@
+.env
+.env.coolify
+vendor/
+composer.lock
+*.log
+.DS_Store
+Thumbs.db
+wamp64/
+php_error.log

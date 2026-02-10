@@ -1,184 +1,223 @@
 <?php
 require_once('verificar_sala.php');
-if(!isset($_GET['id'])){ echo "<script>self.location='?p=school'</script>"; return; }
-if(!isset($_GET['jutsu'])){ echo "<script>self.location='?p=school'</script>"; return; }
-vn($c->decode($_GET['jutsu'],$chaveuniversal));
+
+if(!isset($_GET['id']) || !isset($_GET['jutsu'])){ 
+    echo "<script>self.location='?p=school'</script>"; 
+    exit(); 
+}
+
+$id_sala = (int)$_GET['id'];
+$id_jutsu = (int)$c->decode($_GET['jutsu'], $chaveuniversal);
 $atual = date('Y-m-d H:i:s');
-$fim = $dbr['fim'];
-if($atual<$dbr['fim']){
-	$sqltempo = mysql_fetch_assoc(mysql_query("SELECT timediff('$fim','$atual') as fim"));
-	$fim = $sqltempo['fim'];
-	$msgconc = '<b>Tempo Restante: <span id="sala_tempo" style="color:#FFFFFF">'.$fim.'</span></b>';
-	$msg = '<b>Tempo Restante: <span id="sala_tempo" style="color:#FFFFFF">'.$fim.'</span></b>';
-} else $msgconc = '<b>Tempo Restante: <span id="sala_tempo" style="color:#FFFFFF">'.$fim.'</span></b>';
-?>
-<script language="javascript" type="text/javascript">
-var conc=0;
-function calculafim(div,divtotal){
-	if(conc==0){
-	var navegador=navigator.appName;
-	var tmp = document.getElementById(div).innerHTML.split(":");
-	var s = tmp[2];
-	var m = tmp[1];
-	var h = tmp[0];
-	s--;
-	if (s < 00){ s = 59;	m--; }
-	if (m < 00){ m = 59;	h--; };
-	s = new String(s); if (s.length < 2) s = "0" + s;
-	m = new String(m); if (m.length < 2) m = "0" + m;
-	h = new String(h); if (h.length < 2) h = "0" + h;
 
-	var temp = h + ":" + m + ":" + s;
+// Busca informações do jutsu
+$stmt_j = mysqli_prepare($mysqli_link, "SELECT id, nome, natureza, forca, nivel, valor FROM table_jutsus WHERE id=?");
+mysqli_stmt_bind_param($stmt_j, "i", $id_jutsu);
+mysqli_stmt_execute($stmt_j);
+$res_j = mysqli_stmt_get_result($stmt_j);
+$dbj = mysqli_fetch_assoc($res_j);
 
-	document.getElementById(div).innerHTML = temp;
-	document.getElementById(div).value = temp;
-	atualiza(div,divtotal);
-	}
-}
-<?php if($atual<$dbr['fim']) echo "window.setInterval('calculafim(\"sala_tempo\",\"mensagem\")',1000);"; ?>
-function atualiza(div,divtotal){
-  	if((document.getElementById(div).value) < "00:00:01"){
-  		self.location="?p=school";
-  		conc=1;
-	}
-}
-</script>
-<?php
-$sqlj = mysql_query("SELECT id,nome,natureza,forca,nivel,valor FROM table_jutsus WHERE id=".$c->decode(antiinjection($_GET['jutsu']),$chaveuniversal));
-$dbj = mysql_fetch_assoc($sqlj);
-if($dbj['nivel']>$db['nivel']){ echo "<script>self.location='?p=learn&id=".$_GET['id']."'</script>"; return; }
-if($dbj['valor']>$db['yens']){ echo "<script>self.location='?p=learn&id=".$_GET['id']."&msg=2'</script>"; return; }
-if(($dbj['natureza']<>'nenhum')&&($db['natureza1']<>$dbj['natureza'])&&($db['natureza2']<>$dbj['natureza'])&&($db['natureza3']<>$dbj['natureza'])){ echo "<script>self.location='?p=learn&id=".$_GET['id']."'</script>"; return; }
+if(!$dbj){ echo "<script>self.location='?p=school'</script>"; exit(); }
+
+// Validações
+if($dbj['nivel'] > $db['level']){ echo "<script>self.location='?p=learn&id=$id_sala'</script>"; exit(); }
+if($dbj['valor'] > $db['yens']){ echo "<script>self.location='?p=learn&id=$id_sala&msg=2'</script>"; exit(); }
+
+// Processamento de Conclusão do Minigame
 if(isset($_POST['contador'])){
-	if($_POST['contador']>=floor($dbj['forca']/4)){
-		$sqlv=mysql_query("SELECT count(id) conta FROM jutsus WHERE usuarioid=".$db['id']." AND jutsu=".$dbj['id']);
-		$dbv=mysql_fetch_assoc($sqlv);
-		if($dbv['conta']==0){
-			if($dbj['valor']>$db['yens']){ echo "<script>self.location='?p=learn&id=".$_GET['id']."&msg=2'</script>"; return; }
-			mysql_query("INSERT INTO jutsus (usuarioid, jutsu, nivel, exp, expmax) VALUES (".$db['id'].", ".$dbj['id'].", 1, 0, 50)");
-			mysql_query("INSERT INTO atualizacoes (usuarioid, texto, hora) VALUES (".$db['id'].", '<a href=?p=view&view=".strtolower($db['usuario']).">".$db['usuario']."</a> aprendeu <b>".$dbj['nome']."</b>.', '".time(date('Y-m-d H:i:s'))."')");
-			mysql_query("UPDATE usuarios SET yens=yens-".$dbj['valor']." WHERE id=".$db['id']);
-			echo "<script>self.location='?p=room&id=".$_GET['id']."&msg=2'</script>"; return;
-		} else { echo "<script>self.location='?p=room&id=".$_GET['id']."'</script>"; return; }
+	$req_selos = floor($dbj['forca'] / 4);
+    if($req_selos < 1) $req_selos = 1;
+
+	if((int)$_POST['contador'] >= $req_selos){
+        // Verifica se já possui
+        $stmt_p = mysqli_prepare($mysqli_link, "SELECT count(id) as conta FROM jutsus WHERE usuarioid=? AND jutsu=?");
+        mysqli_stmt_bind_param($stmt_p, "ii", $db['id'], $dbj['id']);
+        mysqli_stmt_execute($stmt_p);
+        $res_p = mysqli_stmt_get_result($stmt_p);
+        $dbv = mysqli_fetch_assoc($res_p);
+
+		if($dbv['conta'] == 0){
+            mysqli_begin_transaction($mysqli_link);
+            try {
+                // Insere Jutsu
+                $stmt_i = mysqli_prepare($mysqli_link, "INSERT INTO jutsus (usuarioid, jutsu, nivel, exp, expmax) VALUES (?, ?, 1, 0, 50)");
+                mysqli_stmt_bind_param($stmt_i, "ii", $db['id'], $dbj['id']);
+                mysqli_stmt_execute($stmt_i);
+
+                // Log de Atualização
+                $at_msg = '<a href="?p=view&view='.strtolower($db['usuario']).'">'.$db['usuario'].'</a> aprendeu <b>'.$dbj['nome'].'</b>.';
+                $stmt_a = mysqli_prepare($mysqli_link, "INSERT INTO atualizacoes (usuarioid, texto, hora) VALUES (?, ?, ?)");
+                $time_now = time();
+                mysqli_stmt_bind_param($stmt_a, "isi", $db['id'], $at_msg, $time_now);
+                mysqli_stmt_execute($stmt_a);
+
+                // Deduz Yens
+                $stmt_u = mysqli_prepare($mysqli_link, "UPDATE usuarios SET yens=yens-? WHERE id=?");
+                mysqli_stmt_bind_param($stmt_u, "di", $dbj['valor'], $db['id']);
+                mysqli_stmt_execute($stmt_u);
+
+                mysqli_commit($mysqli_link);
+                echo "<script>self.location='?p=room&id=$id_sala&msg=2'</script>"; 
+                exit();
+            } catch (Exception $e) {
+                mysqli_rollback($mysqli_link);
+                die("Erro técnico: " . $e->getMessage());
+            }
+		} else {
+            echo "<script>self.location='?p=room&id=$id_sala'</script>"; 
+            exit(); 
+        }
 	}
 }
-?>
-<div class="box_top">Aprender Jutsu</div>
-<div class="box_middle"><div style="background: url(../_img/_detalhes/base2.PNG);width: 720px;height: 250px;">
-<table cellpadding="0" cellspacing="0" width="712" height="230"><tbody><tr><td width="150">
-<img width="142" style="" src="_img/_detalhes/msg/38.png"></td><td valign="top"><br><br><br>
-<div style="margin-left: -345px;margin-top: 15px;height: 0px;">
-<b id="title" style="font-family: impact;font-size: 20px;font-weight: normal;color: #ffffff;"  onmouseover="style.color='#F5F5F5'" onmouseout="color.color='#ffffff'">
-&raquo; Seus Jutsus!</b></div><br>
-<div style="margin-left: 0px;margin-top: 35px;font-family: arial;font-size: 12px;color: #fff;"><b>
 
-É hora de treinar! Seja o mais rápido possível, e faça os selos que lhe mostrarei.</br>
-Caso você erre, começará tudo novamente. Completando os <?php echo floor($dbj['forca']/4); ?> selos, você estará pronto</br>
-para utilizar o jutsu!</br>
-</br>
-</br>
-</br>
-</b>
-</div></td></tr></tbody></table></div>
-<div class="sep"></div>
-	<div class="aviso" id="mensagem">
-    <?php
-	if(isset($_GET['msg'])){
-		switch($_GET['msg']){
-			case 1: $errmsg='Você não está pronto para controlar a natureza do seu chakra.<br />Volte quando estiver no nível 15.';
-		}
-	echo $errmsg.'<div class="sep"></div>';
-	}
-	?>
-    <b>
-	<?php
-	if($atual<$dbr['fim'])
-		echo $msg;
-	else
-		echo $msgconc;
-	?>
-    </b><br /><a href="?p=room&amp;leave=true">Sair da Sala</a></div><div class="sep"></div>
-    <div align="center" style="margin-top:10px;" id="div_minigame">
-    <?php
-    $inicial=rand(1,3);
-	$selos=array('bode','dragao','cobra','cachorro','coelho','boi','macaco','cavalo','tigre','rato','passaro');
-	?>
-    <script>
-	inicial=<?php echo $inicial; ?>;
-	conta=0;
-	function randOrd() {
-    	return (Math.round(Math.random())-0.5);
-	}
-	function minigame(id){
-		var selos=Array();
-		selos[0]='bode';
-		selos[1]='dragao';
-		selos[2]='javali';
-		selos[3]='cobra';
-		selos[4]='cachorro';
-		selos[5]='coelho';
-		selos[6]='boi';
-		selos[7]='macaco';
-		selos[8]='cavalo';
-		selos[9]='tigre';
-		selos[10]='rato';
-		selos[11]='passaro';
-	if(inicial==id){
-			conta=conta+1;
-			document.getElementById('status').innerHTML='Acertou!!';
-			document.getElementById('status').style.color='#00CC00';
-		} else {
-			conta=0;
-			document.getElementById('status').innerHTML='Errou!!';
-			document.getElementById('status').style.color='#FF0000';
-		}
-		selos.sort(randOrd);
-		numero=Math.floor(Math.random()*8);
-		novo=selos[numero];
-		inicial=numero+1;
-		document.getElementById('repeat').setAttribute("src","_img/school/selo_"+novo+".jpg");
-		document.getElementById('t1').setAttribute("src","_img/school/selo_"+selos[0]+".jpg");
-		document.getElementById('t2').setAttribute("src","_img/school/selo_"+selos[1]+".jpg");
-		document.getElementById('t3').setAttribute("src","_img/school/selo_"+selos[2]+".jpg");
-		document.getElementById('t4').setAttribute("src","_img/school/selo_"+selos[3]+".jpg");
-		document.getElementById('t5').setAttribute("src","_img/school/selo_"+selos[4]+".jpg");
-		document.getElementById('t6').setAttribute("src","_img/school/selo_"+selos[5]+".jpg");
-		document.getElementById('t7').setAttribute("src","_img/school/selo_"+selos[6]+".jpg");
-		document.getElementById('t8').setAttribute("src","_img/school/selo_"+selos[7]+".jpg");
-		document.getElementById('contador').value=conta;
-		document.getElementById('count').innerHTML=conta;
-		if(conta>=<?php echo floor($dbj['forca']); ?>){
-			document.form_minigame.submit();
-		}
-	}
-	</script>
-	    <table width="100%" cellpadding="0" cellspacing="1" style="background:url(_img/school/fundo_selos.jpg) center no-repeat;">
-    	<tr>
-    	  <td width="43%" rowspan="2" align="center" height="125"><img id="repeat" style="margin-right:-100px;" src="_img/school/selo_<?php echo $selos[$inicial-1]; ?>.jpg" /></td>
-    	  <td align="center"><div id="conta" style="font-size:18px;font-weight:bold;margin-top:7px;margin-right:90px;color:#666666;"></br>Acertos: <span id="count">0</span>/<?php echo floor($dbj['forca']); ?></div></td>
-  	  </tr>
-    	<tr>
-        	<td align="center" valign="top"><div id="status" style="font-size:18px;margin-top:20px;font-weight:bold;margin-right:90px;">-</div></td>
-      </tr>
-    </table>
-    <br />
-    <img id="t1" src="_img/school/selo_<?php echo $selos[0]; ?>.jpg" onclick="minigame(1)" style="cursor:pointer;" />
-    <img id="t2" src="_img/school/selo_<?php echo $selos[1]; ?>.jpg" onclick="minigame(2)" style="cursor:pointer;" />
-    <img id="t3" src="_img/school/selo_<?php echo $selos[2]; ?>.jpg" onclick="minigame(3)" style="cursor:pointer;" />
-    <img id="t4" src="_img/school/selo_<?php echo $selos[3]; ?>.jpg" onclick="minigame(4)" style="cursor:pointer;" />
-    <br />
-    <img id="t5" src="_img/school/selo_<?php echo $selos[4]; ?>.jpg" onclick="minigame(5)" style="cursor:pointer;" />
-    <img id="t6" src="_img/school/selo_<?php echo $selos[5]; ?>.jpg" onclick="minigame(6)" style="cursor:pointer;" />
-    <img id="t7" src="_img/school/selo_<?php echo $selos[6]; ?>.jpg" onclick="minigame(7)" style="cursor:pointer;" />
-    <img id="t8" src="_img/school/selo_<?php echo $selos[7]; ?>.jpg" onclick="minigame(8)" style="cursor:pointer;" />
-    <form method="post" action="?p=pratice&amp;id=<?php echo $_GET['id']; ?>&amp;jutsu=<?php echo $c->encode($dbj['id'],$chaveuniversal); ?>" name="form_minigame" id="form_minigame">
-    	<input type="hidden" id="contador" name="contador" value="0" />
-    </form>
-  </div>
-</div>
-<div class="box_bottom"></div>
-<?php
-@mysql_free_result($sqlj);
-@mysql_free_result($sqln);
-@mysql_free_result($sqlv);
+// Configuração do Minigame
+$selos_nomes = ['bode','dragao','cobra','cachorro','coelho','boi','macaco','cavalo','tigre','rato','passaro', 'javali'];
+$max_selos = floor($dbj['forca'] / 4);
+if($max_selos < 1) $max_selos = 1;
+
+$fim_time = $dbr['fim'];
+$stmt_t = mysqli_prepare($mysqli_link, "SELECT timediff(?, ?) as fim");
+mysqli_stmt_bind_param($stmt_t, "ss", $fim_time, $atual);
+mysqli_stmt_execute($stmt_t);
+$sqltempo = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt_t));
+$tempo_restante = $sqltempo['fim'];
 ?>
+
+<div class="modern-card">
+    <div class="modern-card-header">⚔️ Praticando Selos: <?php echo $dbj['nome']; ?></div>
+    <div class="modern-card-body">
+        
+        <div style="display: flex; gap: 20px; align-items: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; border: 1px solid #333; margin-bottom: 25px;">
+            <img src="_img/_detalhes/msg/38.png" style="width: 100px; border-radius: 8px; filter: drop-shadow(0 0 10px rgba(255,100,0,0.3));">
+            <div style="flex: 1;">
+                <h3 style="color: #f60; margin: 0 0 10px 0; font-family: 'Impact', sans-serif; letter-spacing: 1px;">FOCO E VELOCIDADE</h3>
+                <p style="color: #ccc; font-size: 13px; line-height: 1.6; margin: 0;">
+                    Execute os selos de mão na ordem correta para dominar esta técnica. Se errar, deverá recomeçar a sequência!<br>
+                    <span style="color: #0f0; font-size: 11px; font-weight: bold;">Selos Necessários: <?php echo $max_selos; ?></span>
+                </p>
+            </div>
+            <div style="text-align: right; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; border: 1px solid #444;">
+                <span style="color: #aaa; font-size: 10px; display: block; text-transform: uppercase;">Sala Expira em:</span>
+                <b style="color: #fff; font-family: monospace;" id="sala_tempo"><?php echo $tempo_restante; ?></b>
+            </div>
+        </div>
+
+        <div style="background: url('_img/school/fundo_selos.jpg') center no-repeat; height: 160px; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; border: 1px solid #222; margin-bottom: 30px; box-shadow: inset 0 0 50px rgba(0,0,0,0.8);">
+            
+            <div style="display: flex; gap: 40px; align-items: center; margin-right: 50px;">
+                <div style="text-align: center;">
+                    <span style="color: #aaa; font-size: 10px; display: block; margin-bottom: 5px; text-transform: uppercase;">Executar Selo:</span>
+                    <img id="repeat" src="_img/school/selo_<?php echo $selos_nomes[rand(0, 7)]; ?>.jpg" style="border: 2px solid gold; border-radius: 10px; box-shadow: 0 0 15px rgba(255,215,0,0.4);">
+                </div>
+                
+                <div style="text-align: center; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; border: 1px solid #444; min-width: 120px;">
+                    <div style="font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 5px;">Progresso</div>
+                    <div style="font-size: 28px; color: #fff; font-family: 'Impact';"><span id="count">0</span>/<?php echo $max_selos; ?></div>
+                    <div id="status" style="font-size: 12px; font-weight: bold; margin-top: 5px; color: #666;">AGUARDANDO...</div>
+                </div>
+            </div>
+        </div>
+
+        <div align="center" style="display: grid; grid-template-columns: repeat(4, 110px); justify-content: center; gap: 15px; background: rgba(0,0,0,0.1); padding: 20px; border-radius: 15px; border: 1px solid #333;">
+            <?php for($i=1; $i<=8; $i++): ?>
+                <div class="selo-btn" onclick="minigame(<?php echo $i; ?>)" style="cursor: pointer; transition: transform 0.1s; border: 1px solid #444; border-radius: 8px; overflow: hidden;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
+                    <img id="t<?php echo $i; ?>" src="_img/school/selo_<?php echo $selos_nomes[rand(0, 11)]; ?>.jpg" style="width: 100%; display: block;">
+                </div>
+            <?php endfor; ?>
+        </div>
+
+        <form method="post" action="?p=pratice&id=<?php echo $id_sala; ?>&jutsu=<?php echo $_GET['jutsu']; ?>" id="form_minigame">
+            <input type="hidden" id="contador" name="contador" value="0">
+        </form>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="?p=room&leave=true" class="modern-btn" style="background: #444; font-size: 12px;">Desisitr e Sair</a>
+        </div>
+    </div>
+</div>
+
+<script>
+var selos = ['bode','dragao','javali','cobra','cachorro','coelho','boi','macaco','cavalo','tigre','rato','passaro'];
+var target_id = 0;
+var conta = 0;
+var max_conta = <?php echo $max_selos; ?>;
+
+function shuffle() {
+    var j, x, i;
+    for (i = selos.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = selos[i];
+        selos[i] = selos[j];
+        selos[j] = x;
+    }
+}
+
+function update_selos(){
+    shuffle();
+    target_id = Math.floor(Math.random() * 8) + 1;
+    
+    // Atualiza o selo alvo
+    document.getElementById('repeat').src = "_img/school/selo_" + selos[target_id-1] + ".jpg";
+    
+    // Atualiza botões
+    for(var i=1; i<=8; i++){
+        document.getElementById('t' + i).src = "_img/school/selo_" + selos[i-1] + ".jpg";
+    }
+}
+
+function minigame(id){
+    if(id == target_id){
+        conta++;
+        document.getElementById('status').innerHTML = 'ACERTOU!';
+        document.getElementById('status').style.color = '#0f0';
+    } else {
+        conta = 0;
+        document.getElementById('status').innerHTML = 'ERROU!';
+        document.getElementById('status').style.color = '#f00';
+    }
+    
+    document.getElementById('count').innerHTML = conta;
+    document.getElementById('contador').value = conta;
+    
+    if(conta >= max_conta){
+        document.getElementById('form_minigame').submit();
+        return;
+    }
+    
+    update_selos();
+}
+
+// Inicializa
+update_selos();
+
+// Timer
+var conc = 0;
+function calculafim(){
+    if(conc == 0){
+        var el = document.getElementById("sala_tempo");
+        if(!el) return;
+        var tmp = el.innerHTML.split(":");
+        var h = parseInt(tmp[0]);
+        var m = parseInt(tmp[1]);
+        var s = parseInt(tmp[2]);
+        
+        s--;
+        if(s < 0){ s = 59; m--; }
+        if(m < 0){ m = 59; h--; }
+        
+        if(h < 0){
+            self.location = "?p=school";
+            conc = 1;
+            return;
+        }
+
+        var res = (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+        el.innerHTML = res;
+    }
+}
+setInterval(calculafim, 1000);
+</script>
+
+<style>
+.selo-btn:hover { border-color: gold !important; filter: brightness(1.2); }
+</style>
