@@ -2,7 +2,11 @@
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
-$dotenv->load();
+if (file_exists(dirname(__DIR__) . '/.env')) {
+    $dotenv->load();
+} else {
+    $dotenv->safeLoad();
+}
 
 require_once('mysqli_shim.php');
 @session_start();
@@ -10,13 +14,21 @@ require_once('mail.php');
 require_once('security.php');
 require_once('cache.php');
 require_once('error_handler.php');
+require_once('db_init.php');
 $mysql_banco=$_ENV['DB_NAME'];
 $mysql_usuario=$_ENV['DB_USER'];
 $mysql_senha=$_ENV['DB_PASS'];
 $mysql_host=$_ENV['DB_HOST'];
-$conexao=mysql_pconnect($mysql_host,$mysql_usuario,$mysql_senha);
+$conexao = @mysql_pconnect($mysql_host, $mysql_usuario, $mysql_senha);
+if (!$conexao) {
+    die("Database Connection Failed. Check your DB credentials. " . mysqli_connect_error());
+}
 mysql_select_db($mysql_banco);
+if (mysqli_error($mysqli_link)) {
+    die("Database Selection Failed: " . mysqli_error($mysqli_link));
+}
 mysql_query("SET NAMES 'utf8'");
+db_auto_init($mysqli_link, $mysql_banco);
 error_reporting(E_ALL & ~E_NOTICE);
 define("NARUTO_NOME", $_ENV['GAME_NAME'] ?? "Fight");
 function antiinjection2($sql){
