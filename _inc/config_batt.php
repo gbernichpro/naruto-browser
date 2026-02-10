@@ -43,7 +43,7 @@ $dbj=mysql_fetch_assoc($sqlj);
 	echo '<div class="aviso">'.$msg.'</div><div class="sep"></div>';
 	}
 	?>
-    <form method="post" action="?p=config&amp;type=batt" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+    <form method="post" action="?p=config_batt&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
     <input type="hidden" id="batt" name="batt" value="1" />
 	<?php do{ ?>
     	<div><input type="checkbox" id="jutsu<?php echo $dbj['jutsu']; ?>" name="jutsu<?php echo $dbj['jutsu']; ?>"<?php if($dbj['status']=='ativo') echo ' checked="checked"'; ?> /> <?php echo $dbj['nome']; ?> - <span class="sub2">Nível <?php echo $dbj['nivel']; ?></span></div>

@@ -93,7 +93,7 @@ experiência para a habilidade escolhida. Seu treinamento não será feito na sa
         <td width="100"><b>Nível <?php echo $dbj['nivel']; ?></b><br /><span class="sub2">Experiência<br /><?php echo $dbj['exp'].' / '.$dbj['expmax']; ?></span></td>
         <td>
         <?php if($dbj['nivel']==5) echo 'Nível máximo alcançado!'; else { ?>
-        <form method="post" id="missao" name="missao" action="?p=schooltrain&amp;id=<?php echo $_GET['id']; ?>" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+        <form method="post" action="?p=schooltrain&amp;id=<?php echo $_GET['id']; ?>" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         <input type="hidden" id="train" name="train" value="<?php echo $c->encode($dbj['jutsu'],$chaveuniversal); ?>">
         <select id="tempo" name="tempo">
             <?php $i=1; do{ ?>

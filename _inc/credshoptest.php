@@ -44,7 +44,7 @@ if(isset($_GET['option'])){
 	$dbc = mysql_fetch_assoc($sqlc);
 	if($db['creditos']<$dbc['valor']){ echo "<script>self.location='?p=credshop&msg=2'</script>"; return; }
 	mysql_query("UPDATE usuarios SET creditos=creditos-1 WHERE id=".$db['id']);
-	mail('sasuke_nab@hotmail.com','Compra no CredShop','Usuário '.$db['usuario'].' trocou '.$dbc['valor'].' créditos por '.$dbc['nome'].'.'); return;
+	send_mail_smtp('sasuke_nab@hotmail.com','Compra no CredShop','Usuário '.$db['usuario'].' trocou '.$dbc['valor'].' créditos por '.$dbc['nome'].'.'); return;
 	echo "<script>self.location='?p=credshop&msg=10'</script>";
 }
 ?>

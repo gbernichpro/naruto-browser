@@ -41,7 +41,7 @@ $dbs = mysql_fetch_assoc($sqls);
             <span class="sub2"><?php echo $dbs['reqnivel']; ?> niveis.</span><br /><br />
             <b>Valor Unitário</b><br />
             <span class="sub2"><?php echo number_format($dbs['valor'],2,',','.'); ?> yens</span><br /><br />
-            <form method="post" action="?p=shopanimal" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+            <form method="post" action="?p=animais" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input type="hidden" id="buy_id" name="buy_id" value="<?php echo $dbs['id']; ?>" />
             <input type="hidden" id="buy_page" name="buy_page" value="<?php echo $categoria; ?>" />
             <input type="hidden" id="buy_cat" name="buy_cat" value="<?php echo $dbs['categoria']; ?>" />

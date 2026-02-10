@@ -45,7 +45,7 @@ Também é possível mandar mensagens para os administradores!</br>
 		}
 	echo '<div class="aviso">'.$msg.'</div><div class="sep"></div>'; } ?>
     <fieldset><legend>Enviar Mensagem</legend>
-    	<form method="post" action="?p=messages" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+    	<form method="post" id="Form-Enviar-Mensagem" action="?p=messages&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
        	  <input type="hidden" id="msg_origem" name="msg_origem" value="<?php echo $db['usuario']; ?>" />
             <span class="destaque">Destino(s) da Mensagem:</span><br />
             <input type="text" id="msg_destino" name="msg_destino" maxlength="159" onfocus="className='input'" onblur="className=''" <?php if(isset($_GET['destiny'])) echo 'value="'.$_GET['destiny'].'"'; ?>/><br />

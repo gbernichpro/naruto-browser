@@ -56,7 +56,7 @@ mysql_query("UPDATE usuarios SET  creditos=creditos-50 , yens=yens + 750000, yen
         <td align="center" width="20%">
               <b>Preco</b><br />
             <span class="sub2">1 creditos</span><br><br>
-            <form method="post" action="?p=credshopyn&yens=ok" onsubmit="subm.value='Carregando';subm.disabled=true;">
+            <form method="post" action="?p=credshop&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input id="subm" name="subm" class="botao" value="Adiquirir" type="submit">            </form>
         </td>
   </tr>
@@ -71,7 +71,7 @@ mysql_query("UPDATE usuarios SET  creditos=creditos-50 , yens=yens + 750000, yen
         <td align="center" width="20%">
               <b>Preco</b><br />
             <span class="sub2">3 creditos</span><br><br>
-            <form method="post" action="?p=credshopyn&yens2=ok" onsubmit="subm.value='Carregando';subm.disabled=true;">
+            <form method="post" action="?p=credshopyn&yens2=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input id="subm" name="subm" class="botao" value="Adiquirir" type="submit">            </form>
         </td>
   </tr>
@@ -86,7 +86,7 @@ mysql_query("UPDATE usuarios SET  creditos=creditos-50 , yens=yens + 750000, yen
         <td align="center" width="20%">
               <b>Preco</b><br />
             <span class="sub2">10 creditos</span><br><br>
-            <form method="post" action="?p=credshopyn&yens3=ok" onsubmit="subm.value='Carregando';subm.disabled=true;">
+            <form method="post" action="?p=credshopyn&yens3=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input id="subm" name="subm" class="botao" value="Adiquirir" type="submit">            </form>
         </td>
   </tr>
@@ -101,7 +101,7 @@ mysql_query("UPDATE usuarios SET  creditos=creditos-50 , yens=yens + 750000, yen
         <td align="center" width="20%">
               <b>Preco</b><br />
             <span class="sub2">50 creditos</span><br><br>
-            <form method="post" action="?p=credshopyn&yens4=ok" onsubmit="subm.value='Carregando';subm.disabled=true;">
+            <form method="post" action="?p=credshopyn&yens4=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input id="subm" name="subm" class="botao" value="Adiquirir" type="submit">            </form>
         </td>
   </tr>

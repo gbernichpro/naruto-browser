@@ -8,7 +8,7 @@ $tam = 200;
 require_once('funcoes.php');
 ?>
 <div class="box_top">Jutsus</div>
-<div class="box_middle"><div style="background: url(../_img/_detalhes/base2.PNG);width: 720px;height: 250px;">
+<div class="box_middle"><div style="background: url(_img/_detalhes/base2.PNG);width: 720px;height: 250px;">
 <table cellpadding="0" cellspacing="0" width="712" height="230"><tbody><tr><td width="150">
 <img width="142" style="" src="_img/_detalhes/msg/38.png"></td><td valign="top"><br><br><br>
 <div style="margin-left: -345px;margin-top: 15px;height: 0px;">

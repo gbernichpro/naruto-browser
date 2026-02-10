@@ -56,7 +56,7 @@ if(isset($_GET['msg'])){
 	echo '<div class="aviso">'.$msg.'</div><div class="sep"></div>';
 }
 ?>
-<form method="post" action="?p=config" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+<form method="post" action="?p=config_inicial&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 <input type="hidden" id="inicial" name="inicial" value="1" />
 <fieldset><legend>Configurações Iniciais</legend>
 	<span class="destaque">Usuário:</span><br />

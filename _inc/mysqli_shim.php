@@ -100,5 +100,22 @@ if (!function_exists('mysql_connect')) {
         $link = ($link_identifier === null) ? $mysqli_link : $link_identifier;
         return mysqli_get_server_info($link);
     }
+
+    /**
+     * Simplified helper for Prepared Statements
+     * Usage: $result = mysqli_query_prepared("SELECT * FROM table WHERE id=?", "i", $id);
+     */
+    function mysqli_query_prepared($query, $types = "", ...$params) {
+        global $mysqli_link;
+        $stmt = mysqli_prepare($mysqli_link, $query);
+        if (!$stmt) return false;
+        
+        if ($types && $params) {
+            mysqli_stmt_bind_param($stmt, $types, ...$params);
+        }
+        
+        mysqli_stmt_execute($stmt);
+        return mysqli_stmt_get_result($stmt);
+    }
 }
 ?>

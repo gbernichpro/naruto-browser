@@ -1,47 +1,95 @@
 <?php
-if($db['orgid']>0){ echo "<script>self.location='?p=myorg'</script>"; return; }
-$sqlo=mysql_query("SELECT id,sigla,nome,nivel,logo,minimo FROM organizacoes ORDER BY nivel DESC");
-$dbo=mysql_fetch_assoc($sqlo);
-?>
-<div class="box_top">Clas</div>
-<div class="box_middle"><div style="background: url(../_img/_detalhes/base2.PNG);width: 720px;height: 250px;">
-<table cellpadding="0" cellspacing="0" width="712" height="230"><tbody><tr><td width="150">
-<img width="142" style="" src="_img/_detalhes/msg/32.png"></td><td valign="top"><br><br><br>
-<div style="margin-left: -345px;margin-top: 15px;height: 0px;">
-<b id="title" style="font-family: impact;font-size: 20px;font-weight: normal;color: #ffffff;"  onmouseover="style.color='#F5F5F5'" onmouseout="color.color='#ffffff'">
-&raquo; Clã!</b></div><br>
-<div style="margin-left: 0px;margin-top: 35px;font-family: arial;font-size: 12px;color: #fff;"><b>
-Os clãs são locais em que os ninjas cooperam entre si para melhorar</br>
-suas habilidades de batalha. Abaixo estão listados os clãs existentes</br>
-na sua vila, até o momento. Escolha um deles e faça sua candidatura a</br>
-membro. Sua entrada depende da aprovação do líder ou dos moderadores do</br>
-clã. Se preferir, crie seu próprio clã!
-</br>
-</div></td></tr></tbody></table></div><div class="sep"></div>
-<?php if(isset($_GET['msg'])){
-	switch($_GET['msg']){
-		case 1: $msg='Você deixou o clã em que estava.'; break;
-		case 2: $msg='Requisição realizada com sucesso!<br />Aguarde a confirmação do administrador ou dos moderadores do clã.'; break;
-		case 3: $msg='Você já requisitou ingresso à este clã.<br />Favor aguarde a confirmação.'; break;
-		case 4: $msg='Seu nível é muito baixo para entrar neste clã.'; break;
-		case 5: $msg='O clã foi destruído!'; break;
-	}
-echo '<div class="aviso">'.$msg.'</div><div class="sep"></div>';
+// Se já tem org, redireciona
+if($db['orgid']>0){ echo "<script>self.location='?p=myorg'</script>"; exit(); }
+
+// Verificação de Phantom Leader (Dono sem orgid)
+$check_lider = mysqli_query($mysqli_link, "SELECT id, nome FROM organizacoes WHERE liderid='".$db['id']."'");
+if(mysqli_num_rows($check_lider) > 0){
+    $row_lider = mysqli_fetch_assoc($check_lider);
+    
+    // Processar Recuperação
+    if(isset($_GET['recover'])){
+        mysqli_query($mysqli_link, "UPDATE usuarios SET orgid='".$row_lider['id']."' WHERE id='".$db['id']."'");
+        echo "<script>alert('Vínculo com o clã restaurado com sucesso!'); self.location='?p=myorg';</script>"; exit();
+    }
+    
+    // Aviso Visual
+    echo '<div class="aviso" style="background: #a33; color: white; border: 2px solid red; padding: 15px; margin-bottom: 20px;">
+        <h3 style="margin:0 0 10px 0;">⚠️ ERRO DE VÍNCULO DETECTADO</h3>
+        Você consta como Líder do clã <b>'.$row_lider['nome'].'</b>, mas seu personagem está desvinculado (bug).<br><br>
+        <a href="?p=org&recover=true" class="modern-btn" style="background: white; color: #a33; font-weight: bold; padding: 10px 20px;">CLIQUE AQUI PARA CORRIGIR E ENTRAR NO CLÃ</a>
+    </div>';
 }
+
+$sqlo = mysqli_query($mysqli_link, "SELECT id,sigla,nome,nivel,logo,minimo FROM organizacoes ORDER BY nivel DESC");
 ?>
-	<div align="center"><a href="?p=org">Clãs</a> | <a href="?p=createorg">Criar Clã</a></div>
-    <div class="sep"></div>
-    <?php if(mysql_num_rows($sqlo)==0) echo '<div class="aviso">Nenhuma organização na sua vila até o momento.<br />Seja o primeiro a criar uma, clicando <a href="?p=createorg">aqui</a>!</div>'; else { ?>
-    <table width="100%" cellpadding="0" cellspacing="1">
-        <?php $cor='#323232'; do{ ?>
-       	<tr class="table_dados" style="background:#323232;" onmouseover="style.background='#2C2C2C'" onmouseout="style.background='#323232'">
-        	<td height="35"><?php if($dbo['logo']<>'') echo '<img src="'.$dbo['logo'].'" height="35" width="49" />'; else echo '<span class="sub2">Sem Imagem</span>'; ?></td>
-        	<td width="40%"><b>Clã <?php echo $dbo['nome']; ?></b><br /><span class="sub2">Sigla <?php echo $dbo['sigla']; ?></span></td>
-            <td width="30%"><b>Nível <?php echo $dbo['nivel']; ?></b><br /><span class="sub2">Recrutamento: Nível <?php echo $dbo['minimo']; ?>+</span></td>
-            <td width="15%"><a href="?p=vieworg&amp;id=<?php echo $dbo['id']; ?>">Visualizar</a></td>
-        </tr>
-        <?php if($cor=='#323232') $cor='#2C2C2C'; else $cor='#323232'; } while($dbo=mysql_fetch_assoc($sqlo)); ?>
-    </table>
-    <?php } ?>
+
+<div class="modern-card">
+    <div class="modern-card-header">Clãs / Organizações</div>
+    <div class="modern-card-body">
+        
+        <div style="display: flex; gap: 20px; align-items: center; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <img src="_img/_detalhes/msg/32.png" width="80">
+            <div style="font-size: 13px; color: #ccc;">
+                Os clãs são locais onde ninjas cooperam para evoluir e dominar vilas.<br>
+                Junte-se a um clã existente ou crie o seu próprio legado!
+            </div>
+        </div>
+
+        <?php if(isset($_GET['msg'])){
+        	switch($_GET['msg']){
+        		case 1: $msg='Você deixou o clã em que estava.'; break;
+        		case 2: $msg='Requisição realizada com sucesso! Aguarde aprovação.'; break;
+        		case 3: $msg='Você já requisitou ingresso neste clã.'; break;
+        		case 4: $msg='Seu nível é muito baixo para este clã.'; break;
+        		case 5: $msg='O clã foi destruído!'; break;
+        		default: $msg='';
+        	}
+        	if($msg) echo '<div class="aviso" style="margin-bottom: 15px;">'.$msg.'</div>';
+        }
+        ?>
+
+        <div style="text-align: center; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px;">
+            <a href="?p=org" class="modern-btn active">Listar Clãs</a>
+            <a href="?p=createorg" class="modern-btn">Criar Novo Clã</a>
+        </div>
+
+        <?php if(mysqli_num_rows($sqlo)==0) { ?>
+            <div class="aviso" style="text-align: center; padding: 30px;">
+                Nenhuma organização encontrada.<br>
+                <a href="?p=createorg" style="font-weight: bold; color: gold;">Seja o primeiro a criar uma!</a>
+            </div>
+        <?php } else { ?>
+            <table class="modern-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Logo</th>
+                        <th>Clã</th>
+                        <th>Nível / Req</th>
+                        <th style="width: 100px;">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while($dbo = mysqli_fetch_assoc($sqlo)){ ?>
+                    <tr>
+                        <td style="text-align: center; padding: 5px;">
+                            <?php if($dbo['logo']) echo '<img src="'.$dbo['logo'].'" style="max-height: 40px; border-radius: 4px;">'; else echo '<span style="font-size: 10px; color: #555;">Sem Logo</span>'; ?>
+                        </td>
+                        <td>
+                            <b style="color: #fff;"><?php echo $dbo['nome']; ?></b><br>
+                            <span style="font-size: 10px; color: #aaa;">[<?php echo $dbo['sigla']; ?>]</span>
+                        </td>
+                        <td>
+                            <span class="nivel-badge"><?php echo $dbo['nivel']; ?></span><br>
+                            <span style="font-size: 10px; color: #777;">Min Lvl: <?php echo $dbo['minimo']; ?></span>
+                        </td>
+                        <td style="text-align: center;">
+                            <a href="?p=vieworg&id=<?php echo $dbo['id']; ?>" class="modern-btn" style="padding: 5px 10px; font-size: 11px;">Ver</a>
+                        </td>
+                    </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } ?>
+    </div>
 </div>
-<div class="box_bottom"></div>

@@ -24,7 +24,7 @@
     <tr class="table_dados" style="background:#323232">
     	<td width="140"><img src="_img/ramen/ramen<?php echo $dbr['ramenid']; ?>.png" /></td>
         <td><b><?php echo $nome; ?></b><br /><span class="sub2">Regenera <?php echo $reg; ?> pontos de Energia</span>
-        <form method="post" action="?p=home" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+        <form method="post" action="?p=home" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         <input type="hidden" id="ram_id" name="ram_id" value="<?php echo $c->encode($dbr['id'],$chaveuniversal); ?>" />
         <input type="hidden" id="ram_tipo" name="ram_tipo" value="<?php echo $c->encode($dbr['ramenid'],$chaveuniversal); ?>" />
         <input type="submit" id="subm" name="subm" class="botao" value="Usar" />

@@ -233,7 +233,7 @@ $array2=array("t"=>$dbi['taijutsu'],"n"=>$dbi['ninjutsu'],"g"=>$dbi['genjutsu'])
 arsort($array2);
 ?>
 <div class="box_top">Treino</div>
-<form method="post" action="?p=treinarpet&id=<?=$_GET['id']?>" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+<form method="post" action="?p=treinarpet&id=<?=$_GET['id']?>" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 <input type="hidden" id="id" name="id" value="<?php echo $_GET['id']; ?>" />
 <input type="hidden" id="train_taijutsu" name="train_taijutsu" value="<?php echo $dbi['taijutsu']; ?>" />
 <input type="hidden" id="train_ninjutsu" name="train_ninjutsu" value="<?php echo $dbi['ninjutsu']; ?>" />

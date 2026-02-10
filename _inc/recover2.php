@@ -13,7 +13,7 @@ if(isset($_POST['rec_email'])){
 			$assunto='Solicitar Nova Senha';
 			$remetente='';
 			$headers = implode ( "\n",array ( "From: $remetente","Subject: ".$assunto,"Return-Path: $remetente","MIME-Version: 1.0","X-Priority: 3","Content-Type: text/html" ) );
-			mail($_POST['rec_email'],'',$mensagem,$headers);
+			send_mail_smtp($_POST['rec_email'],'',$mensagem);
 		}
 	}
 	echo "<script>self.location='?p=recoverteste&msg=".$erro."'</script>"; return;

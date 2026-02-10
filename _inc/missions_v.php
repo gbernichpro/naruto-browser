@@ -12,7 +12,7 @@
     <td width="220"><img src="_img/missoes/vacation.jpg" /></td>
     <td><b>Férias!</b><br /><span class="sub2">100,00 yens<br />por hora</span></td>
     <td>
-    <form method="post" id="missao" name="missao" action="?p=missions" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+    <form method="post" id="missao" name="missao" action="?p=missions" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
     <input type="hidden" id="mis_rank" name="mis_rank" value="<?php echo $c->encode('V',$chaveuniversal); ?>">
     <select id="mis_tempo" name="mis_tempo">
     	<?php $i=7; do{ ?>

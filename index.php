@@ -27,12 +27,51 @@ function anti_sql_injection ($str) {
 if((isset($_GET['p']))&&($_GET['p']=='logout')) require_once('_inc/logout.php');
 if(isset($_POST['login_login'])){
 	$erro=0;
-	if($_POST['login_senha']=='') $erro=1;
+    if(!validate_csrf_token($_POST['csrf_token'])) $erro=99; // Generic error for CSRF failure
+    if($erro==0 && !validate_turnstile($_POST['cf-turnstile-response'])) $erro=98; // Turnstile failure
+	if($erro==0 && $_POST['login_senha']=='') $erro=1;
 	if($erro==0){
-       $sql = mysql_query("SELECT id,senha,avatar,missao,missao_fim,status FROM usuarios WHERE senha='".md5(antiinjection2($_POST['login_senha']))."' AND usuario='".antiinjection2($_POST['login_login'])."'");
-	   if(mysql_num_rows($sql)==0) $erro=2;
+       // Prepared Statement for Login
+       $stmt = mysqli_prepare($mysqli_link, "SELECT id,senha,avatar,missao,missao_fim,status FROM usuarios WHERE usuario=?");
+       mysqli_stmt_bind_param($stmt, "s", $_POST['login_login']);
+       mysqli_stmt_execute($stmt);
+       $result = mysqli_stmt_get_result($stmt);
+       
+	   if(mysqli_num_rows($result)==0) $erro=2;
 		if($erro==0){
-			$db=mysql_fetch_assoc($sql);
+			$db=mysqli_fetch_assoc($result);
+
+            
+            // Password Verification Logic
+            $senha_digitada = $_POST['login_senha'];
+            $senha_banco = $db['senha'];
+            $login_ok = false;
+
+            // 1. Check if it's a legacy MD5 hash
+            if (md5(antiinjection2($senha_digitada)) === $senha_banco) {
+                $login_ok = true;
+                // Upgrade to password_hash
+                $new_hash = password_hash($senha_digitada, PASSWORD_DEFAULT);
+                $stmt_up = mysqli_prepare($mysqli_link, "UPDATE usuarios SET senha=? WHERE id=?");
+                mysqli_stmt_bind_param($stmt_up, "si", $new_hash, $db['id']);
+                mysqli_stmt_execute($stmt_up);
+
+            } 
+            // 2. Check if it's a modern hash
+            elseif (password_verify($senha_digitada, $senha_banco)) {
+                $login_ok = true;
+                // Check if needs rehash (e.g. algorithm changed)
+                if (password_needs_rehash($senha_banco, PASSWORD_DEFAULT)) {
+                    $new_hash = password_hash($senha_digitada, PASSWORD_DEFAULT);
+                    $stmt_re = mysqli_prepare($mysqli_link, "UPDATE usuarios SET senha=? WHERE id=?");
+                    mysqli_stmt_bind_param($stmt_re, "si", $new_hash, $db['id']);
+                    mysqli_stmt_execute($stmt_re);
+                }
+
+            }
+
+            if (!$login_ok) $erro=2;
+
 			//if($db['status']=='inativo') $erro=5;
 			if($db['missao']==999){
 				$atual=date('Y-m-d H:i:s');
@@ -64,20 +103,33 @@ if(isset($_POST['login_login'])){
 }
 ?>
 <?php
-if(isset($_COOKIE['logado'])){
+if(isset($_SESSION['logado']) || isset($_COOKIE['logado'])){
 	if(!isset($_SESSION['logado'])){ setcookie('logado',1,time()-3600); echo "<script>self.location='?p=login'</script>"; return; }
-	if((isset($_GET['p']))&&($_GET['p']=='view')) $user="u.usuario='".$_GET['view']."'"; else
-	if((isset($_GET['p']))&&($_GET['p']=='prepare')) $user='u.id='.$_SESSION['prepare']; else
-	$user='u.id='.$_SESSION['logado'];
+	
 	setcookie('logado',1,time()+900);
 	//setcookie('session_id',session_id(),time()+900);
 	if((!isset($_GET['p']))or(isset($_GET['p']))&&($_GET['p']<>'attack')){
-		$sql=mysql_query("SELECT u.*,o.nome orgnome, o.nivel orgnivel FROM usuarios u LEFT OUTER JOIN organizacoes o ON u.orgid=o.id WHERE status<>'banido' AND ".$user);
-		$db = mysql_fetch_assoc($sql) or die(mysql_error());
-		if((isset($_GET['p']))&&($_GET['p']=='view')&&(mysql_num_rows($sql)==0)){ echo "<script>self.location='?p=home'</script>"; return; }
+        if((isset($_GET['p']))&&($_GET['p']=='view')) {
+            $stmt_u = mysqli_prepare($mysqli_link, "SELECT u.*,o.nome orgnome, o.nivel orgnivel FROM usuarios u LEFT OUTER JOIN organizacoes o ON u.orgid=o.id WHERE status<>'banido' AND u.usuario=?");
+            mysqli_stmt_bind_param($stmt_u, "s", $_GET['view']);
+        } elseif((isset($_GET['p']))&&($_GET['p']=='prepare')) {
+            $stmt_u = mysqli_prepare($mysqli_link, "SELECT u.*,o.nome orgnome, o.nivel orgnivel FROM usuarios u LEFT OUTER JOIN organizacoes o ON u.orgid=o.id WHERE status<>'banido' AND u.id=?");
+            mysqli_stmt_bind_param($stmt_u, "i", $_SESSION['prepare']);
+        } else {
+            $stmt_u = mysqli_prepare($mysqli_link, "SELECT u.*,o.nome orgnome, o.nivel orgnivel FROM usuarios u LEFT OUTER JOIN organizacoes o ON u.orgid=o.id WHERE status<>'banido' AND u.id=?");
+            mysqli_stmt_bind_param($stmt_u, "i", $_SESSION['logado']);
+        }
+        
+        mysqli_stmt_execute($stmt_u);
+        $result_u = mysqli_stmt_get_result($stmt_u);
+		$db = mysqli_fetch_assoc($result_u) or die(mysqli_error($mysqli_link));
+		if((isset($_GET['p']))&&($_GET['p']=='view')&&(mysqli_num_rows($result_u)==0)){ echo "<script>self.location='?p=home'</script>"; return; }
 	} else {
-		$sql = mysql_query("SELECT u.id, u.status, u.usuario, u.yens, u.yens_fat, u.nivel, u.orgid, u.energia, u.energiamax, u.taijutsu, u.ninjutsu, u.genjutsu, u.personagem, u.avatar, u.renegado, u.vila, u.doujutsu, u.exp, u.expmax, u.doujutsu, u.doujutsu_nivel, u.doujutsu_exp, u.doujutsu_expmax, u.vip_inicio, u.vip, u.missao, u.hunt, u.treino, u.penalidade_fim, u.loginip, o.nivel orgnivel FROM usuarios u LEFT OUTER JOIN organizacoes o ON u.orgid=o.id WHERE u.id=".$_SESSION['logado']);
-		$db = mysql_fetch_assoc($sql) or die(mysql_error());
+            $stmt_u = mysqli_prepare($mysqli_link, "SELECT u.id, u.status, u.usuario, u.yens, u.yensbanco, u.yens_fat, u.nivel, u.orgid, u.energia, u.energiamax, u.taijutsu, u.ninjutsu, u.genjutsu, u.personagem, u.avatar, u.renegado, u.vila, u.doujutsu, u.exp, u.expmax, u.doujutsu, u.doujutsu_nivel, u.doujutsu_exp, u.doujutsu_expmax, u.vip_inicio, u.vip, u.missao, u.hunt, u.treino, u.penalidade_fim, u.loginip, o.nivel orgnivel FROM usuarios u LEFT OUTER JOIN organizacoes o ON u.orgid=o.id WHERE u.id=?");
+        mysqli_stmt_bind_param($stmt_u, "i", $_SESSION['logado']);
+        mysqli_stmt_execute($stmt_u);
+        $result_u = mysqli_stmt_get_result($stmt_u);
+		$db = mysqli_fetch_assoc($result_u) or die(mysqli_error($mysqli_link));
 		if($db['status']=='banido'){ echo "<script>self.location='?p=logout&ban=true'</script>"; return; }
 	}
 	if((isset($_GET['p']))&&($_GET['p']<>'first')&&($_GET['p']<>'view')&&($_GET['p']<>'prepare')&&($db['avatar']==0)){ echo "<script>self.location='?p=first'</script>"; return; }
@@ -87,17 +139,40 @@ if(isset($_COOKIE['logado'])){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <title>Naruto <?php echo NARUTO_NOME; ?></title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="_css/naruto.css" rel="stylesheet" type="text/css" />
  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <link type="text/css" href="_css/menu.css" rel="stylesheet" />
 	<link type="text/css" href="_css/menu3.css" rel="stylesheet" />
+    <link type="text/css" href="_css/sidebar_refined.css" rel="stylesheet" />
+    <link type="text/css" href="_css/modern_ui.css" rel="stylesheet" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="javascript/zebra_dialog.js"></script>
     <link rel="stylesheet" href="css/zebra_dialog.css" type="text/css">
+    <script type="text/javascript">
+        window.onTurnstileSuccess = function(token) {
+            console.log("Turnstile Success! Token captured.");
+            var headerToken = document.getElementById('header_turnstile_token');
+            if (headerToken) {
+                headerToken.value = token;
+                console.log("Header token field updated.");
+            }
+        };
+
+        function validateLoginForm() {
+            var token = document.getElementById('header_turnstile_token').value;
+            console.log("Submitting form. Token status: " + (token ? "Present" : "Missing"));
+            if (!token) {
+                alert("Por favor, aguarde a verificação Anti-Bot na barra lateral ser concluída.");
+                return false;
+            }
+            return true;
+        }
+    </script>
 <script type="text/javascript" src="_js/jquery-impromptu.4.0.min.js"></script>
 <script type="text/javascript" src="_js/jquery-modal-1.0.pack.js"></script>
-<script type="text/javascript" src="_js/wz/wz_tooltip.js"></script>
 <script type='text/javascript' src='javascripts/jquery.tipsy.js'></script>
 <link rel="stylesheet" href="stylesheets/tipsy.css" type="text/css" />
 <?php if((isset($_GET['p']))&&($_GET['p']=='messages')or(isset($_GET['p']))&&($_GET['p']=='config')or(isset($_GET['p']))&&($_GET['p']=='configorg')){ ?><script type="text/javascript" src="_js/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
@@ -275,23 +350,20 @@ window.location.href='?p=painel';
 $random = rand(1,1);
  echo'
           
-		  <td height="365" colspan="2" valign="top" background="template/topo0'.$random.'.png" style="background-repeat:no-repeat"><form id="login" name="login" method="post" action="#">
-
-                <table width="968" align="left" cellspacing="12">
-                    <tr>
-                  <tr>
-                    <td width="48">&nbsp;</td>
-                    <td width="79" height="35"><img src="template/login.png" width="79" height="56" /></td>
-                    <td width="147"><input id="login_login" name="login_login" type="text"  /></td>
-                    <td width="79"><img src="template/senha.png" width="79" height="56" /></td>
-                    <td width="147"><input id="login_senha" name="login_senha" type="password"  /></td>
-                    <td width="90"></td>
-                    <td width="157"><input type="submit" name="Submit" value=" " class="Button_Login"/></td>
-                  </tr>
-                                </table>
-                            </form>
-
-            </td>
+		  <td height="365" colspan="2" valign="top" class="modern-header"><form id="login" name="login" method="post" action="#" onsubmit="return validateLoginForm()">
+                <input type="hidden" name="csrf_token" value="' . get_csrf_token() . '">
+                <input type="hidden" name="cf-turnstile-response" id="header_turnstile_token">
+                <div style="padding: 40px 0 0 50px;">
+                    <div class="modern-login-container">
+                        <span class="modern-label">Login:</span>
+                        <input id="login_login" name="login_login" type="text" placeholder="Usuário" />
+                        <span class="modern-label">Senha:</span>
+                        <input id="login_senha" name="login_senha" type="password" placeholder="Senha" />
+                        <input type="submit" name="Submit" value="Entrar" class="Button_Login modern-btn-login"/>
+                    </div>
+                </div>
+            </form>
+          </td>
         </tr>
 ';
 }
@@ -299,7 +371,10 @@ else {
 $random = rand(1,1);
 $nickname = ucfirst($db['usuario']); 
 $time = time();
-mysql_query("UPDATE usuarios SET tempo=".$time." WHERE id=".$db['id']);
+$stmt_last = mysqli_prepare($mysqli_link, "UPDATE usuarios SET tempo=? WHERE id=?");
+mysqli_stmt_bind_param($stmt_last, "ii", $time, $db['id']);
+mysqli_stmt_execute($stmt_last);
+
 $tempo = (time() - 180);
 $sqlee = mysql_query("SELECT * FROM usuarios WHERE tempo>".$tempo."");
 $ok = mysql_num_rows($sqlee);
@@ -309,37 +384,30 @@ if($hr >= 06 && $hr<12) { $livre = 'Bom dia';
 else if ($hr >= 12 && $hr <18 ) { $livre = 'Boa Tarde'; 
 }
 else { $livre = 'Boa Noite'; }
-echo '<td height="365" colspan="2" valign="top" background="template/topo0'.$random.'.png" style="background-repeat:no-repeat">
-
-
-
-                <table width="968" align="left" cellspacing="12">
-                                        <tr>
-                    <td width="48">&nbsp;</td>
-                    <td width="180" height="35"><b>'.$livre.', '.$nickname.'</b> Seja Bem-Vindo</td>
-
-
-                    <td width="40" height="56" ></td>
-                    <td width="95">
-
-                      <span id="clock" ></span><script>setTimeout("horas()",1000);</script>
-
-                   </td>
-                   <td  width=110><b id="onl"><font color="#FF0000"><b>'.$ok.'</b></font> </b>Ninja(s) online</td>
-             <td width="20"></td>
-
-                <td width="100" align="right">
-                    <input type="button" value=" " class="Button_Logout" onclick="sair()" /></td>
-                  </tr>
-                                </table>
-                            
-
+echo '<td height="365" colspan="2" valign="top" class="modern-header">
+                <div style="padding: 40px 0 0 50px;">
+                    <div class="modern-login-container" style="color: #fff; font-family: var(--font-heading);">
+                        <div style="font-size: 16px;">
+                            <span style="color: var(--primary-red); font-weight: bold;">'.$livre.',</span> '.$nickname.'
+                        </div>
+                        <div style="width: 1px; height: 30px; background: var(--border-subtle);"></div>
+                        <div style="font-size: 14px;">
+                            <span id="clock"></span><script>setTimeout("horas()",1000);</script>
+                        </div>
+                        <div style="width: 1px; height: 30px; background: var(--border-subtle);"></div>
+                        <div style="font-size: 12px; color: var(--text-dim);">
+                            <b style="color: #0f0;">'.$ok.'</b> Ninjas Online
+                        </div>
+                        <div style="width: 1px; height: 30px; background: var(--border-subtle);"></div>
+                        <input type="button" value="Sair" class="Button_Logout modern-btn-login" style="background: #333;" onclick="location.href=\'?p=logout&csrf_token='.get_csrf_token().'\'" />
+                    </div>
+                </div>
             </td>
         </tr>'; }?>
         
         
         <tr>
-          <td width="246" rowspan="4" valign="top" background="template/bg_menu.png"><img src="template/top_menu.png" width="246" height="140" />
+          <td width="246" rowspan="3" valign="top" background="template/bg_menu.png"><img src="template/top_menu.png" width="246" height="140" />
             <table width="246" border="0" cellpadding="0" cellspacing="0">
               <tr>
                 <td width="209"><img src="template/top_bg_home.png" width="246" height="14" /></td>
@@ -356,6 +424,16 @@ echo '<td height="365" colspan="2" valign="top" background="template/topo0'.$ran
               <tr>
                 <td><img src="template/bottom_menu.png" width="246" height="73" /></td>
               </tr>
+              <?php if(!isset($_SESSION['logado'])): ?>
+              <tr>
+                <td align="center" style="padding: 10px 0;">
+                    <div style="background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; border: 1px solid #444; width: 154px;">
+                        <div style="color: #fff; font-size: 10px; margin-bottom: 5px; font-weight: bold;">VERIFICAÇÃO ANTI-BOT</div>
+                        <div class="cf-turnstile" data-sitekey="<?php echo $_ENV['TURNSTILE_SITE_KEY']; ?>" data-size="compact" data-callback="onTurnstileSuccess"></div>
+                    </div>
+                </td>
+              </tr>
+              <?php endif; ?>
             </table>
           </td>
 		  <?php
@@ -367,14 +445,6 @@ $sqlr1=mysql_query("SELECT usuario, nivel, vila FROM usuarios WHERE tipo='player
 $dbr1=@mysql_fetch_assoc($sqlr1);
 ?>
 <script type="text/javascript">
-
-function altera(){
-
-var msg="Olá Bem-vindo ao Naruto <?php echo NARUTO_NOME; ?>.|Loteria: <?php echo"" . $ultimo['value'] . ""; ?> venceu na loteria ninja e adiquiriu <?php echo"" . $premio['value'] . ""; ?>.|<b>Vip: Troque creditos por VIP no credshop.</b>|<b>Staff: <?php echo $dbr1['usuario']; ?>.</b>|<b>Lembre-se Sua Senha Padrão do Inventário é 1.</b>";
-var mensagem=msg.split("|");
-var rand=Math.floor(Math.random()*5);
-var random = mensagem[rand];
-
 
 function altera(){
 	var msg = <?php echo json_encode("Olá Bem-vindo ao Naruto " . NARUTO_NOME . ".|Loteria: " . ($ultimo['value'] ?? 'Ninguém') . " venceu na loteria ninja e adiquiriu " . ($premio['value'] ?? '0') . ".|<b>Vip: Troque creditos por VIP no credshop.</b>|<b>Staff: " . ($dbr1['usuario'] ?? 'Ninguém') . ".</b>|<b>Lembre-se Sua Senha Padrão do Inventário é 1.</b>"); ?>;
@@ -402,7 +472,7 @@ text-shadow:none;
 }
 </style>
 
-          <td width="776" height="56" valign="top" background="template/msgs.png" style="background-repeat:no-repeat"><table cellspacing="10">
+          <td width="778" height="56" valign="top" background="template/msgs.png" style="background-repeat:no-repeat"><table cellspacing="10">
             <tr><td width="18" height="22">&nbsp;</td>
               <td width="677">
 
@@ -412,12 +482,13 @@ text-shadow:none;
               </td>
           </tr></table></td></tr>
         <tr>
-          <td height="22" align="center" valign="top"><div align="left"><img src="template/top_home.png" width="759" height="22" /></div></td>
+          <td height="8" align="center" valign="top"></td>
         </tr>
         <tr>
-          <td width="776" height="15" valign="top" background="template/middle_home.png" style="background-repeat:repeat-y"><table cellpadding="0" cellspacing="8" style="text-align:center">
+          <td width="778" height="15" valign="top" class="modern-card-body"><div class="modern-card" style="overflow: visible !important;"><div class="modern-card-body" style="overflow: visible !important;">
+            <table cellpadding="0" cellspacing="8" style="text-align:center; width: 100%;">
             <tr>
-              <td width="548" valign="top">
+              <td width="100%" valign="top">
         <?php 
 	if(isset($_SESSION['logado']))  {
 		if((date('Y-m-d H:i:s')>=$db['vip'])&&(isset($_GET['p']))&&($_GET['p']<>'view')&&($_GET['p']<>'prepare'));
@@ -602,82 +673,34 @@ if(isset($_SESSION['logado'])) {
 			case 'cassa': require_once('_inc/cassa.php'); break;
 			case 'banco': require_once('_inc/banco.php'); break;
             case 'doarbanco': require_once('_inc/doarbanco.php'); break;
+            case 'doacao': require_once('_inc/doacao.php'); break; // Rota adicionada
             default: require_once('_inc/error.php'); break;
    	}
 	} ?>
-    <?php if(!isset($_SESSION['logado']))  {
-		// Removed dead code that accessed undefined $db['vip']
-	} ?></td>
+    </table></div></div></td>
     </tr>
-
-	<tr>
-	<script type="text/javascript">
-	$(function(){
-$(".receber").click(function(){
-	var id = $(this).attr('id');
-	$('#recebeajax').load("_inc/diario.php", {jogador: id});
-		return false;
-});
-		return false;
-});
-	</script>
-
-    </tr>
-
-</table>
-<?php
-@mysql_free_result($sql);
-//@mysql_close();
-?>
- <script type="text/javascript">
-    $('#tip-direita').tipsy({gravity: 'w'});
-    $('#tip-esquerda').tipsy({gravity: 'e'});
-    $('#tip-cima').tipsy({gravity: 's'});
-    $('#tip-baixo').tipsy({gravity: 'n'});
- </script>
- <script type='text/javascript'> 
-  $(function() {
-    $('input.jrrios').tipsy({trigger: 'focus', gravity: 's'});
-  });
-</script>
-
+<!-- Footer Row 1 -->
 <tr>
-          <td height="22" align="center" valign="top" background="template/bg_home.png" style="background-repeat:repeat-y"><div align="left"><img src="template/bottom_home.png" /></div></td>
+          <td colspan="2" height="8" align="center" valign="top"></td>
         </tr>
+<!-- Footer Row 2 -->
 <tr>
-          <td height="544" colspan="2" valign="bottom" background="template/rodape.png" style="background-repeat:no-repeat"><table align="center">
-            <tr><td width="965" height="244"><table width="679" border="0" align="center">
-              <tr>
-                <td width="673" height="49">&nbsp;</td>
-              </tr>
-              <tr>
-                <td><div align="center" class="style1">
-                  <p>Copyright 2014 © Todos Os Direitos Reservados a Naruto <?php echo NARUTO_NOME; ?> E Empresariais a <strong>(<?php echo NARUTO_NOME; ?> Games)</strong></p>
-                  <p>Copyright 2014 © Direitos do <strong>Anime e Imagens</strong> Reservados a <strong>Masashi Kishimoto</strong><br />
-                    <br />
-                  </p>
-                </div></td>
-              </tr>
-              <tr>
-
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-              </tr>
-            </table></td>
-          </tr></table></td>
+          <td colspan="2" class="modern-footer" align="center">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <p>Copyright 2014 © Todos Os Direitos Reservados a Naruto <b><?php echo NARUTO_NOME; ?></b> E Empresariais a <strong>(<?php echo NARUTO_NOME; ?> Games)</strong></p>
+                <p style="opacity: 0.6; margin-top: 10px;">Copyright 2014 © Direitos do <strong>Anime e Imagens</strong> Reservados a <strong>Masashi Kishimoto</strong></p>
+                <div style="margin-top: 20px; height: 1px; background: var(--border-subtle); width: 100px; margin-inline: auto;"></div>
+                <p style="margin-top: 15px; font-size: 10px; color: var(--primary-red); letter-spacing: 2px;">NARUTO SHIBUYA RPG</p>
+            </div>
+          </td>
         </tr>
       </table>
-      <script type="text/javascript">
+<script type="text/javascript">
     $('#tip-direita').tipsy({gravity: 'w'});
     $('#tip-esquerda').tipsy({gravity: 'e'});
     $('#tip-cima').tipsy({gravity: 's'});
     $('#tip-baixo').tipsy({gravity: 'n'});
- </script>
- <script type='text/javascript'>
-  $(function() {
     $('input.jrrios').tipsy({trigger: 'focus', gravity: 's'});
-  });
 </script>
 </div>
 

@@ -48,7 +48,7 @@ if(isset($_GET['act']) && $_GET['act'] == "dcl" && empty($_GET['r'])){
 ?>
 <fieldset>
 	<legend>Fazer declaração de guerra</legend>
-	<form method="post" action="?p=warorg&amp;m=declare&act=dcl" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+	<form method="post" action="?p=warorg&amp;m=declare&act=dcl" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 	<table width="100%">
 		<?php if(!empty($_GET['r'])){ ?><tr><td colspan="2"><div class="apresentacao">A Guerra foi declara com sucesso!</div></td></tr><?php } ?>
 		<?php if(!empty($error)){ ?><tr><td colspan="2"><div class="apresentacao"><?=$error;?></div></td></tr><?php } ?>

@@ -2,40 +2,40 @@
 <?php require_once('verificar.php'); ?>
 <?php require_once('funcoes.php'); ?>
 <?php
-if(!isset($_GET['bot'])){ echo "<script>self.location='?p=home'</script>"; return; }
+if(!isset($_GET['bot'])){ echo "<script>self.location='?p=home'</script>"; exit(); }
 if(!isset($_SESSION['errobot'])) $_SESSION['errobot']=0;
 if($_GET['bot']<>$_SESSION['bot']){
 	$_SESSION['errobot']=$_SESSION['errobot']+1;
-	if($_SESSION['errobot']>=2){ echo "<script>self.location='?p=logout'</script>"; return; }
-	echo "<script>self.location='?p=prepare&msg=1'</script>"; return;
+	if($_SESSION['errobot']>=2){ echo "<script>self.location='?p=logout'</script>"; exit(); }
+	echo "<script>self.location='?p=prepare&msg=1'</script>"; exit();
 }
 $_SESSION['errobot']=0;
-if(!isset($_SESSION['prepare'])){ echo "<script>self.location='?p=home'</script>"; return; }
+if(!isset($_SESSION['prepare'])){ echo "<script>self.location='?p=home'</script>"; exit(); }
 $sqli=mysql_query("SELECT u.id, u.usuario, u.yens, u.yens_fat, u.nivel, u.orgid, u.energia, u.score ,u.torneio,u.torneio_eliminado, u.energiamax, u.taijutsu, u.ninjutsu, u.genjutsu, u.personagem, u.avatar, u.renegado, u.vila, u.doujutsu, u.doujutsu_nivel, u.doujutsu_exp, u.doujutsu_expmax, u.exp, u.expmax, u.vip, u.missao, u.loginip, u.tipo, o.nivel orgnivel , sum(i.taijutsu) cla_taijutsu, sum(i.ninjutsu) cla_ninjutsu, sum(i.genjutsu) cla_genjutsu FROM usuarios u LEFT OUTER JOIN organizacoes o ON u.orgid=o.id  LEFT OUTER JOIN clas_investimentos i ON u.orgid=i.orgid WHERE u.id=".$_SESSION['prepare']);
 $dbi=mysql_fetch_assoc($sqli);
-if(($dbi['torneio']=='sim')&&($dbi['torneio_eliminado']==0)){ echo "<script>self.location='?p=hunt&msg=18'</script>"; return; }
+if(($dbi['torneio']=='sim')&&($dbi['torneio_eliminado']==0)){ echo "<script>self.location='?p=hunt&msg=18'</script>"; exit(); }
 $sqlgrupos=mysql_query("SELECT u.id, u.usuario, u.yens, u.yens_fat, u.nivel, u.orgid, u.energia, u.score , u.energiamax, u.taijutsu, u.ninjutsu, u.genjutsu, u.personagem, u.avatar, u.renegado, u.vila, u.doujutsu, u.doujutsu_nivel, u.doujutsu_exp, u.doujutsu_expmax, u.exp, u.expmax, u.vip, u.missao, u.loginip, u.tipo, o.nivel orgnivel , sum(i.taijutsu) cla_taijutsu, sum(i.ninjutsu) cla_ninjutsu, sum(i.genjutsu) cla_genjutsu FROM usuarios u LEFT OUTER JOIN organizacoes o ON u.orgid=o.id  LEFT OUTER JOIN clas_investimentos i ON u.orgid=i.orgid WHERE u.id=".$db['id']."");
 $dbg=mysql_fetch_assoc($sqlgrupos);
 $sqlv=mysql_query("SELECT data FROM relatorios WHERE usuarioid=".$db['id']." AND inimigoid=".$dbi['id']." ORDER BY id DESC LIMIT 1");
 $dbv=@mysql_fetch_assoc($sqlv);
 $soma=mktime(date('H')-12, date('i'), date('s'));
 $penalidade=date('Y-m-d H:i:s',$soma);
-if($penalidade<$dbv['data']){ echo "<script>self.location='?p=hunt&msg=9'</script>"; return; }
+if($penalidade<$dbv['data']){ echo "<script>self.location='?p=hunt&msg=9'</script>"; exit(); }
 $sqlv=mysql_query("SELECT data FROM relatorios WHERE usuarioid=".$dbi['id']." OR inimigoid=".$dbi['id']." ORDER BY id DESC LIMIT 1");
 $dbv=@mysql_fetch_assoc($sqlv);
 $soma=mktime(date('H'), date('i')-30, date('s'));
 $penalidade=date('Y-m-d H:i:s',$soma);
 if($dbi['tipo']=='player'){
-	if($penalidade<$dbv['data']){ echo "<script>self.location='?p=hunt&msg=8'</script>"; return; }
+	if($penalidade<$dbv['data']){ echo "<script>self.location='?p=hunt&msg=8'</script>"; exit(); }
 }
-if($dbi['missao']==999){ echo "<script>self.location='?p=hunt&msg=10'</script>"; return; }
+if($dbi['missao']==999){ echo "<script>self.location='?p=hunt&msg=10'</script>"; exit(); }
 require_once('verifica_nivelatk.php');
-if(mysql_num_rows($sqli)==0){ echo "<script>self.location='?p=hunt&msg=1'</script>"; return; }
-if($dbi['tipodeconta']=='admin'){ echo "<script>self.location='?p=hunt&msg=22'</script>"; return; }
-if($db ['tipodeconta']=='admin'){ echo "<script>self.location='?p=hunt&msg=20'</script>"; return; }
-if($dbi['energia']<25){ echo "<script>self.location='?p=hunt&msg=2'</script>"; return; }
-if($db['energia']<25){ echo "<script>self.location='?p=hunt&msg=13'</script>"; return; }
-if($dbi['avatar']==0){ echo "<script>self.location='?p=hunt&msg=12'</script>"; return; }
+if(mysql_num_rows($sqli)==0){ echo "<script>self.location='?p=hunt&msg=1'</script>"; exit(); }
+if($dbi['tipodeconta']=='admin'){ echo "<script>self.location='?p=hunt&msg=22'</script>"; exit(); }
+if($db ['tipodeconta']=='admin'){ echo "<script>self.location='?p=hunt&msg=20'</script>"; exit(); }
+if($dbi['energia']<25){ echo "<script>self.location='?p=hunt&msg=2'</script>"; exit(); }
+if($db['energia']<25){ echo "<script>self.location='?p=hunt&msg=13'</script>"; exit(); }
+if($dbi['avatar']==0){ echo "<script>self.location='?p=hunt&msg=12'</script>"; exit(); }
 $sqls=mysql_query("SELECT i.id, i.upgrade, t.id itemid, t.nome, t.taijutsu, t.ninjutsu, t.genjutsu, t.imagem, t.categoria FROM inventario i LEFT OUTER JOIN table_itens t ON i.itemid=t.id WHERE i.usuarioid=".$db['id']." AND i.status='on'");
 $sqlss=mysql_query("SELECT i.id, i.upgrade, t.id itemid, t.nome, i.taijutsu, i.ninjutsu, i.genjutsu, t.imagem, t.categoria FROM animais i LEFT OUTER JOIN table_animais t ON i.itemid=t.id WHERE i.usuarioid=".$db['id']." AND i.status='on'");
 $sqlsss=mysql_query("SELECT i.id, i.upgrade, t.id itemid, t.nome, t.taijutsu, t.ninjutsu, t.genjutsu, t.imagem, t.categoria FROM selos i LEFT OUTER JOIN table_selos t ON i.itemid=t.id WHERE i.usuarioid=".$db['id']." AND i.status='on'");

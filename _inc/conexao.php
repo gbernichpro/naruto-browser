@@ -1,15 +1,24 @@
 <?php
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load();
+
 require_once('mysqli_shim.php');
 @session_start();
-$mysql_banco='naruto';
-$mysql_usuario='root';
-$mysql_senha='';
-$mysql_host='localhost';
+require_once('mail.php');
+require_once('security.php');
+require_once('cache.php');
+require_once('error_handler.php');
+$mysql_banco=$_ENV['DB_NAME'];
+$mysql_usuario=$_ENV['DB_USER'];
+$mysql_senha=$_ENV['DB_PASS'];
+$mysql_host=$_ENV['DB_HOST'];
 $conexao=mysql_pconnect($mysql_host,$mysql_usuario,$mysql_senha);
 mysql_select_db($mysql_banco);
 mysql_query("SET NAMES 'utf8'");
 error_reporting(E_ALL & ~E_NOTICE);
-define("NARUTO_NOME", "Fight");
+define("NARUTO_NOME", $_ENV['GAME_NAME'] ?? "Fight");
 function antiinjection2($sql){
 $sql = addslashes($sql);
 $sql = str_replace("<","</",$sql);

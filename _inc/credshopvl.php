@@ -30,7 +30,7 @@ if($_GET['akt']) {
 	echo '<div class="aviso">'.$msg.'</div><div class="sep"></div>';
 	} ?>
 
-<form method="post" action="?p=credshopvl&akt=ok" onsubmit="subm.value='Carregando';subm.disabled=true;">
+<form method="post" action="?p=credshop&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 <table border="0" width="100%">
 <tr style="background: none repeat scroll 0% 0% rgb(50, 50, 50);" onmouseover="style.background='#310000'" onmouseout="style.background='#161616'">
     	<td align="center" width="140"><img src="_img/equipamentos/trocavila.png"></td>

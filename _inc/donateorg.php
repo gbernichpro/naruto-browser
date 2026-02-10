@@ -97,7 +97,7 @@ if(ereg("^[0-9]+$",$yens)){
 	?>
 
     <div style="padding-left:5px;background:url(_img/gradient.jpg) repeat-y;font-weight:bold;color:#FFFFAA;"><img src="_img/yens.png" width="14" height="14" align="absmiddle" /> Meus yens: <?php echo number_format($db['yens'],2,',','.'); ?> yens</div><div class="sep"></div>
-    <form method="post" action="?p=donateorg" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+    <form method="post" action="?p=donateorg" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
     <input type="hidden" id="don" name="don" value="1" />
     <span class="destaque">Yens para Doação:</span><br />
     <input type="text" id="don_yens" name="don_yens" /><br />

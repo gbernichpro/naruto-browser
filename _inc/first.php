@@ -27,7 +27,7 @@ não interfere na força da sua conta. A troca de avatares pode ser feita uma</b
 vez por dia (ilimitado para jogadores VIP).
 </b>
 </div></td></tr></tbody></table></div><div class="sep"></div>
-	<form method="post" action="?p=first" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+	<form method="post" action="?p=home" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 	<fieldset><legend>Avatar</legend>
     <div align="center">
     <table width="100%" border="0" cellpadding="0" cellspacing="0">

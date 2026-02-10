@@ -68,7 +68,7 @@ case 1: $msg='Configurações salvas com sucesso!'; break;
 }
 echo '<div class="aviso">'.$msg.'</div><div class="sep"></div>';}
 ?>
-<form method="post" action="?p=configorg" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+<form method="post" action="?p=configorg&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 <input type="hidden" id="org" name="org" value="1">
 <fieldset><legend>Configuração do Clã</legend>
 <span class="destaque">Logotipo do Clã:</span><br />

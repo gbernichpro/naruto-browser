@@ -56,7 +56,7 @@ ramen, mas pretendemos ampliar os negócios em breve.
     	<td width="140"><img src="_img/ramen/ramen1.png" /></td>
         <td ><b>Gohan</b><br /><span class="sub2">Regenera 50 pontos<br />de Energia</span><br /><br /><b><?php echo number_format($valorinicial,2,',','.'); ?> yens</b><br /><span class="sub2">Valor Unitário</span></td>
         <td width="20%">
-        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         <input type="hidden" id="ram_id" name="ram_id" value="1" />
         <select id="ram_qtdade" name="ram_qtdade">
             <?php $i=1; do{ ?>
@@ -76,7 +76,7 @@ ramen, mas pretendemos ampliar os negócios em breve.
     	<td width="150"><img src="_img/ramen/ramen2.png" /></td>
         <td><b>Sushi</b><br /><span class="sub2">Regenera 100 pontos<br />de Energia</span><br /><br /><b><?php echo number_format(($valorinicial*2),2,',','.'); ?> yens</b><br /><span class="sub2">Valor Unitário</span></td>
         <td width="20%">
-        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         <input type="hidden" id="ram_id" name="ram_id" value="2" />
         <select id="ram_qtdade" name="ram_qtdade">
             <?php $i=1; do{ ?>
@@ -96,7 +96,7 @@ ramen, mas pretendemos ampliar os negócios em breve.
     	<td width="150"><img src="_img/ramen/ramen3.png" /></td>
         <td><b>Porção de Peixe Empanado</b><br /><span class="sub2">Regenera 250 pontos<br />de Energia</span><br /><br /><b><?php echo number_format(($valorinicial*5),2,',','.'); ?> yens</b><br /><span class="sub2">Valor Unitário</span></td>
         <td width="20%">
-        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         <input type="hidden" id="ram_id" name="ram_id" value="3" />
         <select id="ram_qtdade" name="ram_qtdade">
             <?php $i=1; do{ ?>
@@ -116,7 +116,7 @@ ramen, mas pretendemos ampliar os negócios em breve.
     	<td width="150"><img src="_img/ramen/ramen4.png" /></td>
         <td><b>Porção de Sashimi</b><br /><span class="sub2">Regenera 500 pontos<br />de Energia</span><br /><br /><b><?php echo number_format(($valorinicial*10),2,',','.'); ?> yens</b><br /><span class="sub2">Valor Unitário</span></td>
         <td width="20%">
-        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         <input type="hidden" id="ram_id" name="ram_id" value="4" />
         <select id="ram_qtdade" name="ram_qtdade">
             <?php $i=1; do{ ?>
@@ -137,7 +137,7 @@ ramen, mas pretendemos ampliar os negócios em breve.
     	<td width="150"><img src="_img/ramen/ramen5.png" /></td>
         <td><b>Ramen</b><br /><span class="sub2">Regenera 1.000 pontos<br />de Energia</span><br /><br /><b><?php echo number_format(($valorinicial*20),2,',','.'); ?> yens</b><br /><span class="sub2">Valor Unitário</span></td>
         <td width="20%">
-        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+        <form method="post" id="ramen" name="ramen" action="?p=ramen" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         <input type="hidden" id="ram_id" name="ram_id" value="5" />
         <select id="ram_qtdade" name="ram_qtdade">
             <?php $i=1; do{ ?>

@@ -54,7 +54,7 @@ assim como no comércio do jogo. Caso esteja anunciando um item equipado,</br>
             <?php if($dbi['genjutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.($dbi['genjutsu']+$dbi['upgrade']).'] em Genjutsu<br />'; ?></b>
             <br />
             <b>Valor de Venda (em yens)</b><br />
-            <form method="post" action="?p=addmy" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+            <form method="post" action="?p=addmy" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input type="hidden" id="id" name="id" value="<?php echo $_GET['id']; ?>" />
         	<input type="text" id="valor" name="valor" value="" size="10" />&nbsp;
        		<br><span class="sub2">Valor máximo: <?php echo number_format((($dbi['upgrade']+1)*$dbi['valor']),2,',','.'); ?> yens</span><br>

@@ -146,7 +146,7 @@ Você já inscrito na arena aguarde até o fim das inscrições.
 elseif($insc<=0){	echo"Inscrições encerradas tente da proxima vez";
 	}else{?>
 <div class="sep"></div>
-<form method="post" id="Form-Inscrição-Torneio-Vila" action="?p=torneio" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+<form method="post" id="Form-Inscrever" action="?p=torneio&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 
 <input type="hidden" id="p" name="Inscrever-se" value="rank" />
 <input type="submit" id="subm" style="cursor:pointer;" class="button" name="Inscrever-se" value="Inscrever-Se">

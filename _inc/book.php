@@ -58,7 +58,7 @@ suas batalhas.</br>
             <td width="170">Último ataque em<br /><?php $ex=explode(' ',$dbb['ultimo']); $data=explode('-',$ex[0]); echo $data[2].'/'.$data[1].'/'.$data[0].', às '.$ex[1]; ?></td>
             <td><?php if($dbb['yens']==0) echo '-'; else { echo number_format($dbb['yens'],2,',','.'); echo ' yens'; } ?></td>
             <td width="120">
-            <form method="post" action="?p=hunt" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+            <form method="post" action="?p=hunt" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input type="hidden" id="hunt_1" name="hunt_1" value="<?php echo strtolower($dbb['usuario']); ?>" />
             <input type="hidden" id="hunt_tipo" name="hunt_tipo" value="<?php echo $c->encode('1',$chaveuniversal); ?>" />
             <?php

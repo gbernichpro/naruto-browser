@@ -1,10 +1,10 @@
 <?php
 require_once('_inc/conexao.php');
 
-if ($_GET['action'] == "chatheartbeat") { chatHeartbeat(); } 
-if ($_GET['action'] == "sendchat") { sendChat(); } 
-if ($_GET['action'] == "closechat") { closeChat(); } 
-if ($_GET['action'] == "startchatsession") { startChatSession(); } 
+if (isset($_GET['action']) && $_GET['action'] == "chatheartbeat") { chatHeartbeat(); } 
+if (isset($_GET['action']) && $_GET['action'] == "sendchat") { sendChat(); } 
+if (isset($_GET['action']) && $_GET['action'] == "closechat") { closeChat(); } 
+if (isset($_GET['action']) && $_GET['action'] == "startchatsession") { startChatSession(); } 
 
 if (!isset($_SESSION['chatHistory'])) {
 	$_SESSION['chatHistory'] = array();	

@@ -59,7 +59,7 @@ var genjutsu=0;
           </td>
 
             <td align="center" width="20%">
-            	<form method="post" action="?p=selos" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+            	<form method="post" action="?p=portoes" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         		<input type="hidden" id="inv_id" name="inv_id" value="<?php echo $c->encode($dbe['id'],$chaveuniversal); ?>" />
             	<input type="hidden" id="inv_cat" name="inv_cat" value="<?php echo $c->encode($dbe['categoria'],$chaveuniversal); ?>" />
             	<input type="hidden" id="inv_act" name="inv_act" value="<?php echo $c->encode('off',$chaveuniversal); ?>" />

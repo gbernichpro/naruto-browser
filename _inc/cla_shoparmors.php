@@ -27,7 +27,7 @@ $dbs = mysql_fetch_assoc($sqls);
             <span class="sub2"><?php echo $dbs['reqnivel']; ?> </span><br /><br />
             <b>Valor Unitário</b><br />
             <span class="sub2"><?php echo $dbs['valor']; ?> Pts</span><br /><br />
-            <form method="post" action="?p=cla_shop" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+            <form method="post" action="?p=clashops&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input type="hidden" id="buy_id2" name="buy_id2" value="<?php echo $dbs['id']; ?>" />
             <input type="hidden" id="buy_page2" name="buy_page2" value="<?php echo $categoria; ?>" />
             <input type="hidden" id="buy_cat2" name="buy_cat2" value="<?php echo $dbs['categoria']; ?>" />

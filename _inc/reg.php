@@ -9,6 +9,8 @@ $vagas=45000;
 if($dbc['conta']>=$vagas){ echo "<script>self.location='?p=login'</script>"; return; }
 if(isset($_POST['reg_submit'])){
 	$erro=0;
+    if(!validate_csrf_token(@$_POST['csrf_token'])) $erro=17; // New error code for CSRF
+    if($erro==0 && !validate_turnstile(@$_POST['cf-turnstile-response'])) $erro=18; // Turnstile failure
 	if(@$_POST['reg_termos']=='') $erro=11;
 	if(!isset($_POST['reg_termos'])) $erro=8;
 	if($_POST['reg_senha']<>$_POST['reg_senha2']) $erro=7;
@@ -30,32 +32,50 @@ if(preg_match('/' . $pattern . '/', $_POST['reg_usuario']))
 die("<script>self.location='?p=reg&erro=16'</script>");
 }
 
-	$sqlc=mysql_query("SELECT count(id) conta FROM usuarios WHERE usuario='".$usuario."'");
-	$dbc=mysql_fetch_assoc($sqlc);
+	// Modernized counts and checks with Prepared Statements
+	$stmt_c = mysqli_prepare($mysqli_link, "SELECT count(id) conta FROM usuarios WHERE usuario=?");
+	mysqli_stmt_bind_param($stmt_c, "s", $usuario);
+	mysqli_stmt_execute($stmt_c);
+	$result_c = mysqli_stmt_get_result($stmt_c);
+	$dbc = mysqli_fetch_assoc($result_c);
 	if($dbc['conta']>0) $erro=12;
-	$sqlc=mysql_query("SELECT count(id) conta FROM usuarios WHERE email='".$_POST['reg_email']."'");
-	$dbc=mysql_fetch_assoc($sqlc);
+
+	$stmt_c2 = mysqli_prepare($mysqli_link, "SELECT count(id) conta FROM usuarios WHERE email=?");
+	mysqli_stmt_bind_param($stmt_c2, "s", $_POST['reg_email']);
+	mysqli_stmt_execute($stmt_c2);
+	$result_c2 = mysqli_stmt_get_result($stmt_c2);
+	$dbc = mysqli_fetch_assoc($result_c2);
 	if($dbc['conta']>0) $erro=12;
+
 	if($_POST['reg_nlink']<>''){
 		$nlink=$_POST['reg_nlink'];
-		$sqlv=mysql_query("SELECT count(id) conta FROM usuarios WHERE usuario='$nlink'");
-		$dbv=mysql_fetch_assoc($sqlv);
+		$stmt_v = mysqli_prepare($mysqli_link, "SELECT count(id) conta FROM usuarios WHERE usuario=?");
+		mysqli_stmt_bind_param($stmt_v, "s", $nlink);
+		mysqli_stmt_execute($stmt_v);
+		$result_v = mysqli_stmt_get_result($stmt_v);
+		$dbv = mysqli_fetch_assoc($result_v);
 		if($dbv['conta']==0) $erro=13;
 	}
-	$sqlv=mysql_query("SELECT count(id) conta FROM usuarios WHERE senha='".md5($_POST['reg_senha'])."'");
-	$dbv=mysql_fetch_assoc($sqlv);
-	//if($dbv['conta']>=5) $erro=15;
+
+	// Password check modernization removed as we handle Bcrypt now
 	if(isset($_POST['nlink'])) $link='&nlink='.$_POST['nlink']; else $link='';
 	if($erro>0){ echo "<script>self.location='?p=reg&user=".$_POST['reg_usuario']."&mail=".$_POST['reg_email']."&char=".$personagem."&village=".$vila."&erro=".$erro.$link."'</script>"; return; }
 	else {
-	$novocodigo=rand(99999,99999999);
+	    $novocodigo=rand(99999,99999999);
 		if(isset($_POST['reg_akatsuki'])) $renegado='sim'; else $renegado='nao';
-$atual=date('Y-m-d H:i:s');
-$soma = mktime(date('H')+168, date('i'), date('s'));
-$fim = date('Y-m-d H:i:s',$soma);
-$vipadd=$fim;
+        $atual=date('Y-m-d H:i:s');
+        $soma = mktime(date('H')+168, date('i'), date('s'));
+        $fim = date('Y-m-d H:i:s',$soma);
+        $vipadd=$fim;
 		$usuario=ucfirst(strtolower(str_replace(array(' ','/','^','[','-',']','+','$','(',')','?','\'','|','°','ª','#','@','.','?','!'),'',$_POST['reg_usuario'])));
-		mysql_query("INSERT INTO usuarios (usuario, status, senha, email, personagem, vila, renegado, hunt_restantes, reg, natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens) VALUES ('".$usuario."','ativo','".md5($_POST['reg_senha'])."','".strtolower($_POST['reg_email'])."','".$personagem."',".$vila.",'".$renegado."',14,'".date('Y-m-d H:i:s')."','','','','".ip2long($_SERVER['REMOTE_ADDR'])."','".$vipadd."','".$atual."','".$novocodigo."','9000')") or die(mysql_error());
+		
+        // Secure Registration INSERT with Prepared Statements
+        $senha_hash = password_hash($_POST['reg_senha'], PASSWORD_DEFAULT);
+        $stmt_reg = mysqli_prepare($mysqli_link, "INSERT INTO usuarios (usuario, status, senha, email, personagem, vila, renegado, hunt_restantes, reg, natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens) VALUES (?, 'ativo', ?, ?, ?, ?, ?, 14, ?, '', '', '', ?, ?, ?, ?, '9000')");
+        $ip_long = ip2long($_SERVER['REMOTE_ADDR']);
+        mysqli_stmt_bind_param($stmt_reg, "ssssisssssss", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $ip_long, $vipadd, $atual, $novocodigo);
+        mysqli_stmt_execute($stmt_reg) or die(mysqli_error($mysqli_link));
+
 
             $assunto = "Código de ativação Naruto";
             $messagem .= "<html>\n"; 
@@ -86,14 +106,8 @@ $vipadd=$fim;
             $messagem .= "</body>\n"; 
             $messagem .= "</html>\n"; 
             
-            $headers .= "MIME-Version: 1.0\n" ; 
-            $headers .= "Content-Type: text/html; charset=\"iso-8859-1\"\n"; 
-            $headers .= "X-Priority: 1 (Higuest)\n"; 
-            $headers .= "X-MSMail-Priority: High\n"; 
-            $headers .= "Importance: High\n"; 
-            $headers .= "From: ";
-            
-            mail( $_POST['reg_email'], $assunto, $messagem, $headers );
+            send_mail_smtp( $_POST['reg_email'], $assunto, $messagem );
+
 //=============================================//
 
 
@@ -124,8 +138,10 @@ obrigatórios, sem exceção.</br>
 </b>
 </div></td></tr></tbody></table></div><br /><div class="sep"></div><div style="background:url(_img/gradient.jpg) repeat-y;padding-left:5px;">Neste momento, temos <b><?php echo $vagas-$dbc['conta']; ?> vagas</b> disponíveis para registro.<?php if(($vagas-$dbc['conta'])<10) echo ' Seja rápido!'; ?></div><div class="sep"></div>
 
-<form method="post" action="?p=reg" name="reg" id="reg" style="background:url(_img/reg.jpg) no-repeat right top;" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+<form method="post" action="?p=reg&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
+<?php csrf_input(); ?>
 <div align="left">
+
 <input type="hidden" id="reg_submit" name="reg_submit" value="1" />
 <input type="hidden" id="reg_nlink" name="reg_nlink" value="<?php if(isset($_GET['nlink'])) echo $_GET['nlink']; ?>" />
 <fieldset>
@@ -234,7 +250,10 @@ function Cvila(obj){
 	<legend>Termos e Condi&ccedil;&otilde;es</legend>
     <input type="checkbox" id="reg_termos" name="reg_termos" /> Declaro que <b>li</b> e <b>aceito</b> os termos propostos, e que estou ciente das regras do jogo.
     <div class="sep"></div>
-    <div align="center"><input type="submit" class="botao" id="subm" name="subm" value="Registrar" /></div>
+    <div align="center">
+        <div class="cf-turnstile" data-sitekey="<?php echo $_ENV['TURNSTILE_SITE_KEY']; ?>" data-size="compact"></div>
+        <input type="submit" class="botao" id="subm" name="subm" value="Registrar" />
+    </div>
 </fieldset>
 </form>
 </div></div>

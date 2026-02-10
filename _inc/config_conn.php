@@ -33,7 +33,7 @@ function showDiv(box,id)
  elm.style.display = box.checked? "block":"none" 
 }
 </script>
-<form method="post" action="?p=config&amp;type=conn" style="background:url(_img/config_conn.jpg) no-repeat right top;" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+<form method="post" action="?p=config_conn&amp;en=ok" style="background:url(_img/config_conn.jpg) no-repeat right top;" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 <input type="hidden" id="conn" name="conn" value="1" />
 <fieldset><legend>Atualizações</legend>
     <input type="checkbox" id="conn_atu" name="conn_atu" <?php if($db['config_atualizacoes']=='sim') echo 'checked="true"'; ?>/> Desejo enviar minhas atualizações aos meus amigos.<br /><span class="sub2">Marque esta opção para permitir o envio de atualizações à seus amigos.</span>

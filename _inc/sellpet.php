@@ -40,7 +40,7 @@ if($dbi['usuarioid']<>$db['id']){ echo "<script>self.location='?p=home'</script>
 
 
              <?php echo number_format(($dbi['valor']/2),2,',','.'); ?> yens<br />
-            <form method="post" action="?p=sellpet" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+            <form method="post" action="?p=mypet" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input type="hidden" id="id" name="id" value="<?php echo $_GET['id']; ?>" />
         	<span class="sub2">Metade do preço do comercio.</span><br /><br />
        		<input type="password" id="senha" name="senha" maxlength="15" onfocus="className='input'" onblur="className=''" /><br />

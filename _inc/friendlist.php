@@ -8,23 +8,24 @@ $dba=mysql_fetch_assoc($sqla);
 $sqlupdate = '';
 $timeout = time()-900;
 ?>
-<div class="box5_top" align="center">Lista de Amigos</div>
-<div class="box5_middle"><?php if(mysql_num_rows($sqla)==0) echo '<div class="sub2">Nenhum amigo encontrado.<br />Para adicionar um amigo, <br />visite seu perfil e clique em <b>Adicionar Amigo</b>.</div>'; else { ?>
-	<table width="80%" cellspacing="0" cellpadding="0" align="center">
-        <?php do{ if($dba['config_atualizacoes']=='sim') $sqlupdate.=' OR usuarioid='.$dba['amigoid']; ?>
-        <tr class="table_dados">
-        	<td><img src="_img/<?php if($dba['timestamp']>=$timeout) echo 'online'; else echo 'offline'; ?>.png" width="14" height="14" style="margin-right:2px;" /></td>
-        	<td style="text-align:center;padding-left:2px;"><a href="javascript:void(0)" onclick="javascript:chatWith('<?php echo $dba['usuario']; ?>')" title="Clique aqui para conversar com seu amigo!"><?php echo $dba['usuario']; ?></a></td>
-            <td><b>[<?php echo $dba['nivel']; ?>]</b></td>
-        </tr>
-        <?php } while($dba=mysql_fetch_assoc($sqla)); ?>
-    </table>
-
-    <div class="sep"></div>
-    <div class="sub2"><a href="?p=friends">Gerenciar Lista</a></div>
-    <?php } ?>
+<div class="sidebar-box">
+    <div class="sidebar-box-header">Lista de Amigos</div>
+    <div class="sidebar-box-content">
+        <?php if(mysql_num_rows($sqla)==0): ?>
+            <div class="sub2">Nenhum amigo encontrado.<br />Visite um perfil para adicionar.</div>
+        <?php else: ?>
+            <table width="100%" cellspacing="0" cellpadding="2">
+                <?php do{ if($dba['config_atualizacoes']=='sim') $sqlupdate.=' OR usuarioid='.$dba['amigoid']; ?>
+                <tr>
+                    <td width="20"><img src="_img/<?php if($dba['timestamp']>=$timeout) echo 'online'; else echo 'offline'; ?>.png" width="12" height="12" /></td>
+                    <td><a href="javascript:void(0)" onclick="javascript:chatWith('<?php echo $dba['usuario']; ?>')" style="font-size: 11px;"><?php echo $dba['usuario']; ?></a></td>
+                    <td align="right" style="color: #888;">[<?php echo $dba['nivel']; ?>]</td>
+                </tr>
+                <?php } while($dba=mysql_fetch_assoc($sqla)); ?>
+            </table>
+            <div class="sidebar-sep"></div>
+            <div align="center"><a href="?p=friends" style="font-size: 10px; color: #ff0000;">GERENCIAR LISTA</a></div>
+        <?php endif; ?>
+    </div>
 </div>
-<div class="box5_bottom"></div>
-<?php
-@mysql_free_result($sqla);
-?>
+<?php @mysql_free_result($sqla); ?>

@@ -15,7 +15,7 @@ $dbp = mysql_fetch_assoc($sqlp);
     <td style="background:#282828;" width="120"><img src="_img/personagens/<?php echo $dbm['personagem']; ?>/0.jpg" /></td>
     <td><b>Rank S</b><br /><span class="sub2">3.000,00 yens<br />por hora</span></td>
     <td>
-    <form method="post" id="missao" name="missao" action="?p=missions" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+    <form method="post" action="?p=missions_e" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
     <input type="hidden" id="mis_rank" name="mis_rank" value="S">
     <select id="mis_tempo" name="mis_tempo">
     	<?php $i=1; do{ ?>

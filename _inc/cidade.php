@@ -19,7 +19,7 @@ else if ($hr >= 12 && $hr <18 ) { $livre1 = 'tarde';
 else { $livre1 = 'noite'; }
 	?>
 	<div class="modalExemplo" align="center" style="background:#282828;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;">
-		<div style="background:url(_img/city/<?php echo $livre1; ?>.png) no-repeat center;width:684px;height:346px;">
+		<div style="background:url(_img/city/<?php echo $livre1; ?>.png) no-repeat center;width:100%;max-width:778px;height:346px;">
 			<a href="?p=ramen"><img src="_img/city/point.gif" border="0" style="position:relative; left:350px; top:220px;"   width="13" height="13" onmouseover="nome('<b>Ichiraku Bar</b>: Entre e experimente o melhor ramen da vila!')" onmouseout="nomeout()" /></a>
 			<a href="?p=missions"><img src="_img/city/point.gif" border="0" style="position:relative; left:70px; top:170px;" width="13" height="13" onmouseover="nome('<b>Sala do Kage</b>: Realize missões para o kage da vila, e ganhe recompensas!')" onmouseout="nomeout()" /></a>
 			<a href="?p=school"><img src="_img/city/point.gif" border="0" style="position:relative; left:-100px; top:280px;" width="13" height="13" onmouseover="nome('<b>Escola Ninja</b>: Aprenda e aperfeiçoe jutsus com nossos ótimos senseis!')" onmouseout="nomeout()" /></a>

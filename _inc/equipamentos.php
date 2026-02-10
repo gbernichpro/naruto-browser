@@ -49,7 +49,7 @@ var genjutsu=0;
                 <?php if($dbe['genjutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.($dbe['genjutsu']+$dbe['upgrade']).'] em Genjutsu<br />'; ?></b>
           </td>
             <td align="center" width="20%">
-            	<form method="post" action="?p=inventory" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+            	<form method="post" action="?p=inventory" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
         		<input type="hidden" id="inv_id" name="inv_id" value="<?php echo $c->encode($dbe['id'],$chaveuniversal); ?>" />
             	<input type="hidden" id="inv_cat" name="inv_cat" value="<?php echo $c->encode($dbe['categoria'],$chaveuniversal); ?>" />
             	<input type="hidden" id="inv_act" name="inv_act" value="<?php echo $c->encode('off',$chaveuniversal); ?>" />

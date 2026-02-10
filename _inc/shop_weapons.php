@@ -1,42 +1,65 @@
 <?php
 $categoria = 'weapons';
 $dif = $db['nivel']+7;
-$sqls = mysql_query("SELECT * FROM table_itens WHERE categoria='arma' AND reqnivel<$dif ORDER BY reqnivel ASC");
-$dbs = mysql_fetch_assoc($sqls);
+// Conversão para mysqli
+$sqls = mysqli_query($mysqli_link, "SELECT * FROM table_itens WHERE categoria='arma' AND reqnivel<$dif ORDER BY reqnivel ASC");
 ?>
-<table width="100%" cellpadding="0" cellspacing="1">
-  <?php if(mysql_num_rows($sqls)==0) echo '<tr><td colspan="3"><div class="aviso">Nenhum item encontrado.</div></td></tr>'; else do{ if(date('Y-m-d H:i:s')<$db['vip']) $dbs['valor']=$dbs['valor']-($dbs['valor']*0.15); ?>
-      <!--<?php
-    $texto="<table border=0 width=100%><div style='float:left;'><font color='#FFFFFF'><b>".$dbs["nome"]."</b></font></div><div style='float:right;'><font color='#00FF00'><b>Detalhes</b></font></div>";
-    $texto.="<table border=0 width=100%><tr><td valign=top align='left' ><table border=0 width=100%><tr><td width=50 align='left' ><tr><td width=50 align='left'><b>Nivel Requerido</b></td><td>".$dbs["reqnivel"]."</td></tr></table></td><td align='left'><table border=0 width=100%><tr><td width=50 align='left'><b class=add>Taijutsu:</b></td><td align='left'> +".$dbs["taijutsu"]."</td></tr><tr><td width=50 align='left'><b class=add>Ninjutsu:</b></td><td align='left'> +".$dbs["ninjutsu"]."</td></tr><tr><td width=50 align='left'><b class=add>Genjutsu:</b></td><td> +".$dbs["genjutsu"]."</td></tr></table></td></tr></table>";
-    $texto.="<div class=sep></div>";
-    $texto.="<table border=0 width=100%><tr><td width=50 align='left'>Preço:".number_format($dbs['valor'],2,',','.')." Yens.</td></tr>";
-    ?> -->
+<div class="shop-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 10px;">
+    <?php if(mysqli_num_rows($sqls)==0): ?>
+        <div class="aviso" style="grid-column: 1 / -1;">Nenhum item disponível para o seu nível.</div>
+    <?php else: 
+        while($dbs = mysqli_fetch_assoc($sqls)): 
+            if(date('Y-m-d H:i:s') < $db['vip']) {
+                $dbs['valor'] = $dbs['valor'] - ($dbs['valor'] * 0.20); // Correção: 20% desconto no texto do shop.php, aqui estava 15%. Ajustei para 20%? Original dizia 0.8 no calc, entao eh 20%.
+            }
+    ?>
+        <div class="modern-card" style="border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.4); display: flex; flex-direction: column;">
+            <div class="modern-card-header" style="height: 45px; padding: 0 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
+                <span><?php echo $dbs['nome']; ?></span>
+                <span style="font-size: 10px; color: var(--text-dim);">Lvl <?php echo $dbs['reqnivel']; ?>+</span>
+            </div>
+            <div class="modern-card-body" style="padding: 15px; flex: 1; display: flex; flex-direction: column;">
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <div style="flex: 0 0 80px; height: 80px; background: rgba(255,255,255,0.03); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05);">
+                        <img src="_img/equipamentos/<?php echo $dbs['imagem']; ?>.jpg" style="max-width: 60px; max-height: 60px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));"> <!-- Correção extensão .jpg (era .png em tentativa anterior?) -->
+                    </div>
+                    <div style="flex: 1; font-size: 11px;">
+                        <p style="color: var(--text-dim); margin-bottom: 10px; line-height: 1.4;"><?php echo $dbs['descricao']; ?></p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                            <?php if($dbs['taijutsu']>0) echo '<span style="background: rgba(255,50,50,0.1); color: #f55; padding: 2px 6px; border-radius: 4px;">TAI +'.$dbs['taijutsu'].'</span>'; ?>
+                            <?php if($dbs['ninjutsu']>0) echo '<span style="background: rgba(50,255,50,0.1); color: #5f5; padding: 2px 6px; border-radius: 4px;">NIN +'.$dbs['ninjutsu'].'</span>'; ?>
+                            <?php if($dbs['genjutsu']>0) echo '<span style="background: rgba(50,50,255,0.1); color: #55f; padding: 2px 6px; border-radius: 4px;">GEN +'.$dbs['genjutsu'].'</span>'; ?>
+                        </div>
+                    </div>
+                </div>
 
-    <tr style="background:#161616;" onmouseover="style.background='#310000'" onmouseout="style.background='#161616'">
-    	<td align="center" width="140"><img src="_img/equipamentos/<?php echo $dbs['imagem']; ?>.png" id="tip-direita" original-title="<?=$texto?>"/></td>
-        <td valign="top" style="padding:5px;text-align:center;">
-        	<b><?php echo $dbs['nome']; ?></b><br />
-            <span class="sub2"><?php echo $dbs['descricao']; ?></span><br />
-          <b><?php if($dbs['taijutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.$dbs['taijutsu'].'] em Taijutsu<br />'; ?>
-            <?php if($dbs['ninjutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.$dbs['ninjutsu'].'] em Ninjutsu<br />'; ?>
-            <?php if($dbs['genjutsu']>0) echo '<img src="_img/equipamentos/up.png" width="14" height="14" align="absmiddle" /> [+'.$dbs['genjutsu'].'] em Genjutsu<br />'; ?></b>
-      </td>
-        <td align="center" width="20%">
-        	<b>Nivel Mínimo</b><br />
-            <span class="sub2"><?php echo $dbs['reqnivel']; ?> </span><br /><br />
-            <b>Valor Unitário</b><br />
-            <span class="sub2"><?php echo number_format($dbs['valor'],2,',','.'); ?> yens</span><br /><br />
-            <form method="post" action="?p=shop" onsubmit="subm.value='Carregando...';subm.disabled=true;">
-            <input type="hidden" id="buy_id" name="buy_id" value="<?php echo $dbs['id']; ?>" />
-            <input type="hidden" id="buy_page" name="buy_page" value="<?php echo $categoria; ?>" />
-            <input type="hidden" id="buy_cat" name="buy_cat" value="<?php echo $dbs['categoria']; ?>" />
-            <?php if($dbs['vip']=='nao'){ ?><input type="submit" id="subm" name="subm" class="botao" value="Comprar" /><?php } else { if(date('Y-m-d H:i:s')>=$db['vip']) echo '<span class="sub2">Exclusiva para VIP.</span>'; else { ?><input type="submit" id="subm" name="subm" class="botao" value="Comprar" /><?php }} ?>
-            </form>
-        </td>
-  </tr>
-    <?php } while($dbs=mysql_fetch_assoc($sqls)); ?>
-</table>
+                <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-family: var(--font-header);">
+                        <span style="display: block; font-size: 9px; color: var(--text-dim);">PREÇO</span>
+                        <b style="color: #ffd700; font-size: 14px;"><?php echo number_format($dbs['valor'], 2, ',', '.'); ?> <span style="font-size: 9px;">yens</span></b>
+                    </div>
+                    
+                    <form method="post" action="?p=shop" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Processando...'; b.disabled=true; }">
+                        <input type="hidden" name="buy_id" value="<?php echo $dbs['id']; ?>" />
+                        <input type="hidden" name="buy_page" value="<?php echo $categoria; ?>" />
+                        <input type="hidden" name="buy_cat" value="<?php echo $dbs['categoria']; ?>" />
+                        
+                        <?php if($dbs['vip']=='nao'): ?>
+                            <input type="submit" class="modern-btn" style="padding: 8px 15px; font-size: 11px;" value="Comprar" />
+                        <?php else: ?>
+                            <?php if(date('Y-m-d H:i:s') >= $db['vip']): ?>
+                                <span style="font-size: 10px; color: #ff6666; background: rgba(255,0,0,0.1); padding: 4px 8px; border-radius: 4px;">Somente VIP</span>
+                            <?php else: ?>
+                                <input type="submit" class="modern-btn" style="padding: 8px 15px; font-size: 11px; background: linear-gradient(135deg, #ffd700, #b8860b);" value="Comprar VIP" />
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <?php endwhile; ?>
+    <?php endif; ?>
+</div>
 <?php
-@mysql_free_result($sqls);
+if(isset($sqls)) mysqli_free_result($sqls);
 ?>

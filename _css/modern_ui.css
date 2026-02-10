@@ -1,0 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;700&display=swap');
+
+:root {
+    --primary-red: #ff3c3c;
+    --primary-red-glow: rgba(255, 60, 60, 0.4);
+    --bg-darker: #0d0d0d;
+    --bg-main: #141414;
+    --bg-card: rgba(20, 20, 20, 0.85);
+    --border-subtle: rgba(255, 255, 255, 0.12);
+    --text-main: #f0f0f0;
+    --text-dim: #aaa;
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Global Reset & Modern Styles */
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../template/background.png') fixed top center !important;
+    background-size: auto !important;
+    color: var(--text-main);
+    font-family: var(--font-body);
+    margin: 0;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Layout Overrides - Breaking out of tables where possible */
+.modern-layout-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Slick Glass Buttons */
+.modern-btn {
+    background: linear-gradient(135deg, var(--primary-red), #900);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.modern-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--primary-red-glow);
+    filter: brightness(1.2);
+}
+
+/* Content Boxes (Replacing table slices) */
+.modern-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 2px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.modern-card-header {
+    background: linear-gradient(to right, rgba(255, 0, 0, 0.2), transparent);
+    padding: 12px 20px;
+    border-left: 4px solid var(--primary-red);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #fff;
+}
+
+.modern-card-body {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+/* Improved Typography */
+h1,
+h2,
+h3 {
+    font-family: var(--font-heading);
+}
+
+a {
+    color: var(--primary-red);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+a:hover {
+    color: #fff;
+    text-shadow: 0 0 10px var(--primary-red-glow);
+}
+
+/* Scrollbar Modernization */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-red);
+}
+
+/* Form Styling */
+input[type="text"],
+input[type="password"],
+textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    color: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    transition: border 0.3s;
+}
+
+input:focus {
+    border-color: var(--primary-red);
+    outline: none;
+    box-shadow: 0 0 10px var(--primary-red-glow);
+}
+
+/* Header & Login Refinements */
+.modern-header {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2)), url('../template/topo01.png') no-repeat center !important;
+    background-size: cover !important;
+    border-bottom: 2px solid var(--primary-red);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.modern-login-container {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.modern-label {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--primary-red);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.Button_Login.modern-btn-login {
+    background: var(--primary-red);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    width: auto;
+    height: auto;
+}
+
+.Button_Login.modern-btn-login:hover {
+    background: #fff;
+    color: var(--primary-red);
+    box-shadow: 0 0 15px var(--primary-red-glow);
+}
+
+/* Modern Navigation */
+.modern-nav {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    list-style: none;
+    position: relative;
+    z-index: 10000;
+}
+
+.modern-nav>li {
+    position: relative;
+}
+
+.modern-nav>li>a {
+    display: block;
+    padding: 15px 25px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #fff;
+    text-transform: uppercase;
+    transition: var(--transition-fast);
+}
+
+.modern-nav>li>a:hover {
+    background: rgba(255, 60, 60, 0.15);
+    color: var(--primary-red);
+}
+
+.modern-nav ul {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgba(13, 13, 13, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-subtle);
+    border-top: 3px solid var(--primary-red);
+    min-width: 200px;
+    padding: 10px 0;
+    margin: 0;
+    list-style: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 10001;
+}
+
+.modern-nav li:hover>ul {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.modern-nav ul li a {
+    display: block;
+    padding: 10px 20px;
+    font-size: 12px;
+    color: var(--text-main);
+    transition: background 0.2s;
+}
+
+.modern-nav ul li a:hover {
+    background: rgba(255, 60, 60, 0.1);
+    color: #fff;
+    padding-left: 25px;
+}
+
+/* Modern Footer */
+.modern-footer {
+    background: rgba(13, 13, 13, 0.9);
+    border-top: 1px solid var(--border-subtle);
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: 11px;
+    text-align: center;
+    font-family: var(--font-body);
+}
+
+.modern-footer b,
+.modern-footer strong {
+    color: var(--text-main);
+}

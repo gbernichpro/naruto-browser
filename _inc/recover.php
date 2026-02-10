@@ -4,9 +4,13 @@ if(isset($_POST['rec_usuario'])){
 	if($_POST['rec_email']=='') $erro=1;
 	if($_POST['rec_usuario']=='') $erro=2;
 	if($erro==0){
-		$sqlr = mysql_query("SELECT id, senha, config_pergunta, config_resposta FROM usuarios WHERE usuario='".antiinjection2($_POST['rec_usuario'])."' AND email='".antiinjection2($_POST['rec_email'])."'");
-		$dbr = mysql_fetch_assoc($sqlr);
-		if($dbr['senha']=='') $erro=3;
+		$stmt_r = mysqli_prepare($mysqli_link, "SELECT id, senha, config_pergunta, config_resposta FROM usuarios WHERE usuario=? AND email=?");
+		mysqli_stmt_bind_param($stmt_r, "ss", $_POST['rec_usuario'], $_POST['rec_email']);
+		mysqli_stmt_execute($stmt_r);
+		$result_r = mysqli_stmt_get_result($stmt_r);
+		$dbr = mysqli_fetch_assoc($result_r);
+		if(!$dbr) $erro=3;
+
 
 		if($erro==0){
 			$link='?newpass.php?user='.strtolower($_POST['rec_usuario']).'&token='.md5($dbr['id']);
@@ -37,14 +41,7 @@ if(isset($_POST['rec_usuario'])){
             $messagem .= "</body>\n"; 
             $messagem .= "</html>\n"; 
             
-            $headers .= "MIME-Version: 1.0\n" ; 
-            $headers .= "Content-Type: text/html; charset=\"iso-8859-1\"\n"; 
-            $headers .= "X-Priority: 1 (Higuest)\n"; 
-            $headers .= "X-MSMail-Priority: High\n"; 
-            $headers .= "Importance: High\n"; 
-            $headers .= "From: ";
-            
-            mail( $_POST['rec_email'], $assunto, $messagem, $headers );	
+            send_mail_smtp( $_POST['rec_email'], $assunto, $messagem );	
 		}
 	}
 	echo "<script>self.location='?p=recover&msg=".$erro."'</script>"; return;

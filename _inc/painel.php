@@ -2,87 +2,198 @@
 <?php
 if($db['tipodeconta'] =='admin'){
 }else{
-echo "<script>self.location='?p=home&msgg=5'</script>";return;
+echo "<script>self.location='?p=home&msgg=5'</script>"; return;
 }
+
 $dat=date('Y-m-d H:i:s');
-if ($_POST['loteria'])
+
+// --- Processamento de LOTERIA ---
+if (isset($_POST['loteria']))
 {
     if ((!$_POST['preco']) or (!$_POST['creditos'])) {
-echo "<script>self.location='?p=painel&msglot=2'</script>";
-}else{
+        echo "<script>self.location='?p=painel&msglot=2'</script>";
+    }else{
+        $nome_premio = mysqli_real_escape_string($mysqli_link, $_POST['premiolot']);
+        $iten=mysqli_query($mysqli_link, "SELECT * FROM table_itens where nome='".$nome_premio."'");
+        $it=mysqli_fetch_assoc($iten);
+        
+        $preco = mysqli_real_escape_string($mysqli_link, $_POST['preco']);
+        mysqli_query($mysqli_link, "update `settings` set `value`='".$preco."' where `name`='preco'");
+        
+        $usuario_post = mysqli_real_escape_string($mysqli_link, $_POST['usuario']);
+        mysqli_query($mysqli_link, "update `settings` set `value`='".$usuario_post."' where `name`='adm'");
 
-$iten=mysql_query("SELECT * FROM table_itens where nome='".antiinjection($_POST['premiolot'])."'");
-$it=mysql_fetch_assoc($iten);
-	$query = mysql_query("update `settings` set `value`='".antiinjection($_POST['preco'])."' where `name`='preco'");
-    $query2 = mysql_query("update `settings` set `value`='".antiinjection($_POST['usuario'])."' where `name`='adm'");
+        if($_POST['tipo']=='creditos'){
+            $creditos_val = mysqli_real_escape_string($mysqli_link, $_POST['creditos']);
+            mysqli_query($mysqli_link, "update `settings` set `value`='".$creditos_val."' where `name`='vencedor'");
+        }elseif($_POST['tipo']=='item'){
+            mysqli_query($mysqli_link, "update `settings` set `value`='".$it['id']."' where `name`='vencedor'");
+        }
+        
+        mysqli_query($mysqli_link, "update `settings` set `value`='t' where `name`='loteria'");
+        
+        $termina = mysqli_real_escape_string($mysqli_link, $_POST['termina']);
+        mysqli_query($mysqli_link, "update `settings` set `value`='".$termina."' where `name`='end_lotto'");
+        
+        $tipo_post = mysqli_real_escape_string($mysqli_link, $_POST['tipo']);
+        mysqli_query($mysqli_link, "update `settings` set `value`='".$tipo_post."' where `name`='tipo'");
 
- if($_POST['tipo']=='creditos'){
-	$query = mysql_query("update `settings` set `value`='".antiinjection($_POST['creditos'])."' where `name`='vencedor'");
-}elseif($_POST['tipo']=='item'){
-	$query = mysql_query("update `settings` set `value`='".$it['id']."' where `name`='vencedor'");
+        echo "<script>self.location='?p=painel&msglot=1'</script>";
+    }
 }
-	$query = mysql_query("update `settings` set `value`='t' where `name`='loteria'");
-	$query = mysql_query("update `settings` set `value`='".antiinjection($_POST['termina'])."' where `name`='end_lotto'");
-	$query = mysql_query("update `settings` set `value`='".antiinjection($_POST['tipo'])."' where `name`='tipo'");
 
-
-
-echo "<script>self.location='?p=painel&msglot=1'</script>";
-}}
-if ($_POST['invasao'])
+// --- Processamento de INVASÃO ---
+if (isset($_POST['invasao']))
 {
+    $nome = mysqli_real_escape_string($mysqli_link, $_POST['nome']);
+    $hp = mysqli_real_escape_string($mysqli_link, $_POST['hp']);
+    $premio = mysqli_real_escape_string($mysqli_link, $_POST['premioinv']);
+    $reqgen = mysqli_real_escape_string($mysqli_link, $_POST['reqgen']);
+    $exp = mysqli_real_escape_string($mysqli_link, $_POST['exp']);
+    $expmax = mysqli_real_escape_string($mysqli_link, $_POST['expmax']);
+    $data = mysqli_real_escape_string($mysqli_link, $_POST['data']);
+    $usuario = mysqli_real_escape_string($mysqli_link, $_POST['usuario']);
+    $nivelmin = mysqli_real_escape_string($mysqli_link, $_POST['nivelmin']);
+    $nivelmax = mysqli_real_escape_string($mysqli_link, $_POST['nivelmax']);
+    $maxhp = mysqli_real_escape_string($mysqli_link, $_POST['maxhp']);
 
-	$query = mysql_query("update `invasor` set `nome`
-='".$_POST['nome']."',`hp`='".$_POST['hp']."',`premio`='".$_POST['premioinv']."',`reqgen`='".$_POST['reqgen']."', `exp`='".$_POST['exp']."',`expmax`='".$_POST['expmax']."',`data`='".$_POST['data']."',`abertopor`='".$_POST['usuario']."', `nivelmin`='".$_POST['nivelmin']."',`nivelmax`='".$_POST['nivelmax']."',`hpmaximo`='".$_POST['maxhp']."',`vitorias`='0',`status`='t'");
-echo "<script>self.location='?p=painel&msginv=1'</script>";
+    $query = mysqli_query($mysqli_link, "update `invasor` set `nome`='".$nome."',`hp`='".$hp."',`premio`='".$premio."',`reqgen`='".$reqgen."', `exp`='".$exp."',`expmax`='".$expmax."',`data`='".$data."',`abertopor`='".$usuario."', `nivelmin`='".$nivelmin."',`nivelmax`='".$nivelmax."',`hpmaximo`='".$maxhp."',`vitorias`='0',`status`='t'");
+    echo "<script>self.location='?p=painel&msginv=1'</script>";
 }
 
-
-
-
+// --- Processamento de GUERRA ---
 if (isset($_POST['iniciargr'])){
+    $hora_cadastro=date('Y-m-d H:i:s');
+    $hour=time()+86400;
+    $hora_fim=date('Y-m-d H:i:s', $hour);
+    
+    $premio = mysqli_real_escape_string($mysqli_link, $_POST['premio']);
+    $nivelmin = mysqli_real_escape_string($mysqli_link, $_POST['nivelmin']);
+    $nivelmax = mysqli_real_escape_string($mysqli_link, $_POST['nivelmax']);
+    $custo = mysqli_real_escape_string($mysqli_link, $_POST['custo']);
 
-$hora_cadastro=date('Y-m-d H:i:s');
-$hour=time()+86400;
-$hora_fim=date('Y-m-d H:i:s', $hour);
-mysql_query("INSERT INTO nal_war SET premio=".antiinjection($_POST['premio'])." ,nivelmin=".antiinjection($_POST['nivelmin'])." , nivelmax=".antiinjection($_POST['nivelmax'])." , custo=".antiinjection($_POST['custo'])." ,    inicio='$hora_cadastro' , fim='$hora_fim' , status='inscricao'");
-echo "<script>alert('Guerra ninja iniciada com sucesso ');</script>";
-$novoid=mysql_insert_id();
-$number=1;
+    mysqli_query($mysqli_link, "INSERT INTO nal_war SET premio=".$premio." ,nivelmin=".$nivelmin." , nivelmax=".$nivelmax." , custo=".$custo." ,    inicio='$hora_cadastro' , fim='$hora_fim' , status='inscricao'");
+    echo "<script>alert('Guerra ninja iniciada com sucesso ');</script>";
+    $novoid=mysqli_insert_id($mysqli_link);
+    $number=1;
 
-while($number <= 11){
-
-mysql_query("insert into nal_war_vilas set vilaid='.$number.' , warid='.$novoid.'");
-$number++;
+    while($number <= 11){
+        mysqli_query($mysqli_link, "insert into nal_war_vilas set vilaid='".$number."' , warid='".$novoid."'");
+        $number++;
+    }
 }
-}
 
-
+// --- Processamento de ARENA ---
 if (isset($_POST['iniciararena'])){
+    $hora_cadastro=date('Y-m-d H:i:s');
+    $hour=time()+7200;
+    $hora_fim=date('Y-m-d H:i:s', $hour);
+    
+    $premio = mysqli_real_escape_string($mysqli_link, $_POST['premio']);
+    $nivelmin = mysqli_real_escape_string($mysqli_link, $_POST['nivelmin']);
+    $nivelmax = mysqli_real_escape_string($mysqli_link, $_POST['nivelmax']);
+    $custo = mysqli_real_escape_string($mysqli_link, $_POST['custo']);
+    $exp = mysqli_real_escape_string($mysqli_link, $_POST['exp']);
+    $insc = mysqli_real_escape_string($mysqli_link, $_POST['insc']);
 
-$hora_cadastro=date('Y-m-d H:i:s');
-$hour=time()+7200;
-$hora_fim=date('Y-m-d H:i:s', $hour);
-mysql_query("INSERT INTO nal_torneio SET premio=".antiinjection($_POST['premio'])." ,nivelmin=".antiinjection($_POST['nivelmin'])." , nivelmax=".antiinjection($_POST['nivelmax'])." , custo=".antiinjection($_POST['custo'])." , exp=".antiinjection($_POST['exp'])." , inscricoes=".antiinjection($_POST['insc'])." ,    inicio='$hora_cadastro' , fim='$hora_fim' , status='inscricao'");
-echo "<script>alert('Arena iniciada com sucesso');</script>";
-$novoid=mysql_insert_id();
-$number=1;
+    mysqli_query($mysqli_link, "INSERT INTO nal_torneio SET premio=".$premio." ,nivelmin=".$nivelmin." , nivelmax=".$nivelmax." , custo=".$custo." , exp=".$exp." , inscricoes=".$insc." ,    inicio='$hora_cadastro' , fim='$hora_fim' , status='inscricao'");
+    echo "<script>alert('Arena iniciada com sucesso');</script>";
+    $novoid=mysqli_insert_id($mysqli_link);
+    $number=1;
 }
 
-
+// --- Processamento de ENVIO DE MENSAGEM (Global) ---
 if(isset($_GET['act']) && $_GET['act'] == 'send_mail'){
-	if(strlen(trim($_POST['assunto'])) >= 3 && strlen(trim($_POST['assunto'])) <= 20){
-		if(strlen(trim($_POST['mensagem'])) >= 10 && strlen(trim($_POST['mensahem'])) <= 2048){
-			$users = mysql_query("SELECT * FROM `usuarios` WHERE `status`='ativo'");
-			while($row = mysql_fetch_assoc($users)){
-				mysql_query("INSERT INTO `mensagens` (`data`,`origem`,`destino`,`assunto`,`msg`) VALUES (NOW(),'0','".$row['id']."','".$_POST['assunto']."','".$_POST['mensagem']."')");
-			}
-			echo "<script>alert('Mensagens enviadas com sucesso!');</script>";
-		}
-	}
+    if(strlen(trim($_POST['assunto'])) >= 3 && strlen(trim($_POST['assunto'])) <= 20){
+        // Corrigido typo 'mensahem' no original
+        if(strlen(trim($_POST['mensagem'])) >= 10 && strlen(trim($_POST['mensagem'])) <= 2048){
+            $users = mysqli_query($mysqli_link, "SELECT * FROM `usuarios` WHERE `status`='ativo'");
+            $assunto = mysqli_real_escape_string($mysqli_link, $_POST['assunto']);
+            $mensagem = mysqli_real_escape_string($mysqli_link, $_POST['mensagem']);
+            
+            while($row = mysqli_fetch_assoc($users)){
+                mysqli_query($mysqli_link, "INSERT INTO `mensagens` (`data`,`origem`,`destino`,`assunto`,`msg`) VALUES (NOW(),'0','".$row['id']."','".$assunto."','".$mensagem."')");
+            }
+            echo "<script>alert('Mensagens enviadas com sucesso!');</script>";
+        }
+    }
+}
+
+// --- Processamento de BANIR ---
+if (isset($_POST['banned'])) {
+  if(strlen($_POST['banirnome']) < 1 ){
+   echo "<script>alert('Nome Invalido')</script><script>self.location = '?p=painel'</script>";
+  exit(); // Changed die() to exit()
+  }
+ 
+if (!isset($message)){
+    $status_sel = mysqli_real_escape_string($mysqli_link, $_POST['select']);
+    $banirnome = mysqli_real_escape_string($mysqli_link, $_POST['banirnome']);
+    $query = mysqli_query($mysqli_link, "update `usuarios` set `status`='".$status_sel."' WHERE `usuario`='".$banirnome."'");
+    echo "<script>alert('alterado status do usuário!')</script><script>self.location = '?p=painel'</script>";
+  }
+}
+
+// --- Processamento de CREDITOS ---
+if (isset($_POST['credito'])) {
+  if(strlen($_POST['userid']) < 1 ){
+   echo "<script>alert('Nome Invalido')</script><script>self.location = '?p=painel'</script>";
+  exit();
+  }
+ 
+if (!isset($message)){
+    $creditos = mysqli_real_escape_string($mysqli_link, $_POST['creditos']);
+    $userid = mysqli_real_escape_string($mysqli_link, $_POST['userid']);
+    $query = mysqli_query($mysqli_link, "update `usuarios` set `creditos`=creditos+'".$creditos."' WHERE `usuario`='".$userid."'");
+    echo "<script>alert('Credito Enviado!')</script><script>self.location = '?p=painel'</script>";
+  }
+}
+
+// --- Processamento de YENS ---
+if (isset($_POST['yens_submit'])) { // Alterado nome do submit para diferenciar de creditos, ou usar isset yens
+  if(strlen($_POST['nome']) < 1 ){ // post nome vs yens
+   echo "<script>alert('Nome Invalido')</script><script>self.location = '?p=painel'</script>";
+  exit();
+  }
+ 
+if (!isset($message)){
+    $yens_val = mysqli_real_escape_string($mysqli_link, $_POST['yens']);
+    $nome_user = mysqli_real_escape_string($mysqli_link, $_POST['nome']);
+    // BUG ORIGINAL: `usuario`='".$_POST['nome']."' NO UPDATE! Isso mudaria o nome do usuário para o prório nome? Ou é WHERE?
+    // Original: update `usuarios` set `yens`=yens+'".$_POST['yens']."' , `usuario`='".$_POST['nome']."'
+    // Isso parece errado. Deve ser WHERE usuario = bug.
+    // SE for update usuario=nome, não faz sentido.
+    // Provavelmente era WHERE. Vou corrigir para WHERE.
+    
+    // CORREÇÃO CRITICA: Mudei para WHERE
+    $query = mysqli_query($mysqli_link, "update `usuarios` set `yens`=yens+'".$yens_val."' WHERE `usuario`='".$nome_user."'");
+    
+    echo "<script>alert('Yens Enviado!')</script><script>self.location = '?p=painel'</script>";
+  }
+}
+
+// --- Processamento de VIP ---
+if (isset($_POST['vipa'])) {
+  if(strlen($_POST['nome']) < 1 ){
+   echo "<script>alert('Precisa por o nome do usuario que ira receber')</script><script>self.location = '?p=painel'</script>";
+  exit();
+  }
+  if(strlen($_POST['vipdia']) < 14 ){
+   echo "<script>alert('Data Invalida')</script><script>self.location = '?p=painel'</script>";
+   exit();
+  }
+ 
+if (!isset($message)){
+    $vipdia = mysqli_real_escape_string($mysqli_link, $_POST['vipdia']);
+    $nome = mysqli_real_escape_string($mysqli_link, $_POST['nome']);
+    $query = mysqli_query($mysqli_link, "update `usuarios` set `vip`='".$vipdia."' WHERE `usuario`='".$nome."'");
+    echo "<script>alert('vip doado com sucesso!')</script><script>self.location = '?p=painel'</script>";
+  }
 }
 ?>
-  <script type="text/javascript" src="_js/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
+
+<!-- TinyMCE -->
+<script type="text/javascript" src="_js/tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
 <script type="text/javascript">
 tinyMCE.init({
 	mode : "textareas",
@@ -97,300 +208,237 @@ tinyMCE.init({
 	theme_advanced_path : false
 });
 </script>
-<div class="box_top">Fazer comunicado aos jogadores</div>
-<div class="box_middle">
-	<fieldset>
-		<legend>Enviar Mensagem</legend>
-		<form method="post" action="?p=painel&act=send_mail" onsubmit="subm.value='Carregando...';subm.disabled=true;">
-			<span class="destaque">Assunto da Mensagem:</span><br />
-			<input type="text" name="assunto" maxlength="60" onfocus="className='input'" onblur="className=''" /><br />
-			<span class="sub2">Digite o assunto da mensagem.</span><br /><div class="sep"></div>
-			<span class="destaque">Mensagem:</span>
-			<textarea id="msg_msg" name="mensagem" style="width:100%;"></textarea>
-			<span class="sub2">Mensagem a ser enviada. Apenas os primeiros 2048 caracteres serão válidos.</span>
-			<div class="sep"></div>
-			<div align="center"><input type="submit" id="subm" name="sub2" class="botao" value="Enviar Mensagem"></div>
-		</form>
-	</fieldset>
+
+<div class="modern-card">
+    <div class="modern-card-header">Painel Administrativo</div>
+    <div class="modern-card-body">
+    
+        <!-- MENSSAGEM GLOBAL -->
+        <div class="modern-card" style="margin-bottom: 20px;">
+            <div class="modern-card-header">Fazer comunicado aos jogadores</div>
+            <div class="modern-card-body">
+                <form method="post" action="?p=painel&act=send_mail" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
+                    <span class="destaque">Assunto da Mensagem:</span><br />
+                    <input type="text" name="assunto" maxlength="60" class="modern-input" style="width: 100%; margin-bottom: 10px;" required /><br />
+                    
+                    <span class="destaque">Mensagem:</span>
+                    <textarea id="msg_msg" name="mensagem" style="width:100%; height: 100px;"></textarea>
+                    <span class="sub2" style="font-size: 11px;">Max: 2048 caracteres. Envia para TODOS os ativos.</span>
+                    <div class="sep"></div>
+                    <div align="center"><input type="submit" id="subm" name="sub2" class="modern-btn" value="Enviar Mensagem"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- INVASÃO -->
+        <div class="modern-card" style="margin-bottom: 20px;">
+            <div class="modern-card-header">Invasão</div>
+            <div class="modern-card-body">
+                <?php
+                if(isset($_GET['msginv'])){
+                    switch($_GET['msginv']){
+                        case 1: $msg='<b>Invasão iniciada</b>. Não mexa nas configurações enquanto estiver aberta.'; break;
+                    }
+                    echo '<div class="aviso" style="margin-bottom: 10px;">'.$msg.'</div>';
+                }
+                ?>
+                <form method="POST" action="?p=painel">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div><label>Nome:</label><input type="text" name="nome" class="modern-input" style="width:100%"></div>
+                        <div><label>HP:</label><input type="text" name="hp" class="modern-input" style="width:100%"></div>
+                        <div><label>HP Max:</label><input type="text" name="maxhp" class="modern-input" style="width:100%"></div>
+                        <div><label>Prêmio Inicial:</label><input type="text" name="premioinv" class="modern-input" style="width:100%"></div>
+                        <div><label>Genjutsu Req:</label><input type="text" name="reqgen" class="modern-input" style="width:100%"></div>
+                        <div><label>Nível Min:</label><input type="text" value="1" name="nivelmin" class="modern-input" style="width:100%"></div>
+                        <div><label>Nível Max:</label><input type="text" name="nivelmax" class="modern-input" style="width:100%"></div>
+                        <div><label>EXP:</label><input type="text" value="1" name="exp" class="modern-input" style="width:100%"></div>
+                        <div><label>EXP Max:</label><input type="text" name="expmax" class="modern-input" style="width:100%"></div>
+                    </div>
+                    <input type="hidden" id="data" name="data" value="<?php echo $dat; ?>">
+                    <input type="hidden" id="usuario" name="usuario" value="<?php echo $db['usuario']; ?>">
+                    
+                    <div style="margin-top: 10px;">
+                        <?php
+                        $inv=mysqli_query($mysqli_link, "SELECT * FROM invasor");
+                        $inv=mysqli_fetch_assoc($inv);
+                        if($inv['status']=='t'){ ?>
+                            <input class="modern-btn" type="submit" name="invasao" value="Iniciar Invasão">
+                        <?php }else{ ?>
+                            <b>Invasão já iniciada</b>
+                        <?php } ?>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- LOTERIA -->
+        <div class="modern-card" style="margin-bottom: 20px;">
+            <div class="modern-card-header">Loteria <?php echo isset($_POST['premiolot']) ? $_POST['premiolot'] : ''; ?></div>
+            <div class="modern-card-body">
+                <?php
+                if(isset($_GET['msglot'])){
+                    switch($_GET['msglot']){
+                        case 1: $msg='<b>Loteria iniciada</b>.'; break;
+                        case 2: $msg='<b>ERRO</b>: Preencha todos os campos.'; break;
+                    }
+                    echo '<div class="aviso" style="margin-bottom: 10px;">'.$msg.'</div>';
+                }
+                ?>
+                <form method="POST" action="?p=painel">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <b>Tipo de premiação:</b><br>
+                        <label style="cursor:pointer; margin-right: 20px;">
+                            <img src="_img/items.jpg" border="0"><br>
+                            <input name="tipo" value="item" type="radio" CHECKED> Item
+                        </label>
+                        <label style="cursor:pointer;">
+                            <img src="_img/creditos.jpg" border="0"><br>
+                            <input name="tipo" value="creditos" type="radio"> Créditos
+                        </label>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label>Termina em:</label>
+                            <select name="termina" class="modern-input" style="width:100%">
+                               <option value="<?php echo(time()+800);?>">12 minutos</option>
+                               <option value="<?php echo(time()+1800);?>">30 minutos</option>
+                               <option value="<?php echo(time()+3600);?>">1 hora</option>
+                               <option value="<?php echo(time()+7200);?>">2 horas</option>
+                               <option value="<?php echo(time()+18000);?>">5 horas</option>
+                               <option value="<?php echo(time()+36000);?>">10 horas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Prêmio (Item):</label>
+                            <select name="premiolot" class="modern-input" style="width:100%">
+                            <?php
+                            $sqle=mysqli_query($mysqli_link, "SELECT * FROM table_itens");
+                            while($dbr=mysqli_fetch_assoc($sqle)) { echo '<option value="'.$dbr['id'].'">'.$dbr['nome'].'</option>'; }
+                            ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Prêmio (Créditos):</label>
+                            <input type="text" name="creditos" size="20" class="modern-input" style="width:100%">
+                        </div>
+                        <div>
+                            <label>Preço Ticket:</label>
+                            <input type="text" value="300" name="preco" size="20" class="modern-input" style="width:100%">
+                        </div>
+                    </div>
+                    <input type="hidden" id="usuario" name="usuario" value="<?php echo $db['usuario']; ?>">
+                    
+                    <div style="margin-top: 15px;">
+                        <?php
+                        $lo=mysqli_query($mysqli_link, "SELECT * FROM settings where name='end_lotto'");
+                        $lot=mysqli_fetch_assoc($lo);
+                        if($lot['value']<time()){ ?>
+                            <input class="modern-btn" type="submit" name="loteria" value="Iniciar Loteria">
+                        <?php }else{ ?>
+                            <b>Loteria já iniciada</b>
+                        <?php } ?>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- GUERRA E ARENA -->
+        <div class="modern-card" style="margin-bottom: 20px;">
+            <div class="modern-card-header">Guerra de Vilas e Arena</div>
+            <div class="modern-card-body">
+                <?php
+                if(isset($_GET['msgwar'])){
+                    switch($_GET['msgwar']){
+                        case 1: echo '<div class="aviso"><b>Guerra iniciada com sucesso</b></div>'; break;
+                    }
+                }
+                ?>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Guerra -->
+                    <div>
+                        <h4>Guerra de Vilas</h4>
+                        <form method="post" action="?p=painel">
+                            <label>Prêmio:</label><input type="text" name="premio" class="modern-input" style="width:100%"><br>
+                            <label>Min Lvl:</label><input type="text" name="nivelmin" class="modern-input" style="width:100%"><br>
+                            <label>Max Lvl:</label><input type="text" name="nivelmax" class="modern-input" style="width:100%"><br>
+                            <label>Custo:</label><input type="text" name="custo" class="modern-input" style="width:100%"><br>
+                            <input type="submit" name="iniciargr" value="Iniciar Guerra" class="modern-btn" style="margin-top: 5px;">
+                        </form>
+                    </div>
+                    <!-- Arena -->
+                    <div>
+                        <h4>Arena (Torneio)</h4>
+                        <form method="post" action="?p=painel">
+                            <label>Prêmio:</label><input type="text" name="premio" class="modern-input" style="width:100%"><br>
+                            <label>Min Lvl:</label><input type="text" name="nivelmin" class="modern-input" style="width:100%"><br>
+                            <label>Max Lvl:</label><input type="text" name="nivelmax" class="modern-input" style="width:100%"><br>
+                            <label>Custo:</label><input type="text" name="custo" class="modern-input" style="width:100%"><br>
+                            <label>EXP Inicial:</label><input type="text" name="exp" class="modern-input" style="width:100%"><br>
+                            <label>Inscrições:</label><input type="text" name="insc" class="modern-input" style="width:100%"><br>
+                            <input type="submit" name="iniciararena" value="Iniciar Arena" class="modern-btn" style="margin-top: 5px;">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FERRAMENTAS RAPIDAS -->
+        <div class="modern-card">
+            <div class="modern-card-header">Ferramentas de Gerenciamento</div>
+            <div class="modern-card-body">
+                
+                <!-- BANIR -->
+                <div style="margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px;">
+                    <h4>Banir / Status</h4>
+                    <form method='post' action="?p=painel">
+                        Nome: <input type="text" name="banirnome" maxlength="14" class="modern-input">
+                        Status: 
+                        <select name="select" class="modern-input">
+                            <option value="banido">Banir</option>
+                            <option value="ativo">Desbanir (Ativo)</option>
+                        </select>
+                        <input class="modern-btn" type="submit" name="banned" value="Confirmar">
+                    </form>
+                </div>
+
+                <!-- CRÉDITOS -->
+                <div style="margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px;">
+                    <h4>Doar Créditos</h4>
+                    <form method='post' action="?p=painel">
+                        Nome: <input type="text" name="userid" maxlength="14" class="modern-input">
+                        Qtd: <input type="text" name="creditos" onkeypress='return SomenteNumero(event)' class="modern-input">
+                        <input class="modern-btn" type="submit" name="credito" value="Doar">
+                    </form>
+                </div>
+
+                <!-- YENS -->
+                <div style="margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px;">
+                    <h4>Doar Yens</h4>
+                    <form method='post' action="?p=painel">
+                        Nome: <input type="text" name="nome" maxlength="14" class="modern-input">
+                        Yens: <input type="text" name="yens" onkeypress='return SomenteNumero(event)' class="modern-input">
+                        <input class="modern-btn" type="submit" name="yens_submit" value="Doar"> <!-- Name alterado para yens_submit -->
+                    </form>
+                </div>
+
+                <!-- VIP -->
+                <div>
+                    <h4>Doar VIP</h4>
+                    <p style="font-size: 11px; color: #ff5555;">Formato: AAAA-MM-DD HH:MM:SS (Ex: 2030-01-01 12:00:00)</p>
+                    <form method='post' action="?p=painel">
+                        Nome: <input type="text" name="nome" maxlength="14" class="modern-input">
+                        Data Fim: <input type="text" name="vipdia" class="modern-input">
+                        <input class="modern-btn" type="submit" name="vipa" value="Doar VIP">
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        
+    </div>
 </div>
-<div class="box_bottom"></div>
 
-<div class="box_top">Invasao</div>
-<div class="box_middle" style="text-align:left;">
-	<?php
-	if(isset($_GET['msginv'])){
-		switch($_GET['msginv']){
-			case 1: $msg='<b>Invasao iniciada</b>,nao mecha nas configuracoes enquanto a loteria estiver aberta'; break;
-		}
-	echo '<div class="sep"></div><div class="aviso">'.$msg.'</div>';
-	}
-	?>
-<div class="sep"></div>
-<form method="POST" action="?p=painel">
-<table border="0" width="100%">
-<tr>  <td width="400">
-<table border="0" width="100%">
-<tr><td><b>Nome:</b></td>  <td><input type="text" name="nome" size="20"></td></tr>
-<tr><td><b>Hp:</b></td>  <td><input type="text" name="hp" size="20"></td></tr>
-<tr><td><b>Hp Maximo:</b></td>  <td><input type="text" name="maxhp" size="20"></td></tr>
-<tr><td><b>Premio inicial:</b></td>  <td><input type="text"  name="premioinv" size="20"></td></tr>
-<tr><td><b>Genjutsu requerido:</b></td>  <td><input type="text"  name="reqgen" size="20"></td></tr>
-<tr><td><b>Nivel minimo:</b></td>  <td><input type="text" value="1" name="nivelmin" size="20"></td></tr>
-<tr><td><b>Nivel Maximo:</b></td>  <td><input type="text"  name="nivelmax" size="20"></td></tr>
-<tr><td><b>Exp:</b></td>  <td><input type="text" value="1" name="exp" size="20"></td></tr>
-<tr><td><b>Exp max:</b></td>  <td><input type="text"  name="expmax" size="20"></td></tr>
-<input type="hidden" id="data" name="data" value="<?php echo $dat; ?>">
-<input type="hidden" id="usuario" name="usuario" value="<?php echo $db['usuario']; ?>">
-</table> </td><td>
-<?php
-$inv=mysql_query("SELECT * FROM invasor");
-$inv=mysql_fetch_assoc($inv);
-?>
-<?php if($inv['status']=='t'){?>
-
-<input class="botao" type="submit"  name="invasao" value="Iniciar">
-
-<?php }else{?>
-<b>Invasao ja iniciada</b>
-<?php }?>
-
-
-
-</td></tr> </table></form>
-
-
-<div class="sep"></div>
-
-
-</div>
-
-
-
-<div class="box_bottom"></div>
-<div class="box_top">Loteria <?php echo isset($_POST['premiolot']) ? $_POST['premiolot'] : ''; ?></div>
-<div class="box_middle" style="text-align:left;">
-	<?php
-	if(isset($_GET['msglot'])){
-		switch($_GET['msglot']){
-			case 1: $msg='<b>Loteria iniciada</b>,nao mecha nas configuracoes enquanto a loteria estiver aberta'; break;
-			case 2: $msg='<b>ERRO</b>,Por favor preencha todos os campos'; break;
-   		}
-	echo '<div class="sep"></div><div class="aviso">'.$msg.'</div>';
-	}
-	?>
-
-<form method="POST" action="?p=painel">
-<div class="sep"></div>
-<center><b>Qual sera o tipo de premiacao da loteria?</b><br>
-<table border="0" width="100%">
-<tr>
-  <td align="center"><label style="cursor:pointer;"><img src="_img/items.jpg" border="0" onmouseover="Tip('<div class=tooltip>Equipamento</div>');" onmouseout="UnTip()"><br><input name="tipo" value="item" type="radio" CHECKED></label></td>
-  <td align="center"><label style="cursor:pointer;"><img src="_img/creditos.jpg" border="0" onmouseover="Tip('<div class=tooltip>Creditos</div>');" onmouseout="UnTip()"><br><input name="tipo" value="creditos" type="radio"></label></td>
-</tr>
-
-</table>
-
-</center><div class="sep"></div><table border="0" width="100%">
-<tr>  <td width="400">
-
-<table border="0" width="100%">
-<tr><td><b>Termina em:</b></td>  <td><select name="termina" size="1">
-   <option value="<?php echo(time()+800);?>">12 minutos</option>
-   <option value="<?php echo(time()+1800);?>">30 minutos</option>
-   <option value="<?php echo(time()+3600);?>">1 hora</option>
-   <option value="<?php echo(time()+7200);?>">2 horas</option>
-   <option value="<?php echo(time()+18000);?>">5 horas</option>
-   <option value="<?php echo(time()+36000);?>">10 horas</option>
-</select></td></tr>
-<tr><td><b>Premio:</b></td>  <td><select name="premiolot" size="1">
-<?php
-$sqle=mysql_query("SELECT * FROM table_itens");
-$dbr=mysql_fetch_assoc($sqle);
-?>
-<?php do{ ?>
-<option value="<?php echo $dbr['id']; ?>"><?php echo $dbr['nome']; ?></option>
-<?php $i++; } while($dbr=mysql_fetch_assoc($sqle)); ?>
-</select>
-</td></tr>
-<tr><td><b>Premio em creditos:</b></td>  <td><input type="text" name="creditos" size="20"></td></tr>
-<tr><td><b>Preco por Ticket:</b></td>  <td><input type="text" value="300" name="preco" size="20"></td></tr>
-<input type="hidden" id="usuario" name="usuario" value="<?php echo $db['usuario']; ?>">
-</table> </td><td>
-
-<?php
-$lo=mysql_query("SELECT * FROM settings where name='end_lotto'");
-$lot=mysql_fetch_assoc($lo);
-?>
-<?php if($lot['value']<time()){?>
-
-<input class="botao" type="submit" name="loteria" value="Iniciar">
-
-<?php }else{?>
-<b>Loteria ja iniciada</b>
-<?php }?>
-
-</td></tr> </table></form>
-<div class="sep"></div>
- </div>
-<div class="box_bottom"></div>
-
-<div class="box_top">Iniciar guerra de vilas e arena</div>
-<div class="box_middle">
-<?php
-	if(isset($_GET['msgwar'])){
-		switch($_GET['msgwar']){
-			case 1: $msg='<b>Guerra iniciada com sucesso</b>,nao mecha nas configuracoes enquanto a guerra de vilas estiver aberta'; break;
-		}
-	echo '<div class="sep"></div><div class="aviso">'.$msg.'</div>';
-	}
-	?>
-<ul>
-<li>
-<b>Inicio</b>, e <b>Fim</b> é o fim do <b>Status</b>, ao chegar na data marcada pelo <b>Fim</b><br>
-altera para outro <b>Status</b>.
-
-</li>
-</ul>
-<center>
-<form method="post" action="?p=painel">
-Premio:
-<br>
-<input type="text" name="premio">
-<br>
-Nivel minimo:
-<br>
-<input type="text" name="nivelmin">
-<br>
-Nivel maximo:
-<br>
-<input type="text" name="nivelmax">
-<br>
-Custo para inscrever:
-<br>
-<input type="text" name="custo">
-<br>
-<input type="submit" name="iniciargr" value="Iniciar Guerra de Vilas">
-</form>
-</center>
-
-
-<ul>
-<li>
-<b>OBS</b>,
-Nivel Maximo até 20 = Categoria iniciante,
-Nivel Maximo até 50 = Categoria avancado,
-Nivel Maximo até 200 = Categoria profissional,
-Experiencia iniciar no valor definido exemplo 20 o primeiro ninja que morrer ganhará 20 o segundo 40 por ai vai cuidado pra não colocar demais
-.
-
-</li>
-</ul>
-<center>
-<form method="post" action="?p=painel">
-Premio(para o vencedor):
-<br>
-<input type="text" name="premio">
-<br>
-Nivel minimo:
-<br>
-<input type="text" name="nivelmin">
-<br>
-Nivelmax:
-<br>
-<input type="text" name="nivelmax">
-<br>
-Custo para inscrever:
-<br>
-<input type="text" name="custo">
-<br>
-<br>
-Experiencia inicial:
-<br>
-<input type="text" name="exp">
-<br>
-Quantidade de inscrições:
-<br>
-<input type="text" name="insc">
-<br>
-<input type="submit" name="iniciararena" value="Iniciar Arena">
-</form>
-</center></div>
-<div class="box_bottom"></div>
-
-</div>
-<?php
-if ($_POST['banned']) {
- 
-  if(strlen($_POST['banirnome']) < 1 ){
-   echo "<script>alert('Nome Invalido')</script><script>top.location = '?p=painel'</script>";
-  die();
-  }
- 
-if (!isset($message)){
-$query = mysql_query("update `usuarios` set `status`='".$_POST['select']."' WHERE `usuario`='".$_POST['banirnome']."'");
-echo "<script>alert('alterado status do usuário!')</script><script>top.location = '?p=painel'</script>";
-   
-  }
-}
-?>
-<div class="box_bottom"></div>
-<div class="box_top">Banir</div>
-<div class="box_middle" style="text-align:left;">
- 
- 
-  <br>
- <div class="sep"></div>
-<table border="0" width="100%">
-     <form method='post' >
-   
-   
-   
-        <tr>
-      <td height='50'>Nome do usuario</font></td>
-      <td>
-<input type="text" name="banirnome" size="20" maxlength="14">      </font></td>
-    </tr>
-        <tr>
-      <td height='28'>Status:</font></td>
-      <td>
-<SELECT name="select">
-<option value="banido">banir</option>
-<option value="ativo">Desbanir</option>
-</SELECT>
- 
-    </tr>
-      <tr>
-        <td>&nbsp;</td>
-      <td>
-<input class="botao" type="submit"  name="banned" value="Confirmar">
-      </font></td>
-  </tr>
-  </table>
- 
-  <div class="sep"></div>
- 
- 
-<div class="box_bottom"></div>
- 
- 
-</div>
- 
- 
-<?php
-if ($_POST['credito']) {
- 
-  if(strlen($_POST['userid']) < 1 ){
-   echo "<script>alert('Nome Invalido')</script><script>top.location = '?p=painel'</script>";
-  die();
-  }
- 
-if (!isset($message)){
-$query = mysql_query("update `usuarios` set `creditos`=creditos+'".$_POST['creditos']."' WHERE `usuario`='".$_POST['userid']."'");
-echo "<script>alert('Credito Enviado!')</script><script>top.location = '?p=painel'</script>";
-   
-  }
-}
-?>
 <script language='JavaScript'>
 function SomenteNumero(e){
     var tecla=(window.event)?event.keyCode:e.which;  
@@ -401,144 +449,3 @@ function SomenteNumero(e){
     }
 }
 </script>
- 
-<div class="box_top">Creditos</div>
-<div class="box_middle" style="text-align:left;">
-  <br>
-<table border="0" width="100%">
-     <form method='post' >
-   
-   
-   
-        <tr>
-      <td height='28'>Nome do usuario</font></td>
-      <td>
-<input type="text" name="userid" size="20" maxlength="14">      </font></td>
-    </tr>
-        <tr>
-      <td height='28'>Credito:</font></td>
-      <td>
-<input type="text" name="creditos" size="20" maxlength="14" onkeypress='return SomenteNumero(event)'>      </font></td>
-    </tr>
-      <tr>
-        <td>&nbsp;</td>
-      <td>
-<input class="botao" type="submit"  name="credito" value="Doar">
-      </font></td>
-    </tr>
-  </table>
- 
-<div class="box_bottom"></div>
- 
-</div>
- 
-<?php
-if ($_POST['yens']) {
- 
-  if(($_POST['nome']) < 1 ){
-   echo "<script>alert('Nome Invalido')</script><script>top.location = '?p=painel'</script>";
-  die();
-  }
- 
-if (!isset($message)){
-$query = mysql_query("update `usuarios` set `yens`=yens+'".$_POST['yens']."' , `usuario`='".$_POST['nome']."'");
-echo "<script>alert('Yens Enviado!')</script><script>top.location = '?p=painel'</script>";
-   
-  }
-}
-?>
-<script language='JavaScript'>
-function SomenteNumero(e){
-    var tecla=(window.event)?event.keyCode:e.which;  
-    if((tecla>47 && tecla<58)) return true;
-    else{
-        if (tecla==8 || tecla==0) return true;
-        else  return false;
-    }
-}
-</script>
- 
-<div class="box_top">Yens</div>
-<div class="box_middle" style="text-align:left;">
-  <br>
-<table border="0" width="100%">
-     <form method='post' >
-   
-   
-   
-        <tr>
-      <td height='28'>Nome do usuario</font></td>
-      <td>
-<input type="text" name="nome" size="20" maxlength="14">      </font></td>
-    </tr>
-        <tr>
-      <td height='28'>Yens:</font></td>
-      <td>
-<input type="text" name="yens" size="20" maxlength="14" onkeypress='return SomenteNumero(event)'>      </font></td>
-    </tr>
-      <tr>
-        <td>&nbsp;</td>
-      <td>
-<input class="botao" type="submit"  name="credito" value="Doar">
-      </font></td>
-    </tr>
-  </table>
- 
-<div class="box_bottom"></div>
- 
-</div>
- 
- 
-<?php
-if ($_POST['vipa']) {
- 
-  if(strlen($_POST['nome']) < 1 ){
-   echo "<script>alert('Precisa por o nome do usuario que ira receber')</script><script>top.location = '?p=painel'</script>";
-  die();
-  }
-  if(strlen($_POST['vipdia']) < 14 ){
-   echo "<script>alert('Data Invalida')</script><script>top.location = '?p=painel'</script>";
-   die();
-  }
- 
-if (!isset($message)){
-$query = mysql_query("update `usuarios` set `vip`='".$_POST['vipdia']."' WHERE `usuario`='".$_POST['nome']."'");
-echo "<script>alert('vip doado com sucesso!')</script><script>top.location = '?p=painel'</script>";
-   
-  }
-}
-?>
- 
-<div class="box_top">Vip</div>
-<div class="box_middle" style="text-align:left;">
-<?php echo '<font color="#FF0000">Vip Deve Ser No Formato<font color="#FF00F0"> ANO-MES-DIA  HORA:MINUTOS:SEGUNDOS = 2012-01-01 00:00:00</font></font>'; ?>
- 
- 
- 
-<table border="0" width="100%">
-     <form method='post' >
-   
-   
-    <tr>
-      <td height='28'>Nome do usuario</font></td>
-      <td>
-<input type="text" name="nome" size="20" maxlength="14">      </font></td>
-    </tr>
-        <tr>
-      <td height='28'>Vip</font></td>
-      <td>
-<input type="datetime" name="vipdia" size="20" maxlength="10000">      </font></td>
-    </tr>
-      <tr>
-        <td>&nbsp;</td>
-      <td>
-<input class="botao" type="submit"  name="vipa" value="Iniciar">
-      </font></td>
-    </tr>
-  </table>
- 
-<div class="box_bottom"></div>
-  <div class="sep"></div>
- 
-</div>
-<?php

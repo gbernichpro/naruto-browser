@@ -146,7 +146,7 @@ $dbgrupos=@mysql_fetch_assoc($sqlgrupos);
 		<td colspan="5"><div class="sep"></div></td>
         <tr>
         	<td align="right" style="padding-right:10px;"><div align="right"><img src="template/ico_exp.png" width="17" height="17"></div></td>
-          <td align="left" style="background:url(_img/bars/empty_bar.jpg) no-repeat;"><?php if($db['exp']==0) echo '&nbsp;'; else { ?><img src="_img/bars/left_bar_exp.png" /><img src="<?php echo $src4; ?>" width="<?php echo (($db['exp']*$max)/$db['expmax']); ?>" height="19" /><img src="_img/bars/right_bar_exp.png" /><?php } ?></td>
+          <td align="left" style="background:url(_img/bars/bar_empty.jpg) no-repeat;"><?php if($db['exp']==0) echo '&nbsp;'; else { ?><img src="_img/bars/left_bar_exp.png" /><img src="<?php echo $src4; ?>" width="<?php echo (($db['exp']*$max)/$db['expmax']); ?>" height="19" /><img src="_img/bars/right_bar_exp.png" /><?php } ?></td>
             <td align="left"><b><small>| <?php echo $db['exp']; ?> / <?php echo $db['expmax']; ?> |</small></b></td>
         </tr>
     </table>
@@ -202,59 +202,62 @@ if($db['doujutsu']>0) require_once('meudoujutsu.php'); ?>
 
 
 
-<div class="box_top">Desbloqueio de personagens</div>
-<div class="box_middle"><div align="center">
-<?php require_once('shop_characters.php');?>
-</div></div>
-<div class="box_bottom"></div>
-
-
-<div class="box_top">Minhas Estatisticas</div>
-<div class="box_middle">Todas as estatísticas de sua conta.<div class="sep"></div>
-	<div style="background:url(_img/stats.jpg) no-repeat right top;">
-	<table width="60%" cellpadding="0" cellspacing="0">
-    	<tr style="background:url(_img/gradient.jpg) right;">
-        	<td width="50%" style="padding-left:3px;"><b>Meus Yens</b></td>
-            <td><?php echo number_format($db['yens'],2,',','.'); ?> yens</td>
-        </tr>
-        <tr>
-        	<td style="padding-left:3px;"><b>Yens Faturados</b></td>
-            <td><?php echo number_format($db['yens_fat'],2,',','.'); ?> yens</td>
-        </tr>
-        <tr style="background:url(_img/gradient.jpg) right;">
-        	<td style="padding-left:3px;"><b>Yens Perdidos</b></td>
-            <td><?php echo number_format($db['yens_perd'],2,',','.'); ?> yens</td>
-        </tr>
-        <tr>
-        	<td style="padding-left:3px;"><b>Batalhas</b></td>
-            <td><?php echo $db['batalhas']; ?> batalhas</td>
-        </tr>
-
-         <tr style="background:url(_img/gradient.jpg) right;">
-        	<td style="padding-left:3px;"><b>Score</b></td>
-            <td><?php echo number_format($db['score']); ?> Pontos</td>
-        </tr>
-        <tr>
-        	<td style="padding-left:3px;"><b>Vitórias</b></td>
-            <td><?php echo $db['vitorias']; ?> vitórias</td>
-        </tr>
-        <tr>
-        	<tr style="background:url(_img/gradient.jpg) right;">
-        	<td style="padding-left:3px;"><b>Derrotas</b></td>
-            <td><?php echo $db['derrotas']; ?> derrotas</td>
-        </tr>
-      <td style="padding-left:3px;"><b>Empates</b></td>
-            <td><?php echo $db['empates']; ?> empates</td>
-        </tr>
-        <tr>
-        	<tr style="background:url(_img/gradient.jpg) right;">
-        	<td style="padding-left:3px;"><b>Experiência Total</b></td>
-            <td><?php echo $db['exptotal']; ?> pontos</td>
-        </tr>
-    </table>
+<div class="modern-card">
+    <div class="modern-card-header">Desbloqueio de personagens</div>
+    <div class="modern-card-body">
+        <div align="center">
+            <?php require_once('shop_characters.php');?>
+        </div>
     </div>
 </div>
-<div class="box_bottom"></div>
+
+
+<div class="modern-card">
+    <div class="modern-card-header">Minhas Estatísticas</div>
+    <div class="modern-card-body">
+        <p style="color: var(--text-dim); margin-bottom: 15px; font-size: 13px;">Todas as estatísticas de sua conta.</p>
+        <div style="background: rgba(0,0,0,0.3); border-radius: 4px; border: 1px solid var(--border-subtle); overflow: hidden;">
+            <table width="100%" border="0" cellpadding="10" cellspacing="0">
+                <tr style="background: rgba(255,255,255,0.02);">
+                    <td width="50%"><b>Meus Yens</b></td>
+                    <td style="color: #fff;"><?php echo number_format($db['yens'],2,',','.'); ?> yens</td>
+                </tr>
+                <tr>
+                    <td><b>Yens Faturados</b></td>
+                    <td style="color: #fff;"><?php echo number_format($db['yens_fat'],2,',','.'); ?> yens</td>
+                </tr>
+                <tr style="background: rgba(255,255,255,0.02);">
+                    <td><b>Yens Perdidos</b></td>
+                    <td style="color: #fff;"><?php echo number_format($db['yens_perd'],2,',','.'); ?> yens</td>
+                </tr>
+                <tr>
+                    <td><b>Batalhas</b></td>
+                    <td style="color: #fff;"><?php echo $db['batalhas']; ?> batalhas</td>
+                </tr>
+                <tr style="background: rgba(255,255,255,0.02);">
+                    <td><b>Score</b></td>
+                    <td style="color: var(--primary-red); font-weight: bold;"><?php echo number_format($db['score']); ?> Pontos</td>
+                </tr>
+                <tr>
+                    <td><b>Vitórias</b></td>
+                    <td style="color: #0f0;"><?php echo $db['vitorias']; ?> vitórias</td>
+                </tr>
+                <tr style="background: rgba(255,255,255,0.02);">
+                    <td><b>Derrotas</b></td>
+                    <td style="color: #f00;"><?php echo $db['derrotas']; ?> derrotas</td>
+                </tr>
+                <tr>
+                    <td><b>Empates</b></td>
+                    <td style="color: #888;"><?php echo $db['empates']; ?> empates</td>
+                </tr>
+                <tr style="background: rgba(255,255,255,0.02);">
+                    <td><b>Experiência Total</b></td>
+                    <td style="color: #fff;"><?php echo number_format($db['exptotal']); ?> pontos</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
 <?php require_once('atualizacoes.php'); ?>
 <script>
 if(((document.getElementById('atrtai').innerHTML)*1)>0) document.getElementById('atrtai').innerHTML='+'+document.getElementById('atrtai').innerHTML; else document.getElementById('atrtai').innerHTML='';

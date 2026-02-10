@@ -32,7 +32,7 @@ if(isset($_GET['msg'])){
 }
 ?>
 <fieldset><legend>Alterar Senha</legend>
-	<form method="post" action="?p=config&amp;type=pass" style="background:url(_img/config_pass.jpg) no-repeat right top;" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+	<form method="post" action="?p=config_pass&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
     	<span class="destaque">Senha Atual:</span><br />
         <input type="password" id="pass_atual" name="pass_atual" /><br />
         <span class="sub2">Digite a senha atual.</span><br /><div class="sep" style="width:180px;"></div>

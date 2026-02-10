@@ -28,6 +28,6 @@ $assunto='Nova Senha';
 $remetente='narutoHIT <contato@narutohit.net>';
 $headers = implode ( "\n",array ( "From: $remetente","Subject: ".$assunto,"Return-Path: $remetente","MIME-Version: 1.0","X-Priority: 3","Content-Type: text/html" ) );
 mysql_query("UPDATE usuarios SET senha='".md5($senha)."' WHERE usuario='".$user."'");
-mail($dbv['email'],'',$mensagem,$headers);
+send_mail_smtp($dbv['email'],'',$mensagem);
 echo '<div align="center">Nova senha enviada para seu email!</div>';
 ?>

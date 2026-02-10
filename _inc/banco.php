@@ -96,7 +96,7 @@ function SomenteNumero(e){
     }
 }
 </script>
-  <form method="post" action="?p=banco" onsubmit="subm.value='Carregando...';subm.disabled=true;" form="onKeyDown">
+  <form method="post" action="?p=banco&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }" form="onKeyDown">
     <input type="hidden" id="don" name="don" value="1" />
     <span class="destaque">Yens no Banco:</span><br />
     <script language='JavaScript'>

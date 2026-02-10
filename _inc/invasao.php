@@ -461,7 +461,7 @@ function atualiza(div,divtotal){
             <span class="sub2"><?php echo $dbshop['reqnivel']; ?> </span><br /><br />
             <b>Valor Unitário</b><br />
             <span class="sub2"><?php echo number_format($dbshop['valor'],2,',','.'); ?> Creditos</span><br /><br />
-            <form method="post" action="?p=invasao" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+            <form method="post" action="?p=invasao&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
             <input type="hidden" id="buy_id" name="buy_id" value="<?php echo $dbshop['id']; ?>" />
             <input type="hidden" id="buy_cat" name="buy_cat" value="<?php echo $dbshop['categoria']; ?>" />
            <input type="submit" id="subm" name="subm" class="botao" value="Comprar" />

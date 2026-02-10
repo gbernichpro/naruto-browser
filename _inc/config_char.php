@@ -35,7 +35,7 @@ $sqlp=mysql_query("SELECT * FROM personagens WHERE usuarioid=".$db['id']);
 $dbp=mysql_fetch_assoc($sqlp);
 require_once('funcoes.php');
 ?>
-<form method="post" action="?p=config&amp;type=char" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+<form method="post" action="?p=config_char&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 <input type="hidden" id="char" name="char" value="1" />
 <fieldset><legend>Alterar Personagem</legend>
 	<div align="center">

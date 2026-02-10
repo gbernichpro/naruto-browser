@@ -152,7 +152,7 @@ document.getElementById("Click").innerHTML="Exibir Medalhas";
     <?php if($db['id']<>$_SESSION['logado']){ ?>
     <div class="sep"></div>
     <div align="center">
-    	<form method="post" action="?p=hunt" onsubmit="subm.value='Carregando...';subm.disabled=true;">
+    	<form method="post" action="?p=hunt" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 		<?php
         $sqlf=mysql_query("SELECT count(id) conta FROM amigos WHERE usuarioid=".$_SESSION['logado']." AND amigoid=".$db['id']);
 		$dbf=mysql_fetch_assoc($sqlf);
