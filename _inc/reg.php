@@ -77,7 +77,7 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         error_reporting(E_ALL);
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-        echo "Debug: Starting registration...<br>";
+        echo "Debug: Iniciando registro...<br>";
         
         // Secure Registration INSERT with Prepared Statements
         $senha_hash = password_hash($_POST['reg_senha'], PASSWORD_DEFAULT);
@@ -87,19 +87,19 @@ die("<script>self.location='?p=reg&erro=16'</script>");
             natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens,
             alunoid, senseiid, config_resposta, pessoal_nome, pessoal_sexo, pessoal_idade, pessoal_pais, pessoal_uf,
             pontos, tempo, creditos, creditosusados, pontoscla, pass, premiodiario, inwar_score, caiu, torneio_eliminado, torneio_score,
-            hunt_fim, treino_fim, penalidade_fim
+            hunt_fim, treino_fim, penalidade_fim, missao_tempo
         ) VALUES (
             ?, 'ativo', ?, ?, ?, ?, ?, 14, ?, 
             '', '', '', ?, ?, ?, ?, '9000',
             '', '', '', '', '', 0, '', '',
             0, 0, 0, 0, 0, '', 0, 0, 0, 0, 0,
-            ?, ?, ?
+            ?, ?, ?, '0'
         )";
         
         $stmt_reg = mysqli_prepare($mysqli_link, $query);
         if (!$stmt_reg) {
             // Log error but show user friendly message if possible, or let custom handler catch if restored
-             error_log("Registration Prepare Error: " . mysqli_error($mysqli_link));
+             error_log("Erro no preparo do registro: " . mysqli_error($mysqli_link));
              die("Erro no sistema de registro. Contate o suporte. (Cód: PREPARE)");
         }
         
@@ -115,13 +115,13 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         $bind = mysqli_stmt_bind_param($stmt_reg, "ssssisssssisss", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $_SERVER['REMOTE_ADDR'], $vipadd, $atual, $novocodigo, $atual, $atual, $atual);
         
         if (!$bind) {
-             error_log("Registration Bind Error: " . mysqli_stmt_error($stmt_reg));
+             error_log("Erro ao vincular parâmetros do registro: " . mysqli_stmt_error($stmt_reg));
              die("Erro no sistema de registro. Contate o suporte. (Cód: BIND)");
         }
         
         $exec = mysqli_stmt_execute($stmt_reg);
         if (!$exec) {
-             error_log("Registration Execute Error: " . mysqli_stmt_error($stmt_reg));
+             error_log("Erro na execução do registro: " . mysqli_stmt_error($stmt_reg));
              die("Erro ao salvar dados: " . mysqli_stmt_error($stmt_reg));
         }
 
