@@ -141,7 +141,7 @@ if(isset($_SESSION['logado']) || isset($_COOKIE['logado'])){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!-- <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
 <title>Naruto <?php echo NARUTO_NOME; ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="_css/naruto.css" rel="stylesheet" type="text/css" />
@@ -153,6 +153,7 @@ if(isset($_SESSION['logado']) || isset($_COOKIE['logado'])){
     <script type="text/javascript" src="_js/jquery.min.js"></script>
     <script type="text/javascript" src="_js/zebra_dialog.js"></script>
     <link rel="stylesheet" href="_css/zebra_dialog.css" type="text/css">
+<!--
     <script type="text/javascript">
         window.onTurnstileSuccess = function(token) {
             console.log("Turnstile Success! Token captured.");
@@ -167,12 +168,13 @@ if(isset($_SESSION['logado']) || isset($_COOKIE['logado'])){
             var token = document.getElementById('header_turnstile_token').value;
             console.log("Submitting form. Token status: " + (token ? "Present" : "Missing"));
             if (!token) {
-                alert("Por favor, aguarde a verificação Anti-Bot na barra lateral ser concluída.");
-                return false;
+                // alert("Por favor, aguarde a verificação Anti-Bot na barra lateral ser concluída.");
+                // return false;
             }
             return true;
         }
     </script>
+-->
 <script type="text/javascript" src="_js/jquery-impromptu.4.0.min.js"></script>
 <script type="text/javascript" src="_js/jquery-modal-1.0.pack.js"></script>
 <script type='text/javascript' src='_js/jquery.tipsy.js'></script>
@@ -238,7 +240,7 @@ return null;
 <style type="text/css">
 <!--
 body {
-	background: url(_img/background.png) fixed top center no-repeat #5D5D5D;
+	background: url(template/background.png) fixed top center no-repeat #5D5D5D;
 }
 .style1 {color: #FFFFFF}
 .Button_Login {
@@ -427,6 +429,7 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
                 <td><img src="template/bottom_menu.png" width="246" height="73" /></td>
               </tr>
               <?php if(!isset($_SESSION['logado'])): ?>
+              <!--
               <tr>
                 <td align="center" style="padding: 10px 0;">
                     <div style="background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; border: 1px solid #444; width: 154px;">
@@ -435,6 +438,7 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
                     </div>
                 </td>
               </tr>
+              -->
               <?php endif; ?>
             </table>
           </td>
