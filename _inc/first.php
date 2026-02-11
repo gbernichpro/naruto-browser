@@ -3,12 +3,42 @@ require_once('Encrypt.php');
 $c=new C_Encrypt();
 
 if(isset($_POST['fir_avatar'])){
-	$avatar=$c->decode($_POST['fir_avatar'],$chaveuniversal);
+	$avatar = $c->decode($_POST['fir_avatar'], $chaveuniversal);
 	vn($avatar);
-	mysql_query("UPDATE usuarios SET avatar='".antiinjection($avatar)."' WHERE id=".$db['id']);
-	mysql_query("INSERT INTO personagens (usuarioid) VALUES (".$db['id'].")");
+
+    // Modernized update using MySQLi Prepared Statement
+    $stmt_up = mysqli_prepare($mysqli_link, "UPDATE usuarios SET avatar=?, personagem=? WHERE id=?");
+    // Getting personagem name from avatar ID isn't direct here, but the original code
+    // didn't change 'personagem' column, only 'avatar'. 
+    // Wait, the original code had: mysql_query("INSERT INTO personagens (usuarioid) VALUES (".$db['id'].")");
+    // And: mysql_query("UPDATE usuarios SET avatar='".antiinjection($avatar)."' WHERE id=".$db['id']);
+    
+    // Let's stick to the original logic but secure it.
+    
+    $stmt = mysqli_prepare($mysqli_link, "UPDATE usuarios SET avatar=? WHERE id=?");
+    mysqli_stmt_bind_param($stmt, "ii", $avatar, $db['id']);
+    if (!mysqli_stmt_execute($stmt)) {
+        error_log("Error updating avatar: " . mysqli_error($mysqli_link));
+        die("Erro ao salvar avatar. Tente novamente.");
+    }
+    mysqli_stmt_close($stmt);
+
+    $stmt_p = mysqli_prepare($mysqli_link, "INSERT INTO personagens (usuarioid) VALUES (?)");
+    mysqli_stmt_bind_param($stmt_p, "i", $db['id']);
+    if (!mysqli_stmt_execute($stmt_p)) {
+        // This might fail if entry exists, which is fine
+        error_log("Note: Personagem insert failed (duplicate?): " . mysqli_error($mysqli_link));
+    }
+    mysqli_stmt_close($stmt_p);
+
 	$novo = str_replace(' ','_',$db['usuario']);
-	if($db['usuario']<>$novo) mysql_query("UPDATE usuarios SET usuario='".$novo."' WHERE id=".$db['id']);
+	if($db['usuario']<>$novo) {
+        $stmt_u = mysqli_prepare($mysqli_link, "UPDATE usuarios SET usuario=? WHERE id=?");
+        mysqli_stmt_bind_param($stmt_u, "si", $novo, $db['id']);
+        mysqli_stmt_execute($stmt_u);
+        mysqli_stmt_close($stmt_u);
+    }
+    
 	echo "<script>self.location='?p=home'</script>";
 }
 ?>
