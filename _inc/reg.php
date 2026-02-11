@@ -69,12 +69,33 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         $vipadd=$fim;
 		$usuario=ucfirst(strtolower(str_replace(array(' ','/','^','[','-',']','+','$','(',')','?','\'','|','°','ª','#','@','.','?','!'),'',$_POST['reg_usuario'])));
 		
+        // DEBUGGING REGISTRATION
+        echo "Debug: Starting registration...<br>";
+        
         // Secure Registration INSERT with Prepared Statements
         $senha_hash = password_hash($_POST['reg_senha'], PASSWORD_DEFAULT);
-        $stmt_reg = mysqli_prepare($mysqli_link, "INSERT INTO usuarios (usuario, status, senha, email, personagem, vila, renegado, hunt_restantes, reg, natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens) VALUES (?, 'ativo', ?, ?, ?, ?, ?, 14, ?, '', '', '', ?, ?, ?, ?, '9000')");
+        $query = "INSERT INTO usuarios (usuario, status, senha, email, personagem, vila, renegado, hunt_restantes, reg, natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens) VALUES (?, 'ativo', ?, ?, ?, ?, ?, 14, ?, '', '', '', ?, ?, ?, ?, '9000')";
+        
+        $stmt_reg = mysqli_prepare($mysqli_link, $query);
+        if (!$stmt_reg) {
+            die("Debug: Prepare failed: " . mysqli_error($mysqli_link));
+        }
+        
         $ip_long = ip2long($_SERVER['REMOTE_ADDR']);
-        mysqli_stmt_bind_param($stmt_reg, "ssssissssss", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $ip_long, $vipadd, $atual, $novocodigo);
-        mysqli_stmt_execute($stmt_reg) or die(mysqli_error($mysqli_link));
+        // Verify bind params
+        // s, s, s, s, i, s, s, s, s, s, s (11 chars)
+        $bind = mysqli_stmt_bind_param($stmt_reg, "ssssissssss", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $ip_long, $vipadd, $atual, $novocodigo);
+        
+        if (!$bind) {
+             die("Debug: Bind failed: " . mysqli_stmt_error($stmt_reg));
+        }
+        
+        $exec = mysqli_stmt_execute($stmt_reg);
+        if (!$exec) {
+            die("Debug: Execute failed: " . mysqli_stmt_error($stmt_reg));
+        }
+        
+        echo "Debug: Registration success. Redirecting...<br>";
 
 
             $assunto = "Código de ativação Naruto";
