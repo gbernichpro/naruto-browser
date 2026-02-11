@@ -70,6 +70,13 @@ die("<script>self.location='?p=reg&erro=16'</script>");
 		$usuario=ucfirst(strtolower(str_replace(array(' ','/','^','[','-',']','+','$','(',')','?','\'','|','°','ª','#','@','.','?','!'),'',$_POST['reg_usuario'])));
 		
         // DEBUGGING REGISTRATION
+        restore_error_handler();
+        restore_exception_handler();
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
         echo "Debug: Starting registration...<br>";
         
         // Secure Registration INSERT with Prepared Statements
