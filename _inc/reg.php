@@ -123,7 +123,10 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         
         $exec = mysqli_stmt_execute($stmt_reg);
         if (!$exec) {
-        
+             error_log("Erro na execução do registro: " . mysqli_stmt_error($stmt_reg));
+             die("Erro ao salvar dados: " . mysqli_stmt_error($stmt_reg));
+        }
+
             $assunto = "Código de ativação Naruto";
             $messagem = "<html>\n"; 
             $messagem .= "<body>\n";         
