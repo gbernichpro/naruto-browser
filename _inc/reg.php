@@ -87,13 +87,13 @@ die("<script>self.location='?p=reg&erro=16'</script>");
             natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens,
             alunoid, senseiid, config_resposta, pessoal_nome, pessoal_sexo, pessoal_idade, pessoal_pais, pessoal_uf,
             pontos, tempo, creditos, creditosusados, pontoscla, pass, premiodiario, inwar_score, caiu, torneio_eliminado, torneio_score,
-            hunt_fim, treino_fim, penalidade_fim, missao_tempo
+            hunt_fim, treino_fim, penalidade_fim, missao_tempo, missao_fim, treino_tempo, config_apresentacao, loginip
         ) VALUES (
             ?, 'ativo', ?, ?, ?, ?, ?, 14, ?, 
             '', '', '', ?, ?, ?, ?, '9000',
             '', '', '', '', '', 0, '', '',
             0, 0, 0, 0, 0, '', 0, 0, 0, 0, 0,
-            ?, ?, ?, '0'
+            ?, ?, ?, '0', ?, '0', '', ?
         )";
         
         $stmt_reg = mysqli_prepare($mysqli_link, $query);
@@ -110,9 +110,11 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         // s (hunt_fim)
         // s (treino_fim)
         // s (penalidade_fim)
+        // s (missao_fim)
+        // s (loginip)
         
-        // Total: 11 + 3 = 14 params provided
-        $bind = mysqli_stmt_bind_param($stmt_reg, "ssssisssssisss", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $_SERVER['REMOTE_ADDR'], $vipadd, $atual, $novocodigo, $atual, $atual, $atual);
+        // Total: 14 + 2 = 16 params provided
+        $bind = mysqli_stmt_bind_param($stmt_reg, "ssssisssssisssss", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $_SERVER['REMOTE_ADDR'], $vipadd, $atual, $novocodigo, $atual, $atual, $atual, $atual, $_SERVER['REMOTE_ADDR']);
         
         if (!$bind) {
              error_log("Erro ao vincular parâmetros do registro: " . mysqli_stmt_error($stmt_reg));
