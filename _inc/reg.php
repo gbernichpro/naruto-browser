@@ -126,6 +126,15 @@ die("<script>self.location='?p=reg&erro=16'</script>");
              error_log("Erro na execução do registro: " . mysqli_stmt_error($stmt_reg));
              die("Erro ao salvar dados: " . mysqli_stmt_error($stmt_reg));
         }
+        
+        echo "Debug: Execução do Insert realizada.<br>";
+        echo "Debug: Linhas afetadas: " . mysqli_stmt_affected_rows($stmt_reg) . "<br>";
+        
+        if (mysqli_stmt_affected_rows($stmt_reg) > 0) {
+             echo "Debug: Usuário inserido com sucesso.<br>";
+        } else {
+             echo "Debug: Nenhuma linha afetada. Algo estranho.<br>";
+        }
 
 
             $assunto = "Código de ativação Naruto";
@@ -157,13 +166,17 @@ die("<script>self.location='?p=reg&erro=16'</script>");
             $messagem .= "</body>\n"; 
             $messagem .= "</html>\n"; 
             
-            send_mail_smtp( $_POST['reg_email'], $assunto, $messagem );
+            echo "Debug: Tentando enviar email...<br>";
+             // send_mail_smtp( $_POST['reg_email'], $assunto, $messagem );
+            echo "Debug: Email ignorado para debug.<br>";
 
 //=============================================//
 
 
 
-		echo "<script>self.location='?p=reg2'</script>"; return;
+		// echo "<script>self.location='?p=reg2'</script>"; 
+        echo "Debug: Fim do script. Redirecionamento pausado.<br>";
+        return;
 	}
 }
 ?>
