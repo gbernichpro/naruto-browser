@@ -123,22 +123,9 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         
         $exec = mysqli_stmt_execute($stmt_reg);
         if (!$exec) {
-             error_log("Erro na execução do registro: " . mysqli_stmt_error($stmt_reg));
-             die("Erro ao salvar dados: " . mysqli_stmt_error($stmt_reg));
-        }
         
-        echo "Debug: Execução do Insert realizada.<br>";
-        echo "Debug: Linhas afetadas: " . mysqli_stmt_affected_rows($stmt_reg) . "<br>";
-        
-        if (mysqli_stmt_affected_rows($stmt_reg) > 0) {
-             echo "Debug: Usuário inserido com sucesso.<br>";
-        } else {
-             echo "Debug: Nenhuma linha afetada. Algo estranho.<br>";
-        }
-
-
             $assunto = "Código de ativação Naruto";
-            $messagem .= "<html>\n"; 
+            $messagem = "<html>\n"; 
             $messagem .= "<body>\n";         
             $messagem .= "<table style=\"font-family: Arial,Helvetica,sans-serif; text-align: left;\">
 	  <tbody><tr>
@@ -149,7 +136,7 @@ die("<script>self.location='?p=reg&erro=16'</script>");
 	  <tr>
 		<td height=\"300\">&nbsp;</td>
 		<td valign=\"top\"><p style=\"font-size: 12px; color:#5a5756;\">
-		  Olá ".$_POST['usuario'].",<br>
+		  Olá ".$_POST['reg_usuario'].",<br>
 		  <br>
 		  Para prosseguir com seu cadastro você deve ativar a sua conta no Naruto, para ativar sua conta utilize seu codigo de ativação que está logo abaixo dessa mensagem.<br>
 		  <br>
@@ -166,17 +153,18 @@ die("<script>self.location='?p=reg&erro=16'</script>");
             $messagem .= "</body>\n"; 
             $messagem .= "</html>\n"; 
             
-            echo "Debug: Tentando enviar email...<br>";
+            send_mail_smtp( $_POST['reg_email'], $assunto, $messagem );
+            // echo "Debug: Tentando enviar email...<br>";
              // send_mail_smtp( $_POST['reg_email'], $assunto, $messagem );
-            echo "Debug: Email ignorado para debug.<br>";
+            // echo "Debug: Email ignorado para debug.<br>";
 
 //=============================================//
 
 
 
-		// echo "<script>self.location='?p=reg2'</script>"; 
-        echo "Debug: Fim do script. Redirecionamento pausado.<br>";
-        return;
+		echo "<script>self.location='?p=reg2'</script>"; return;
+        // echo "Debug: Fim do script. Redirecionamento pausado.<br>";
+        // return;
 	}
 }
 ?>
