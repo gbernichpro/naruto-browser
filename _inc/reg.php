@@ -86,12 +86,14 @@ die("<script>self.location='?p=reg&erro=16'</script>");
             usuario, status, senha, email, personagem, vila, renegado, hunt_restantes, reg, 
             natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens,
             alunoid, senseiid, config_resposta, pessoal_nome, pessoal_sexo, pessoal_idade, pessoal_pais, pessoal_uf,
-            pontos, tempo, creditos, creditosusados, pontoscla, pass, premiodiario, inwar_score, caiu, torneio_eliminado, torneio_score
+            pontos, tempo, creditos, creditosusados, pontoscla, pass, premiodiario, inwar_score, caiu, torneio_eliminado, torneio_score,
+            hunt_fim, treino_fim, penalidade_fim
         ) VALUES (
             ?, 'ativo', ?, ?, ?, ?, ?, 14, ?, 
             '', '', '', ?, ?, ?, ?, '9000',
             '', '', '', '', '', 0, '', '',
-            0, 0, 0, 0, 0, '', 0, 0, 0, 0, 0
+            0, 0, 0, 0, 0, '', 0, 0, 0, 0, 0,
+            ?, ?, ?
         )";
         
         $stmt_reg = mysqli_prepare($mysqli_link, $query);
@@ -104,26 +106,13 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         $ip_long = ip2long($_SERVER['REMOTE_ADDR']);
         
         // Bind params: 
-        // s (usuario), s (senha), s (email), s (personagem), i (vila), s (renegado), s (reg), 
-        // s (ip - wait, ip column is varchar(255) in schema! ip2long returns int. Let's cast or treat as string? 
-        // Looking at schema: `ip` varchar(255) NOT NULL. So 's' is correct for the value.
-        // s (vip), s (vip_inicio), i (ativador - Wait, schema says `ativador` int(11) NOT NULL. Using $novocodigo which seems to be int rand)
+        // ... (previous params)
+        // s (hunt_fim)
+        // s (treino_fim)
+        // s (penalidade_fim)
         
-        // Updated Types String: 
-        // s (user)
-        // s (pass)
-        // s (email)
-        // s (char)
-        // i (village)
-        // s (renegade)
-        // s (date reg)
-        // s (ip - schema says varchar)
-        // s (vip date)
-        // s (vip start date)
-        // i (activator code)
-        
-        // Total: 11 params provided
-        $bind = mysqli_stmt_bind_param($stmt_reg, "ssssisssssi", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $_SERVER['REMOTE_ADDR'], $vipadd, $atual, $novocodigo);
+        // Total: 11 + 3 = 14 params provided
+        $bind = mysqli_stmt_bind_param($stmt_reg, "ssssisssssisss", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $_SERVER['REMOTE_ADDR'], $vipadd, $atual, $novocodigo, $atual, $atual, $atual);
         
         if (!$bind) {
              error_log("Registration Bind Error: " . mysqli_stmt_error($stmt_reg));
