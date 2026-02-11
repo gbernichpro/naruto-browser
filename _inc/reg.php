@@ -81,28 +81,60 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         
         // Secure Registration INSERT with Prepared Statements
         $senha_hash = password_hash($_POST['reg_senha'], PASSWORD_DEFAULT);
-        $query = "INSERT INTO usuarios (usuario, status, senha, email, personagem, vila, renegado, hunt_restantes, reg, natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens) VALUES (?, 'ativo', ?, ?, ?, ?, ?, 14, ?, '', '', '', ?, ?, ?, ?, '9000')";
+        
+        $query = "INSERT INTO usuarios (
+            usuario, status, senha, email, personagem, vila, renegado, hunt_restantes, reg, 
+            natureza1, natureza2, natureza3, ip, vip, vip_inicio, ativador, yens,
+            alunoid, senseiid, config_resposta, pessoal_nome, pessoal_sexo, pessoal_idade, pessoal_pais, pessoal_uf,
+            pontos, tempo, creditos, creditosusados, pontoscla, pass, premiodiario, inwar_score, caiu, torneio_eliminado, torneio_score
+        ) VALUES (
+            ?, 'ativo', ?, ?, ?, ?, ?, 14, ?, 
+            '', '', '', ?, ?, ?, ?, '9000',
+            '', '', '', '', '', 0, '', '',
+            0, 0, 0, 0, 0, '', 0, 0, 0, 0, 0
+        )";
         
         $stmt_reg = mysqli_prepare($mysqli_link, $query);
         if (!$stmt_reg) {
-            die("Debug: Prepare failed: " . mysqli_error($mysqli_link));
+            // Log error but show user friendly message if possible, or let custom handler catch if restored
+             error_log("Registration Prepare Error: " . mysqli_error($mysqli_link));
+             die("Erro no sistema de registro. Contate o suporte. (Cód: PREPARE)");
         }
         
         $ip_long = ip2long($_SERVER['REMOTE_ADDR']);
-        // Verify bind params
-        // s, s, s, s, i, s, s, s, s, s, s (11 chars)
-        $bind = mysqli_stmt_bind_param($stmt_reg, "ssssissssss", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $ip_long, $vipadd, $atual, $novocodigo);
+        
+        // Bind params: 
+        // s (usuario), s (senha), s (email), s (personagem), i (vila), s (renegado), s (reg), 
+        // s (ip - wait, ip column is varchar(255) in schema! ip2long returns int. Let's cast or treat as string? 
+        // Looking at schema: `ip` varchar(255) NOT NULL. So 's' is correct for the value.
+        // s (vip), s (vip_inicio), i (ativador - Wait, schema says `ativador` int(11) NOT NULL. Using $novocodigo which seems to be int rand)
+        
+        // Updated Types String: 
+        // s (user)
+        // s (pass)
+        // s (email)
+        // s (char)
+        // i (village)
+        // s (renegade)
+        // s (date reg)
+        // s (ip - schema says varchar)
+        // s (vip date)
+        // s (vip start date)
+        // i (activator code)
+        
+        // Total: 11 params provided
+        $bind = mysqli_stmt_bind_param($stmt_reg, "ssssisssssi", $usuario, $senha_hash, $_POST['reg_email'], $personagem, $vila, $renegado, $atual, $_SERVER['REMOTE_ADDR'], $vipadd, $atual, $novocodigo);
         
         if (!$bind) {
-             die("Debug: Bind failed: " . mysqli_stmt_error($stmt_reg));
+             error_log("Registration Bind Error: " . mysqli_stmt_error($stmt_reg));
+             die("Erro no sistema de registro. Contate o suporte. (Cód: BIND)");
         }
         
         $exec = mysqli_stmt_execute($stmt_reg);
         if (!$exec) {
-            die("Debug: Execute failed: " . mysqli_stmt_error($stmt_reg));
+             error_log("Registration Execute Error: " . mysqli_stmt_error($stmt_reg));
+             die("Erro ao salvar dados: " . mysqli_stmt_error($stmt_reg));
         }
-        
-        echo "Debug: Registration success. Redirecting...<br>";
 
 
             $assunto = "Código de ativação Naruto";
