@@ -1,0 +1,89 @@
+---
+# =============================================================================
+#  Deploy do Naruto MMORPG via cPanel Git Version Control (HostGator)
+# =============================================================================
+#  Sem este arquivo o cPanel mostra "The system cannot deploy" e o botao
+#  "Deploy HEAD Commit" fica inativo: ele e o roteiro que diz ao cPanel o que
+#  fazer depois do pull.
+#
+#  Como funciona aqui: o repositorio fica clonado em /home2/geova330/naruto,
+#  que NAO e a pasta publica. Este script copia os arquivos do clone para o
+#  diretorio que o Apache serve.
+#
+#  ---------------------------------------------------------------------------
+#  CONFIRME A LINHA DEPLOYPATH ABAIXO ANTES DO PRIMEIRO DEPLOY
+#  ---------------------------------------------------------------------------
+#  O valor atual assume que o jogo responde no dominio principal, servido por
+#  /home2/geova330/public_html.
+#
+#  Se o jogo estiver em subdominio ou dominio adicional, troque pelo caminho
+#  que o cPanel mostra em "Dominios" -> "Raiz do documento". Exemplos:
+#     export DEPLOYPATH=/home2/geova330/public_html/naruto
+#     export DEPLOYPATH=/home2/geova330/naruto.seudominio.com
+#
+#  Um caminho errado publica o jogo na pasta errada; nada e apagado, mas o
+#  site nao muda e parece que o deploy nao funcionou.
+# =============================================================================
+
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home2/geova330/public_html
+
+    # -----------------------------------------------------------------------
+    #  Copia do clone para a pasta publica.
+    # -----------------------------------------------------------------------
+    #  Por que rsync e nao "cp -R * $DEPLOYPATH":
+    #
+    #  1. O glob * NAO pega arquivos que comecam com ponto. Com cp, o
+    #     .htaccess (que bloqueia _inc/, vendor/, .env e os .sql) ficaria de
+    #     fora e o servidor subiria sem nenhuma dessas protecoes.
+    #
+    #  2. Precisamos preservar arquivos que existem so no servidor. O "./" no
+    #     final da origem faz o rsync copiar o CONTEUDO do diretorio, dotfiles
+    #     inclusos.
+    #
+    #  Nao ha --delete de proposito: apagar no destino o que nao existe no
+    #  repositorio e arriscado demais em cima de um jogo com dados reais.
+    # -----------------------------------------------------------------------
+    - /usr/bin/rsync -a --human-readable
+      --exclude '.git/'
+      --exclude '.gitignore'
+      --exclude '.env'
+      --exclude '_cache/'
+      --exclude 'uploads/'
+      --exclude 'reports/'
+      --exclude 'Dockerfile'
+      --exclude 'docker/'
+      --exclude 'docker-compose.yml'
+      --exclude '.dockerignore'
+      --exclude '.cpanel.yml'
+      --exclude 'composer.phar'
+      ./ $DEPLOYPATH/
+
+    # -----------------------------------------------------------------------
+    #  Diretorios que o jogo grava em runtime.
+    # -----------------------------------------------------------------------
+    #  Ficam de fora do rsync acima porque guardam dado de jogador: avatar
+    #  enviado, relatorio de batalha e a trava do instalador. Sao criados aqui
+    #  caso ainda nao existam, e o conteudo existente nunca e tocado.
+    - /bin/mkdir -p $DEPLOYPATH/_cache $DEPLOYPATH/uploads $DEPLOYPATH/reports
+    - /bin/chmod 755 $DEPLOYPATH/_cache $DEPLOYPATH/uploads $DEPLOYPATH/reports
+
+# =============================================================================
+#  O .env NAO e copiado, de proposito
+# =============================================================================
+#  Ele carrega a senha do banco de producao e vive so no servidor. Se o deploy
+#  o sobrescrevesse, o jogo sairia do ar a cada publicacao.
+#
+#  Isso significa que chaves novas precisam ser adicionadas a mao no .env do
+#  servidor. Nesta versao, confira se estas existem (veja .env.example):
+#
+#     INSTALLER_ENABLED=false     fecha /install/ no site publico
+#     APP_DEBUG=false             nao vaza caminho do servidor em erro
+#     APP_TIMEZONE=America/Sao_Paulo
+#     DB_PORT=3306
+#
+#  Se INSTALLER_ENABLED faltar, o instalador ainda assim se fecha sozinho ao
+#  detectar que o banco ja tem as tabelas do jogo -- mas deixar explicito e
+#  mais seguro.
+# =============================================================================
