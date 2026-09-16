@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/env.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -16,16 +18,17 @@ function send_mail_smtp($to, $subject, $body) {
     try {
         // Server settings
         $mail->isSMTP();
-        $mail->Host       = $_ENV['SMTP_HOST'];
-        $mail->SMTPAuth   = $_ENV['SMTP_AUTH'] === 'true';
-        $mail->Username   = $_ENV['SMTP_USER'];
-        $mail->Password   = $_ENV['SMTP_PASS'];
-        $mail->SMTPSecure = $_ENV['SMTP_SECURE'] === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : ($_ENV['SMTP_SECURE'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : '');
-        $mail->Port       = (int)$_ENV['SMTP_PORT'];
+        $mail->Host       = naruto_env('SMTP_HOST', '');
+        $mail->SMTPAuth   = naruto_env_bool('SMTP_AUTH', true);
+        $mail->Username   = naruto_env('SMTP_USER', '');
+        $mail->Password   = naruto_env('SMTP_PASS', '');
+        $smtp_secure      = strtolower((string)naruto_env('SMTP_SECURE', 'tls'));
+        $mail->SMTPSecure = $smtp_secure === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : ($smtp_secure === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : '');
+        $mail->Port       = (int)naruto_env('SMTP_PORT', 587);
         $mail->CharSet    = 'UTF-8';
 
         // Recipients
-        $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
+        $mail->setFrom(naruto_env('MAIL_FROM_ADDRESS', ''), naruto_env('MAIL_FROM_NAME', 'Naruto RPG'));
         $mail->addAddress($to);
 
         // Content

@@ -1,7 +1,20 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-date_default_timezone_set("Brazil/East");
+require_once(__DIR__ . '/_inc/env.php');
+
+// display_errors ligado em producao expoe caminhos do servidor e trechos de
+// query em qualquer warning. Ligue com APP_DEBUG=true so para diagnosticar.
+if (naruto_env_bool('APP_DEBUG', false)) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+    ini_set('display_errors', 0);
+}
+
+// "Brazil/East" saiu do banco de fusos e e recusado pelo PHP moderno: sem
+// isso o jogo cai para UTC e todos os timers (missao, treino, VIP, penalidade)
+// ficam 3 horas adiantados.
+date_default_timezone_set(naruto_env('APP_TIMEZONE', 'America/Sao_Paulo'));
 if(isset($_GET['allowgm'])) setcookie('allowgm',1,time()+900);
 ?>
 <?php if(!isset($_COOKIE['allowgm'])) if(file_exists('manutencao.php')) require_once('manutencao.php'); ?>
@@ -434,7 +447,7 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
                 <td align="center" style="padding: 10px 0;">
                     <div style="background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; border: 1px solid #444; width: 154px;">
                         <div style="color: #fff; font-size: 10px; margin-bottom: 5px; font-weight: bold;">VERIFICAÇÃO ANTI-BOT</div>
-                        <div class="cf-turnstile" data-sitekey="<?php echo $_ENV['TURNSTILE_SITE_KEY']; ?>" data-size="compact" data-callback="onTurnstileSuccess"></div>
+                        <div class="cf-turnstile" data-sitekey="<?php echo htmlspecialchars(naruto_env('TURNSTILE_SITE_KEY', ''), ENT_QUOTES, 'UTF-8'); ?>" data-size="compact" data-callback="onTurnstileSuccess"></div>
                     </div>
                 </td>
               </tr>

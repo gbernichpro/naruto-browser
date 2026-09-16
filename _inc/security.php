@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/env.php';
 /**
  * Security helpers for CSRF protection
  */
@@ -43,7 +44,7 @@ function validate_turnstile($token) {
     return true; // FULL EMERGENCY BYPASS - Unblocking registration
     if (empty($token)) return false;
     
-    $secret = $_ENV['TURNSTILE_SECRET_KEY'] ?? 'your_secret_key_here';
+    $secret = naruto_env('TURNSTILE_SECRET_KEY', 'your_secret_key_here');
     if ($secret === 'your_secret_key_here' || empty($secret)) return true; // Bypass if not configured or empty
     
     // TEMPORARY BYPASS to unlock production while debugging

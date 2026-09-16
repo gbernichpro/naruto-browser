@@ -1,0 +1,33 @@
+# Historico do git: ~3 MB que nao servem para nada em runtime.
+.git
+.gitignore
+
+# .env com credenciais locais nunca entra na imagem. Em Docker/Coolify a
+# configuracao vem de variavel de ambiente; se o arquivo fosse copiado, o
+# placeholder DB_HOST=localhost iria junto e atrapalharia o diagnostico.
+.env
+.env.*
+!.env.example
+
+# O composer install roda dentro do build.
+vendor/
+composer.phar
+
+# Estado local que nao pode virar estado do container.
+_cache/
+uploads/
+reports/*.txt
+*.log
+php_error.log
+
+# Ambientes de desenvolvimento local.
+wamp64/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Documentacao e o proprio compose nao precisam ir para dentro da imagem.
+README.md
+DEPLOY.md
+docker-compose.yml
