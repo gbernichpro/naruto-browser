@@ -6,8 +6,12 @@
  * banco, importa as 76 tabelas de install/schema.sql, cria a conta de
  * administrador e grava o .env.
  *
- * Depois de instalar ele se tranca sozinho (_cache/installed.lock). Para
- * reabrir: apague a trava, ou defina INSTALLER_ENABLED=true no ambiente.
+ * Trava sozinho de tres formas, para nunca ficar aberto em site publico:
+ * a trava em disco (_cache/installed.lock), INSTALLER_ENABLED=false, e a
+ * deteccao de que o banco configurado ja tem as tabelas do jogo.
+ *
+ * Para reinstalar de proposito: defina INSTALL_TOKEN no ambiente e acesse
+ * /install/?token=SEU_TOKEN.
  */
 
 require_once __DIR__ . '/lib.php';
@@ -45,13 +49,7 @@ if (empty($_SESSION['install_csrf'])) {
 // ---------------------------------------------------------------------------
 // Portao de entrada
 // ---------------------------------------------------------------------------
-$bloqueado = null;
-if (!naruto_token_ok()) {
-    $bloqueado = 'Token invalido. Este instalador exige ?token=... porque a variavel INSTALL_TOKEN esta definida no ambiente.';
-} elseif (naruto_is_locked()) {
-    $bloqueado = 'O jogo ja foi instalado. Para reinstalar, apague o arquivo ' . h(naruto_lock_file())
-        . ' ou defina INSTALLER_ENABLED=true nas variaveis de ambiente.';
-}
+$bloqueado = naruto_motivo_bloqueio();
 
 // ---------------------------------------------------------------------------
 // Checagem de requisitos
@@ -342,7 +340,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$bloqueado) {
 <?php if ($bloqueado): ?>
   <div class="card">
     <h2>Instalador fechado</h2>
-    <div class="msg msg-warn"><?php echo $bloqueado; ?></div>
+    <div class="msg msg-warn"><?php echo h($bloqueado); ?></div>
     <p><a href="../">Ir para o jogo &rarr;</a></p>
   </div>
 

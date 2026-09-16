@@ -94,6 +94,37 @@ Assim que terminar, o instalador se tranca sozinho (`_cache/installed.lock`). Pa
 http://localhost/naruto/
 ```
 
+#### A.1 — Publicando pelo Git do cPanel (HostGator, Hostinger, etc.)
+
+Se você usa **cPanel → Git Version Control**, o deploy é automatizado pelo arquivo [`.cpanel.yml`](.cpanel.yml) na raiz do projeto. Sem ele o painel mostra *"The system cannot deploy"* e o botão **Deploy HEAD Commit** fica inativo — o arquivo é justamente o roteiro que diz ao cPanel o que fazer depois do `git pull`.
+
+**Antes do primeiro deploy, confira o caminho de destino.** Abra `.cpanel.yml` e ajuste esta linha:
+
+```yaml
+- export DEPLOYPATH=/home2/geova330/public_html
+```
+
+O valor deve ser a **Raiz do documento** que o cPanel mostra em *Domínios*. Se o jogo está num subdomínio ou domínio adicional, o caminho é outro (ex.: `/home2/usuario/naruto.seudominio.com`). Caminho errado não apaga nada — só publica na pasta errada, e parece que o deploy não funcionou.
+
+**Como o deploy se comporta:**
+
+| Item | O que acontece |
+|---|---|
+| `.env` | **Nunca é sobrescrito.** Ele guarda a senha do banco de produção e vive só no servidor |
+| `uploads/`, `reports/`, `_cache/` | Preservados — são dados de jogador |
+| `.htaccess` | Copiado (o deploy usa `rsync`, não `cp -R *`, que ignoraria arquivos com ponto) |
+| `Dockerfile`, `docker/`, `.git` | Não vão para a pasta pública |
+
+**Os dois requisitos do cPanel para o botão Deploy funcionar:**
+
+1. O `.cpanel.yml` existe na branch em que o repositório está (`main`, normalmente).
+2. Não há alterações não commitadas no clone do servidor. Se o painel reclamar disso, veja se alguém editou algum arquivo direto no servidor — tipicamente o `.env`, que **nesta versão saiu do versionamento** justamente para parar de travar deploys.
+
+> ⚠️ **Se você está publicando esta versão por cima de um jogo que já roda:** o `.env` do seu servidor é anterior a ela e não tem as chaves novas. Nada quebra — todas têm padrão seguro — mas vale adicionar `INSTALLER_ENABLED=false`, `APP_DEBUG=false` e `APP_TIMEZONE=America/Sao_Paulo`. Mesmo sem elas, o instalador se fecha sozinho ao detectar que o banco já tem as tabelas do jogo.
+
+**Verifique a versão do PHP.** Em cPanel → *MultiPHP Manager*, o domínio precisa estar em **PHP 8.0 ou superior**. Em PHP 7.x o jogo não sobe.
+
+
 <details>
 <summary><strong>Problemas comuns nessa opção</strong></summary>
 
@@ -188,23 +219,37 @@ Todas funcionam tanto no arquivo `.env` quanto como variável de ambiente do pai
 | `APP_DEBUG` | `false` | `true` mostra erros na tela. **Nunca deixe ligado em produção** |
 | `APP_TIMEZONE` | `America/Sao_Paulo` | Fuso dos timers de missão, treino, VIP e penalidade |
 | `DB_LEGACY_SQL_MODE` | `true` | Relaxa o modo estrito do MySQL, que recusa as datas `0000-00-00` do schema de 2013 |
-| `INSTALLER_ENABLED` | `true` | `false` fecha o instalador permanentemente |
-| `INSTALL_TOKEN` | vazio | Se definido, exige `/install/?token=...` |
+| `INSTALLER_ENABLED` | `true` | `false` fecha o instalador de forma absoluta — nem token abre |
+| `INSTALL_TOKEN` | vazio | Senha de acesso ao instalador. É o único jeito de reabri-lo depois de instalado |
 | `SMTP_*`, `MAIL_FROM_*` | vazio | Envio de e-mail (recuperação de senha) |
 | `TURNSTILE_*` | vazio | Captcha do cadastro. Vazio = desligado |
 | `DISCORD_WEBHOOK_URL` | vazio | Recebe notificação dos erros de PHP |
 
 ---
 
+### 🔒 Como o instalador se protege
+
+Um formulário público que recebe credenciais de MySQL e executa SQL é um alvo. Por isso `/install/` se fecha sozinho de **três** formas independentes:
+
+1. A trava em disco `_cache/installed.lock`, gravada ao fim da instalação.
+2. `INSTALLER_ENABLED=false` no ambiente.
+3. **Detecção automática:** se o banco configurado já tem a tabela `usuarios`, o instalador se recusa a abrir — mesmo sem trava e sem a variável. É o que protege quem publica esta versão por cima de um jogo que já está no ar, cujo `.env` antigo não tem `INSTALLER_ENABLED`.
+
+Quando fechado, ele não mostra o formulário nem revela host, usuário ou nome do banco.
+
 ### 🔄 Reinstalar ou resetar o jogo
 
-> ⚠️ `install/schema.sql` começa com `DROP TABLE` nas 76 tabelas. Reinstalar em um banco com jogo ativo **apaga tudo**. O instalador exige uma confirmação explícita quando detecta tabelas existentes — leia o aviso vermelho antes de marcar.
+> ⚠️ `install/schema.sql` começa com `DROP TABLE` nas 76 tabelas. Reinstalar em um banco com jogo ativo **apaga tudo**. O instalador exige confirmação explícita quando detecta tabelas existentes — leia o aviso vermelho antes de marcar.
+
+Como a detecção automática mantém o instalador fechado, apagar a trava não basta. Defina um token no `.env`:
 
 ```bash
-rm _cache/installed.lock     # ou defina INSTALLER_ENABLED=true
+INSTALL_TOKEN=uma-string-aleatoria-bem-longa
 ```
 
-E abra `/install/` de novo.
+E abra `/install/?token=uma-string-aleatoria-bem-longa`.
+
+O token vence a trava em disco e a detecção automática, mas **não** vence `INSTALLER_ENABLED=false` — essa continua sendo o botão de emergência para fechar tudo.
 
 ---
 

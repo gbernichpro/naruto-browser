@@ -17,18 +17,38 @@ require_once dirname(__DIR__) . '/_inc/env.php';
 
 
 
+
 /**
- * O jogo ja foi instalado? Trava em disco OU variavel de ambiente.
+ * O banco configurado no ambiente ja contem o jogo?
  *
- * A variavel existe para o caso do volume nao ser persistente: em Coolify
- * voce marca INSTALLER_ENABLED=false depois de instalar e o instalador
- * fica fechado independente do arquivo.
+ * Responde false sempre que nao der para afirmar que sim (sem configuracao,
+ * banco fora do ar, tabela ausente), para nao travar uma instalacao legitima
+ * so porque o banco ainda nao subiu.
  */
-function naruto_is_locked() {
-    if (naruto_env('INSTALLER_ENABLED') !== null && !naruto_env_bool('INSTALLER_ENABLED', true)) {
-        return true;
+function naruto_jogo_ja_instalado() {
+    $nome = naruto_env('DB_NAME');
+    $user = naruto_env('DB_USER');
+    if ($nome === null || $user === null) {
+        return false;
     }
-    return file_exists(naruto_lock_file());
+
+    naruto_mysqli_quiet();
+    $link = @mysqli_connect(
+        naruto_env('DB_HOST', 'localhost'),
+        $user,
+        naruto_env('DB_PASS', ''),
+        $nome,
+        (int)naruto_env('DB_PORT', 3306)
+    );
+    if (!$link) {
+        return false;
+    }
+
+    $res = @mysqli_query($link, "SHOW TABLES LIKE 'usuarios'");
+    $instalado = $res && mysqli_num_rows($res) > 0;
+    mysqli_close($link);
+
+    return $instalado;
 }
 
 /**
@@ -40,6 +60,54 @@ function naruto_write_lock(array $info) {
         JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
     );
     return @file_put_contents(naruto_lock_file(), $payload) !== false;
+}
+
+/**
+ * Decide se o instalador pode abrir, e por que nao, quando for o caso.
+ *
+ * Ordem das regras:
+ *  1. INSTALLER_ENABLED=false fecha o instalador de forma absoluta. Nem token
+ *     abre: e o botao de emergencia para fechar um host publico.
+ *  2. Um INSTALL_TOKEN configurado e correto destrava o resto. E o caminho
+ *     para reinstalar de proposito.
+ *  3. Trava em disco ou jogo ja instalado no banco: fechado.
+ *
+ * @return string|null  motivo do bloqueio, ou null se pode instalar
+ */
+function naruto_motivo_bloqueio() {
+    if (naruto_env('INSTALLER_ENABLED') !== null && !naruto_env_bool('INSTALLER_ENABLED', true)) {
+        return 'O instalador esta desativado por INSTALLER_ENABLED=false. '
+             . 'Troque para true no ambiente se precisar reabrir.';
+    }
+
+    $tokenConfigurado = naruto_env('INSTALL_TOKEN');
+    $temToken = ($tokenConfigurado !== null && $tokenConfigurado !== '');
+
+    if ($temToken && !naruto_token_ok()) {
+        return 'Token invalido. Este instalador exige /install/?token=... porque '
+             . 'a variavel INSTALL_TOKEN esta definida no ambiente.';
+    }
+
+    // Token correto: abre mesmo com o jogo ja instalado. E assim que se
+    // reinstala de proposito.
+    if ($temToken) {
+        return null;
+    }
+
+    if (file_exists(naruto_lock_file())) {
+        return 'O jogo ja foi instalado. Para reinstalar, apague o arquivo '
+             . naruto_lock_file() . ' ou defina INSTALL_TOKEN no ambiente e '
+             . 'acesse /install/?token=SEU_TOKEN.';
+    }
+
+    if (naruto_jogo_ja_instalado()) {
+        return 'O banco configurado ja tem as tabelas do jogo, entao o instalador '
+             . 'esta fechado para nao ficar exposto no seu site publico. Para '
+             . 'reinstalar de proposito, defina INSTALL_TOKEN no ambiente e acesse '
+             . '/install/?token=SEU_TOKEN.';
+    }
+
+    return null;
 }
 
 /**
