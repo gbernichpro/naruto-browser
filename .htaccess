@@ -1,0 +1,75 @@
+# =============================================================================
+#  Naruto MMORPG - protecoes para Apache (XAMPP/WAMP e hospedagem tradicional)
+# =============================================================================
+#  No deploy por Docker as mesmas regras ja vem em docker/apache-naruto.conf.
+#  Este arquivo existe para o cenario em que voce so consegue enviar arquivos
+#  por FTP/cPanel e nao tem acesso a configuracao do servidor.
+#
+#  Requer AllowOverride All (padrao em XAMPP/WAMP e na maioria das
+#  hospedagens compartilhadas).
+# =============================================================================
+
+Options -Indexes
+
+# --- Arquivos que nunca podem ser baixados ---------------------------------
+# .env carrega senha do banco e credenciais de SMTP.
+<FilesMatch "^\.env">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# install/schema.sql tem o schema e os dados iniciais do jogo.
+<FilesMatch "\.(sql|lock|log|md|bak|sample|dist)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<FilesMatch "^(composer\.(json|lock)|composer\.phar|Dockerfile|docker-compose\.ya?ml)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# --- Bloqueio de diretorios internos ---------------------------------------
+# Sem isso, qualquer um abre /_inc/debug_env.php e ve quais credenciais estao
+# configuradas, ou executa arquivos de _inc/ fora do fluxo de login.
+# O (^|/) no inicio faz a regra valer tambem quando o jogo esta em subpasta
+# (ex.: seusite.com/naruto/), onde o caminho nao comeca em /_inc.
+RedirectMatch 404 (^|/)(_inc|vendor|_cache|reports)(/|$)
+
+# --- uploads: nada ali pode ser executado ----------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^uploads/.*\.(php[0-9]?|phtml|phar)$ - [F,L]
+</IfModule>
+
+# --- Cabecalhos ------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# --- Cache de assets -------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png  "access plus 30 days"
+    ExpiresByType image/gif  "access plus 30 days"
+    ExpiresByType text/css   "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+</IfModule>

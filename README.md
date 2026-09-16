@@ -33,38 +33,178 @@ Recentemente, este projeto passou por um significativo **esforço de modernizaç
 *   **Backend:** PHP (Originalmente 5.x, agora **Compatível com PHP 8.2+**)
 *   **Banco de Dados:** MySQL / MariaDB
 *   **Frontend:** HTML5, CSS3, JavaScript (jQuery 1.9.0)
-*   **Servidor:** Apache/Nginx (Pronto para WAMP/XAMPP)
+*   **Servidor:** Apache/Nginx (pronto para WAMP/XAMPP e para hospedagem compartilhada)
+*   **Dependências:** Composer (phpdotenv, PHPMailer)
+*   **Deploy:** Dockerfile + Docker Compose (Apache + PHP 8.3), pronto para Coolify
 
 ---
 
-## 🚀 Instalação e Configuração
+## 🚀 Instalação
 
-### Pré-requisitos
-*   Um servidor web (Apache/Nginx)
-*   PHP 8.0 ou superior
-*   Banco de Dados MySQL
+O jogo tem um **instalador web**: você não edita nenhum arquivo PHP à mão. Suba os arquivos, abra `/install/` no navegador, informe os dados do MySQL e ele cria o banco, importa as **76 tabelas** de `install/schema.sql`, cria sua conta de administrador e grava o `.env`.
 
-### Passos
+Escolha um dos dois caminhos abaixo.
 
-1.  **Clonar o Repositório**
-    ```bash
-    git clone https://github.com/gbernichpro/naruto-browser.git
-    ```
+| | Opção A — XAMPP/WAMP e hospedagem tradicional | Opção B — Docker / Coolify |
+|---|---|---|
+| **Para quem** | Roda local, ou tem cPanel/Plesk/FTP | Tem VPS própria |
+| **Você precisa de** | Apache + PHP 8.0+ + MySQL | Docker (e Coolify, se for usar painel) |
+| **Configuração** | Arquivo `.env`, escrito pelo instalador | Variáveis de ambiente no painel |
+| **HTTPS** | Depende da hospedagem | Automático (Let's Encrypt) |
 
-2.  **Configuração do Banco de Dados**
-    *   Crie um banco de dados, geralmente chamado `naruto` ou `naruto_game`.
-    *   Importe o arquivo SQL fornecido na pasta `_sql/` ou na raiz (se disponível).
+---
 
-3.  **Configuração**
-    *   Navegue até o diretório `_inc/`.
-    *   Edite o arquivo `conexao.php` com as credenciais do seu banco de dados:
-        ```php
-        $db = mysqli_connect("localhost", "root", "senha", "nome_do_banco");
-        ```
+### Opção A — XAMPP / WAMP / hospedagem tradicional
 
-4.  **Rodar o Jogo**
-    *   Coloque a pasta do projeto na raiz do seu servidor web (ex: `www` ou `htdocs`).
-    *   Acesse pelo navegador: `http://localhost/Naruto`
+**1. Coloque os arquivos no servidor**
+
+Local, com XAMPP ou WAMP:
+
+```bash
+# Windows (XAMPP): C:\xampp\htdocs\    |  WAMP: C:\wamp64\www\
+git clone https://github.com/gbernichpro/naruto-browser.git naruto
+```
+
+Em hospedagem compartilhada, envie o conteúdo do projeto para `public_html/` (ou `www/`) por FTP ou pelo gerenciador de arquivos do painel.
+
+> A pasta `vendor/` já vem no repositório justamente para esse caso: sem SSH você não conseguiria rodar o Composer. Se **tiver** SSH, prefira rodar `composer install` para pegar as versões travadas no `composer.lock`.
+
+**2. Crie o banco (opcional)**
+
+O instalador cria o banco sozinho se o usuário do MySQL tiver permissão. No XAMPP/WAMP o `root` tem, então pode pular. Em hospedagem compartilhada normalmente você precisa criar o banco pelo painel antes (cPanel → *MySQL Databases*) e anotar nome, usuário e senha.
+
+**3. Rode o instalador**
+
+Abra no navegador:
+
+```
+http://localhost/naruto/install/          (XAMPP/WAMP)
+https://seudominio.com/install/           (hospedagem)
+```
+
+Preencha os dados do MySQL e da conta de administrador e clique em **Instalar agora**. Deixe marcado *"Gravar o arquivo .env na raiz"*.
+
+**4. Feche o instalador**
+
+Assim que terminar, o instalador se tranca sozinho (`_cache/installed.lock`). Para fechar de vez, **apague a pasta `install/` do servidor** — ela não é necessária para o jogo rodar.
+
+**5. Jogue**
+
+```
+http://localhost/naruto/
+```
+
+<details>
+<summary><strong>Problemas comuns nessa opção</strong></summary>
+
+| Sintoma | Causa |
+|---|---|
+| Página em branco ou erro 500 | Defina `APP_DEBUG=true` no `.env` para ver o erro. **Volte para `false` depois** — com `true` o PHP expõe caminhos do servidor. |
+| `Database Connection Failed` | Host errado. Em hospedagem compartilhada quase nunca é `localhost`: veja no painel (costuma ser `mysql.seudominio.com` ou um IP). |
+| Banco em porta diferente de 3306 | Preencha o campo **Porta** no instalador, ou use `DB_PORT` no `.env`. |
+| Avatares não salvam | `uploads/` precisa de permissão de escrita (`chmod 775`). |
+| Instalador diz "já foi instalado" | Apague `_cache/installed.lock` ou defina `INSTALLER_ENABLED=true`. |
+
+</details>
+
+---
+
+### Opção B — Docker / Coolify (VPS)
+
+#### B.1 — Local, com Docker Compose
+
+```bash
+git clone https://github.com/gbernichpro/naruto-browser.git
+cd naruto-browser
+cp .env.example .env          # preencha ao menos DB_PASS e DB_ROOT_PASS
+docker compose up -d --build
+```
+
+Abra `http://localhost:8080/install/`. No formulário use:
+
+* **Host:** `db` (o nome do serviço no `docker-compose.yml`, não `localhost`)
+* **Porta:** `3306`
+* **Usuário / senha / banco:** os mesmos `DB_USER`, `DB_PASS` e `DB_NAME` do seu `.env`
+* **Desmarque** *"Gravar o arquivo .env na raiz"* — em container a configuração vem das variáveis de ambiente
+
+#### B.2 — Coolify na sua VPS
+
+1. **Coolify → New Resource → Docker Compose**, apontando para este repositório. Ele usa o `docker-compose.yml` da raiz (app + MariaDB + volumes, tudo junto).
+   *Se preferir separar,* crie um banco MariaDB pelo próprio Coolify e use **Dockerfile** como build pack para o app, apontando `DB_HOST` para o host interno que o Coolify mostrar.
+
+2. **Remova a seção `ports:`** do serviço `app` — quem publica a porta é o proxy do Coolify.
+
+3. Em **Environment Variables**, preencha:
+
+   ```
+   DB_NAME=naruto
+   DB_USER=naruto
+   DB_PASS=<senha forte>
+   DB_ROOT_PASS=<outra senha forte>
+   GAME_NAME=Fight
+   INSTALLER_ENABLED=true
+   INSTALL_TOKEN=<string aleatória longa>
+   ```
+
+   `DB_HOST=db` e `DB_PORT=3306` já vêm do compose.
+
+4. **Configure os volumes persistentes** — este é o passo que mais se esquece. Sem eles, **avatares enviados, relatórios de batalha e a trava do instalador somem a cada redeploy**:
+
+   | Caminho no container | Guarda |
+   |---|---|
+   | `/var/www/html/uploads` | imagens enviadas por jogadores |
+   | `/var/www/html/reports` | relatórios de batalha (`.txt`) |
+   | `/var/www/html/_cache` | cache e trava de instalação |
+   | `/var/lib/mysql` (no serviço `db`) | **o jogo inteiro** |
+
+5. Aponte seu domínio no campo **Domains** e faça o deploy. O Coolify emite o certificado Let's Encrypt sozinho.
+
+6. Abra `https://seudominio.com/install/?token=<INSTALL_TOKEN>` e instale, com **Host `db`** e a opção de gravar `.env` desmarcada.
+
+7. **Depois de instalar**, troque `INSTALLER_ENABLED` para `false` e faça redeploy.
+
+<details>
+<summary><strong>Problemas comuns nessa opção</strong></summary>
+
+| Sintoma | Causa |
+|---|---|
+| `Database Connection Failed` logo no primeiro deploy | O MariaDB ainda está subindo. O `healthcheck` do compose já segura o app; se você separou os serviços no Coolify, é só aguardar e recarregar. |
+| Jogo funciona, mas some tudo no redeploy | Faltam os volumes do passo 4. |
+| Todo jogador aparece com o mesmo IP | O proxy não está mandando `X-Forwarded-For`. O `mod_remoteip` já vem configurado em `docker/apache-naruto.conf`. |
+| Container marcado como *unhealthy* | `health.php` responde 503 quando o banco não responde. Cheque as variáveis `DB_*`. |
+
+</details>
+
+---
+
+### ⚙️ Variáveis de configuração
+
+Todas funcionam tanto no arquivo `.env` quanto como variável de ambiente do painel. O modelo completo e comentado está em [`.env.example`](.env.example).
+
+| Variável | Padrão | Para que serve |
+|---|---|---|
+| `DB_HOST` `DB_PORT` `DB_NAME` `DB_USER` `DB_PASS` | — | Conexão com o MySQL |
+| `GAME_NAME` | `Fight` | Nome do servidor, exibido no título e nas mensagens |
+| `APP_DEBUG` | `false` | `true` mostra erros na tela. **Nunca deixe ligado em produção** |
+| `APP_TIMEZONE` | `America/Sao_Paulo` | Fuso dos timers de missão, treino, VIP e penalidade |
+| `DB_LEGACY_SQL_MODE` | `true` | Relaxa o modo estrito do MySQL, que recusa as datas `0000-00-00` do schema de 2013 |
+| `INSTALLER_ENABLED` | `true` | `false` fecha o instalador permanentemente |
+| `INSTALL_TOKEN` | vazio | Se definido, exige `/install/?token=...` |
+| `SMTP_*`, `MAIL_FROM_*` | vazio | Envio de e-mail (recuperação de senha) |
+| `TURNSTILE_*` | vazio | Captcha do cadastro. Vazio = desligado |
+| `DISCORD_WEBHOOK_URL` | vazio | Recebe notificação dos erros de PHP |
+
+---
+
+### 🔄 Reinstalar ou resetar o jogo
+
+> ⚠️ `install/schema.sql` começa com `DROP TABLE` nas 76 tabelas. Reinstalar em um banco com jogo ativo **apaga tudo**. O instalador exige uma confirmação explícita quando detecta tabelas existentes — leia o aviso vermelho antes de marcar.
+
+```bash
+rm _cache/installed.lock     # ou defina INSTALLER_ENABLED=true
+```
+
+E abra `/install/` de novo.
 
 ---
 

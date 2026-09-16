@@ -1,10 +1,11 @@
 <?php
+require_once __DIR__ . '/env.php';
 /**
  * Sistema de notificação de erros via Discord Webhook
  */
 
 function send_error_to_discord($error_type, $error_message, $file, $line) {
-    $webhook_url = $_ENV['DISCORD_WEBHOOK_URL'] ?? '';
+    $webhook_url = naruto_env('DISCORD_WEBHOOK_URL', '');
     
     // Se não estiver configurado ou for o placeholder, não envia
     if (empty($webhook_url) || $webhook_url === 'your_discord_webhook_url_here') {

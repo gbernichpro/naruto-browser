@@ -1,0 +1,96 @@
+# =============================================================================
+#  Naruto MMORPG - stack completa (app + banco)
+# =============================================================================
+#  Local:   docker compose up -d --build   e abra http://localhost:8080/install/
+#  Coolify: crie um recurso "Docker Compose", aponte para este arquivo e
+#           preencha as variaveis na aba Environment Variables.
+#
+#  Em Coolify NAO exponha a porta do banco: os dois containers se enxergam
+#  pela rede interna usando o nome do servico (db) como host.
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      # Em Coolify remova esta secao: o proxy dele cuida da porta 80/443.
+      - "${APP_PORT:-8080}:80"
+    environment:
+      # --- Banco ---------------------------------------------------------
+      # "db" e o nome do servico abaixo: e assim que o app acha o MySQL
+      # dentro da rede do compose.
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-naruto}
+      DB_USER: ${DB_USER:-naruto}
+      DB_PASS: ${DB_PASS:?defina DB_PASS no .env ou no painel}
+
+      # --- Jogo ----------------------------------------------------------
+      GAME_NAME: ${GAME_NAME:-Fight}
+      NARUTO_NOME: ${NARUTO_NOME:-Fight}
+      APP_TIMEZONE: ${APP_TIMEZONE:-America/Sao_Paulo}
+      APP_DEBUG: ${APP_DEBUG:-false}
+
+      # Deixe true ate rodar /install/, depois troque para false.
+      INSTALLER_ENABLED: ${INSTALLER_ENABLED:-true}
+      # Opcional: exige /install/?token=... enquanto o instalador estiver aberto.
+      INSTALL_TOKEN: ${INSTALL_TOKEN:-}
+
+      # --- E-mail (recuperacao de senha) ---------------------------------
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Naruto RPG}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_AUTH: ${SMTP_AUTH:-true}
+      SMTP_SECURE: ${SMTP_SECURE:-tls}
+
+      # --- Captcha e notificacoes ----------------------------------------
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+    volumes:
+      # Os tres diretorios que o jogo grava em runtime. Sem volume, avatar
+      # enviado, relatorio de batalha e a trava do instalador somem no
+      # proximo deploy.
+      - naruto_cache:/var/www/html/_cache
+      - naruto_uploads:/var/www/html/uploads
+      - naruto_reports:/var/www/html/reports
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-naruto}
+      MARIADB_USER: ${DB_USER:-naruto}
+      MARIADB_PASSWORD: ${DB_PASS:?defina DB_PASS no .env ou no painel}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS:?defina DB_ROOT_PASS no .env ou no painel}
+    command:
+      # O dump de 2013 e todo MyISAM com charset utf8/latin1 misturado; o
+      # servidor sobe com esse padrao para o schema importar sem conversao.
+      # O modo estrito e relaxado por sessao pelo proprio app, nao aqui.
+      - --character-set-server=utf8mb3
+      - --collation-server=utf8mb3_general_ci
+    volumes:
+      - naruto_db:/var/lib/mysql
+    healthcheck:
+      # depends_on: service_healthy segura o app ate o banco aceitar conexao;
+      # sem isso o primeiro boot mostra erro de conexao ate o MariaDB subir.
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+volumes:
+  naruto_db:
+  naruto_cache:
+  naruto_uploads:
+  naruto_reports:

@@ -8,17 +8,47 @@ if (!function_exists('mysql_connect')) {
     global $mysqli_link;
     $mysqli_link = null;
 
+    /**
+     * Separa "host:porta" em [host, porta], como a extensao mysql original
+     * aceitava. O mysqli nao entende essa sintaxe: a porta e um argumento
+     * proprio. Sem isso, qualquer banco fora da porta 3306 (comum em Docker
+     * e em hospedagem compartilhada) fica inacessivel.
+     */
+    function mysql_split_host($host) {
+        $porta = null;
+        // IPv6 entre colchetes: [::1]:3306
+        if (preg_match('/^\[(.+)\](?::(\d+))?$/', $host, $m)) {
+            return [$m[1], isset($m[2]) ? (int)$m[2] : null];
+        }
+        if (substr_count($host, ':') === 1) {
+            list($host, $sufixo) = explode(':', $host, 2);
+            // "host:/caminho/socket.sock" nao e porta.
+            if (ctype_digit($sufixo)) {
+                $porta = (int)$sufixo;
+            } else {
+                $host = $host . ':' . $sufixo;
+            }
+        }
+        return [$host, $porta];
+    }
+
     function mysql_connect($host, $user, $password, $new_link = false, $client_flags = 0) {
         global $mysqli_link;
-        $mysqli_link = mysqli_connect($host, $user, $password);
+        list($h, $porta) = mysql_split_host($host);
+        $mysqli_link = $porta
+            ? mysqli_connect($h, $user, $password, '', $porta)
+            : mysqli_connect($h, $user, $password);
         return $mysqli_link;
     }
 
     function mysql_pconnect($host, $user, $password, $client_flags = 0) {
         global $mysqli_link;
-        // mysqli doesn't have a direct equivalent for pconnect in the same way, 
+        // mysqli doesn't have a direct equivalent for pconnect in the same way,
         // but adding p: to host enables persistent connections.
-        $mysqli_link = mysqli_connect('p:' . $host, $user, $password);
+        list($h, $porta) = mysql_split_host($host);
+        $mysqli_link = $porta
+            ? mysqli_connect('p:' . $h, $user, $password, '', $porta)
+            : mysqli_connect('p:' . $h, $user, $password);
         return $mysqli_link;
     }
 

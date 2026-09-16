@@ -1,3 +1,19 @@
+-- =====================================================================
+--  Naruto MMORPG Browser Game - schema completo (arquivo unico)
+-- ---------------------------------------------------------------------
+--  Consolida o antigo narutov3.sql + database_schema.sql da raiz.
+--  Este e o UNICO arquivo de banco do projeto: e o que o instalador
+--  web (install/index.php) importa e o que db_auto_init() usa.
+--
+--  Origem: dump Navicat de 2013 (MyISAM, latin1/utf8 misturados),
+--  preservado byte a byte para nao corromper acentuacao dos dados.
+--  Alteracao aplicada por cima: 3 colunas em `usuarios` que o codigo
+--  atual usa e o dump nao tinha (`yensbanco`, `ticket`, `penalidade`).
+--
+--  ATENCAO: contem DROP TABLE IF EXISTS em todas as 76 tabelas.
+--  Importar em um banco com jogo em producao APAGA TUDO.
+-- =====================================================================
+
 /*
 Navicat MySQL Data Transfer
 
@@ -1956,6 +1972,7 @@ CREATE TABLE `usuarios` (
   `orgmissao` int(11) NOT NULL DEFAULT '0',
   `nivel` int(11) NOT NULL DEFAULT '1',
   `yens` int(11) NOT NULL DEFAULT '300',
+  `yensbanco` int(11) NOT NULL DEFAULT '0',
   `yens_fat` int(11) NOT NULL DEFAULT '300',
   `yens_perd` int(11) NOT NULL DEFAULT '0',
   `exp` int(11) NOT NULL DEFAULT '0',
@@ -1982,6 +1999,7 @@ CREATE TABLE `usuarios` (
   `treino` int(11) NOT NULL DEFAULT '0',
   `treino_tempo` int(11) NOT NULL,
   `treino_fim` datetime NOT NULL,
+  `penalidade` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   `penalidade_fim` datetime NOT NULL,
   `doujutsu` int(11) NOT NULL DEFAULT '0',
   `doujutsu_nivel` int(11) NOT NULL DEFAULT '0',
@@ -2012,6 +2030,7 @@ CREATE TABLE `usuarios` (
   `tempo` int(11) NOT NULL,
   `tipodeconta` enum('normal','admin') NOT NULL DEFAULT 'normal',
   `creditos` int(11) NOT NULL,
+  `ticket` int(11) NOT NULL DEFAULT '0',
   `creditosusados` int(11) NOT NULL,
   `creditostransferidos` int(11) NOT NULL DEFAULT '0',
   `ativador` int(11) NOT NULL,

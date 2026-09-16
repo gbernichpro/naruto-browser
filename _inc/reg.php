@@ -306,7 +306,7 @@ function Cvila(obj){
     <input type="checkbox" id="reg_termos" name="reg_termos" /> Declaro que <b>li</b> e <b>aceito</b> os termos propostos, e que estou ciente das regras do jogo.
     <div class="sep"></div>
     <div align="center">
-        <!-- <div class="cf-turnstile" data-sitekey="<?php echo $_ENV['TURNSTILE_SITE_KEY']; ?>" data-size="compact"></div> -->
+        <!-- <div class="cf-turnstile" data-sitekey="<?php echo htmlspecialchars(naruto_env('TURNSTILE_SITE_KEY', ''), ENT_QUOTES, 'UTF-8'); ?>" data-size="compact"></div> -->
         <input type="submit" class="botao" id="subm" name="subm" value="Registrar" />
     </div>
 </fieldset>
