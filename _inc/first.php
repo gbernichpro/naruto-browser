@@ -57,14 +57,14 @@ não interfere na força da sua conta. A troca de avatares pode ser feita uma</b
 vez por dia (ilimitado para jogadores VIP).
 </b>
 </div></td></tr></tbody></table></div><div class="sep"></div>
-	<form method="post" action="?p=home" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
+	<form method="post" action="?p=first" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 	<fieldset><legend>Avatar</legend>
     <div align="center">
     <table width="100%" border="0" cellpadding="0" cellspacing="0">
       <tr>
         <td width="150" align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/1.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
-        <td width="150" align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/2.jpg" width="130" height="120"onclick="document.getElementById('fir_avatar1').checked=true" /></td>
-        <td width="150" align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/3.jpg" width="130" height="120"onclick="document.getElementById('fir_avatar1').checked=true" /></td>
+        <td width="150" align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/2.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar2').checked=true" /></td>
+        <td width="150" align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/3.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar3').checked=true" /></td>
       </tr>
       <tr>
         <td align="center"><input type="radio" id="fir_avatar1" name="fir_avatar" value="<?php echo $c->encode('1',$chaveuniversal); ?>" checked="checked" /></td>
@@ -75,9 +75,9 @@ vez por dia (ilimitado para jogadores VIP).
         <td colspan="3" align="center"><div class="sep"></div></td>
         </tr>
       <tr>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/4.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/5.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/6.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/4.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar4').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/5.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar5').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/6.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar6').checked=true" /></td>
       </tr>
       <tr>
         <td align="center"><input type="radio" id="fir_avatar4" name="fir_avatar" value="<?php echo $c->encode('4',$chaveuniversal); ?>" /></td>
@@ -88,9 +88,9 @@ vez por dia (ilimitado para jogadores VIP).
         <td colspan="3" align="center"><div class="sep"></div></td>
         </tr>
       <tr>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/7.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/8.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/9.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/7.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar7').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/8.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar8').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/9.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar9').checked=true" /></td>
       </tr>
       <tr>
         <td align="center"><input type="radio" id="fir_avatar7" name="fir_avatar" value="<?php echo $c->encode('7',$chaveuniversal); ?>" /></td>
@@ -98,9 +98,9 @@ vez por dia (ilimitado para jogadores VIP).
         <td align="center"><input type="radio" id="fir_avatar9" name="fir_avatar" value="<?php echo $c->encode('9',$chaveuniversal); ?>" /></td>
       </tr>
       <tr>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/10.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/11.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
-        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/12.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar1').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/10.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar10').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/11.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar11').checked=true" /></td>
+        <td align="center" bgcolor="#444444"><img src="_img/personagens/<?php echo $db['personagem']; ?>/12.jpg" width="130" height="120" onclick="document.getElementById('fir_avatar12').checked=true" /></td>
       </tr>
       <tr>
         <td align="center"><input type="radio" id="fir_avatar10" name="fir_avatar" value="<?php echo $c->encode('10',$chaveuniversal); ?>" /></td>

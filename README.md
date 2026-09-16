@@ -131,6 +131,29 @@ Caminho errado não apaga nada — só publica na pasta errada, e parece que o d
 
 **Verifique a versão do PHP.** Em cPanel → *MultiPHP Manager*, o domínio precisa estar em **PHP 8.0 ou superior**. Em PHP 7.x o jogo não sobe.
 
+> 🔒 **Se o clone do Git for a própria pasta pública**, `/.git/` fica acessível pela web e existem scanners varrendo a internet atrás de `/.git/HEAD`. Quem encontra baixa o código-fonte inteiro e todo o histórico. O `.htaccess` deste projeto já bloqueia arquivos e pastas ocultos, e o deploy grava um `Require all denied` dentro de `.git/` como segunda camada — mas o arranjo mais seguro continua sendo manter o clone **fora** do document root.
+
+<details>
+<summary><strong>Site sem CSS, sem imagem e sem JS</strong></summary>
+
+No `error_log` do Apache aparece:
+
+```
+AH00529: .../_css/.htaccess pcfg_openfile: unable to check htaccess file,
+ensure it is readable and that '.../_css/' is executable
+```
+
+O diretório está sem o bit de execução, então o Apache não consegue entrar nele. Acontece com facilidade em upload por FTP ou restauração de backup. O deploy corrige sozinho a cada publicação; para resolver na hora, pelo Terminal:
+
+```bash
+cd /home2/SEU_USUARIO/naruto
+find . -path ./.git -prune -o -type d ! -perm -755 -print0 | xargs -0 -r chmod 755
+```
+
+O `-path ./.git -prune` **não é detalhe**: abrir o `.git` para o Apache é exatamente o que expõe o repositório.
+
+</details>
+
 
 <details>
 <summary><strong>Problemas comuns nessa opção</strong></summary>

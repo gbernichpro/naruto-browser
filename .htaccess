@@ -51,6 +51,23 @@ Options -Indexes
 # (ex.: seusite.com/naruto/), onde o caminho nao comeca em /_inc.
 RedirectMatch 404 (^|/)(_inc|vendor|_cache|reports)(/|$)
 
+# --- Arquivos e pastas ocultos (.git, .env, .github...) --------------------
+# CRITICO quando o clone do Git E a pasta publica, que e o caso quando o
+# repositorio fica no proprio document root. Ai /.git/ passa a ser acessivel
+# pela web, e existem scanners varrendo a internet atras de /.git/HEAD. Quem
+# acha, baixa o repositorio inteiro: todo o codigo-fonte e todo o historico,
+# incluindo as versoes antigas do .env.
+#
+# Os blocos <FilesMatch> acima NAO cobrem esse caso: os objetos do git ficam
+# em .git/objects/ com nomes sem extensao nenhuma.
+#
+# Permissao de arquivo tambem nao resolve sozinha: em cPanel o Apache serve
+# como o proprio usuario dono dos arquivos, entao um chmod restritivo no
+# .git nao o esconde do servidor web.
+#
+# .well-known fica de fora: e por onde passa a validacao do certificado SSL.
+RedirectMatch 404 (^|/)\.(?!well-known)[^/]*
+
 # --- uploads: nada ali pode ser executado ----------------------------------
 <IfModule mod_rewrite.c>
     RewriteEngine On
