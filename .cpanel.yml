@@ -52,6 +52,26 @@ deployment:
     - /bin/mkdir -p $DEPLOYPATH/_cache $DEPLOYPATH/uploads $DEPLOYPATH/reports
     - /bin/chmod 755 $DEPLOYPATH/_cache $DEPLOYPATH/uploads $DEPLOYPATH/reports
 
+    # -----------------------------------------------------------------------
+    #  Permissao das pastas de assets.
+    # -----------------------------------------------------------------------
+    #  Um diretorio sem o bit de execucao nao pode ser percorrido pelo Apache,
+    #  que responde "AH00529 pcfg_openfile: unable to check htaccess file" e o
+    #  site aparece sem CSS, sem imagem e sem JS. Acontece com facilidade em
+    #  upload por FTP e em restauracao de backup.
+    #
+    #  So mexe nos diretorios que estao fora do padrao, e o .git fica de fora
+    #  de proposito: abrir o .git para o Apache e o que expoe o codigo-fonte.
+    - find $DEPLOYPATH -path "$DEPLOYPATH/.git" -prune -o -type d ! -perm -755 -print0 | xargs -0 -r chmod 755
+
+    # -----------------------------------------------------------------------
+    #  Rede de seguranca no .git.
+    # -----------------------------------------------------------------------
+    #  Quando o clone e a pasta publica, /.git/ fica acessivel pela web. O
+    #  .htaccess da raiz ja bloqueia, e este arquivo e a segunda camada, caso
+    #  alguem sobrescreva o .htaccess ou o AllowOverride seja reduzido.
+    - if [ -d $DEPLOYPATH/.git ]; then printf 'Require all denied\n' > $DEPLOYPATH/.git/.htaccess; fi
+
 # =============================================================================
 #  O .env NAO e copiado, de proposito
 # =============================================================================
