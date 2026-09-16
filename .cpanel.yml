@@ -41,8 +41,12 @@ deployment:
     #
     #  Nao ha --delete de proposito: apagar no destino o que nao existe no
     #  repositorio e arriscado demais em cima de um jogo com dados reais.
+    #
+    #  O tar e plano B: nem toda hospedagem compartilhada tem rsync, e sem
+    #  acesso a shell nao da para descobrir isso a não ser pelo deploy falhar.
+    #  Os dois caminhos excluem exatamente a mesma lista.
     # -----------------------------------------------------------------------
-    - if [ "$(readlink -f .)" != "$(readlink -f $DEPLOYPATH)" ]; then /usr/bin/rsync -a --exclude '.git/' --exclude '.gitignore' --exclude '.env' --exclude '_cache/' --exclude 'uploads/' --exclude 'reports/' --exclude 'Dockerfile' --exclude 'docker/' --exclude 'docker-compose.yml' --exclude '.dockerignore' --exclude '.cpanel.yml' --exclude 'composer.phar' ./ $DEPLOYPATH/; else echo "[naruto] clone e pasta publica sao o mesmo diretorio - o git pull ja publicou, nada a copiar."; fi
+    - if [ "$(readlink -f .)" != "$(readlink -f $DEPLOYPATH)" ]; then if command -v rsync >/dev/null 2>&1; then rsync -a --exclude '.git/' --exclude '.gitignore' --exclude '.env' --exclude '_cache/' --exclude 'uploads/' --exclude 'reports/' --exclude 'Dockerfile' --exclude 'docker/' --exclude 'docker-compose.yml' --exclude '.dockerignore' --exclude '.cpanel.yml' --exclude 'composer.phar' ./ $DEPLOYPATH/; else echo '[naruto] rsync indisponivel, usando tar'; tar --exclude='./.git' --exclude='./.gitignore' --exclude='./.env' --exclude='./_cache' --exclude='./uploads' --exclude='./reports' --exclude='./Dockerfile' --exclude='./docker' --exclude='./docker-compose.yml' --exclude='./.dockerignore' --exclude='./.cpanel.yml' --exclude='./composer.phar' -cf - . | ( cd $DEPLOYPATH && tar -xf - ); fi; else echo "[naruto] clone e pasta publica sao o mesmo diretorio - o git pull ja publicou, nada a copiar."; fi
 
     # -----------------------------------------------------------------------
     #  Diretorios que o jogo grava em runtime.
