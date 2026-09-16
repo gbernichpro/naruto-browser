@@ -90,6 +90,14 @@ if (!function_exists('mysql_connect')) {
     function mysql_real_escape_string($unescaped_string, $link_identifier = null) {
         global $mysqli_link;
         $link = ($link_identifier === null) ? $mysqli_link : $link_identifier;
+
+        // O codigo legado chama esta funcao com variaveis que podem ser null
+        // (chave de sessao ausente, coluna NULL, $_POST que nao veio). Ate o
+        // PHP 8.0 isso virava '' em silencio; do 8.1 em diante cada chamada
+        // emite um deprecated, e uma pagina que faz poll enche o error_log da
+        // hospedagem em minutos. O cast reproduz o comportamento antigo.
+        $unescaped_string = ($unescaped_string === null) ? '' : (string)$unescaped_string;
+
         if (!$link) {
             // Fallback for when no connection is established yet
             return addslashes($unescaped_string);

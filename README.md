@@ -101,10 +101,17 @@ Se você usa **cPanel → Git Version Control**, o deploy é automatizado pelo a
 **Antes do primeiro deploy, confira o caminho de destino.** Abra `.cpanel.yml` e ajuste esta linha:
 
 ```yaml
-- export DEPLOYPATH=/home2/geova330/public_html
+- export DEPLOYPATH=/home2/geova330/naruto
 ```
 
-O valor deve ser a **Raiz do documento** que o cPanel mostra em *Domínios*. Se o jogo está num subdomínio ou domínio adicional, o caminho é outro (ex.: `/home2/usuario/naruto.seudominio.com`). Caminho errado não apaga nada — só publica na pasta errada, e parece que o deploy não funcionou.
+O valor deve ser a **Raiz do documento** que o cPanel mostra em *Domínios*.
+
+Há dois cenários, e o arquivo cobre os dois sozinho:
+
+* **Clone e pasta pública são o mesmo diretório** (o caso deste servidor). O `git pull` do cPanel já atualiza o site; não há nada para copiar, e o deploy só faz a manutenção das pastas graváveis.
+* **Pasta pública é outro diretório** (ex.: o clone fora de `public_html`). O deploy copia os arquivos para lá.
+
+Caminho errado não apaga nada — só publica na pasta errada, e parece que o deploy não funcionou.
 
 **Como o deploy se comporta:**
 

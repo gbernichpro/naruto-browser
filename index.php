@@ -42,12 +42,14 @@ function anti_sql_injection ($str) {
 if((isset($_GET['p']))&&($_GET['p']=='logout')) require_once('_inc/logout.php');
 if(isset($_POST['login_login'])){
 	$erro=0;
-    if(!validate_csrf_token($_POST['csrf_token'])) $erro=99; // Generic error for CSRF failure
-    if($erro==0 && !validate_turnstile($_POST['cf-turnstile-response'])) $erro=98; // Turnstile failure
+    if(!validate_csrf_token($_POST['csrf_token'] ?? '')) $erro=99; // Generic error for CSRF failure
+    // O widget do Turnstile so envia este campo quando esta ativo na pagina.
+    // Sem o ?? '', cada tentativa de login gera um warning no error_log.
+    if($erro==0 && !validate_turnstile($_POST['cf-turnstile-response'] ?? '')) $erro=98; // Turnstile failure
 	if($erro==0 && $_POST['login_senha']=='') $erro=1;
 	if($erro==0){
        // Prepared Statement for Login
-       $stmt = mysqli_prepare($mysqli_link, "SELECT id,senha,avatar,missao,missao_fim,status FROM usuarios WHERE usuario=?");
+       $stmt = mysqli_prepare($mysqli_link, "SELECT id,usuario,senha,avatar,missao,missao_fim,status FROM usuarios WHERE usuario=?");
        mysqli_stmt_bind_param($stmt, "s", $_POST['login_login']);
        mysqli_stmt_execute($stmt);
        $result = mysqli_stmt_get_result($stmt);
@@ -104,6 +106,11 @@ if(isset($_POST['login_login'])){
             if($erro==0){
 				//session_regenerate_id();
 				$_SESSION['logado']=$db['id'];
+				// O chat identifica o jogador por nome (chat.from / chat.to sao
+				// varchar). Guardamos o valor do banco, nao o que foi digitado:
+				// aquelas colunas usam collation utf8_bin e diferenciam
+				// maiusculas de minusculas.
+				$_SESSION['username']=$db['usuario'];
 				setcookie('logado',1,time()+900);
 				mysql_query("UPDATE usuarios SET loginip='".ip2long($_SERVER['REMOTE_ADDR'])."' WHERE id=".$db['id']);
 				//setcookie('session_id',session_id(),time()+900);

@@ -6,66 +6,49 @@
 #  "Deploy HEAD Commit" fica inativo: ele e o roteiro que diz ao cPanel o que
 #  fazer depois do pull.
 #
-#  Como funciona aqui: o repositorio fica clonado em /home2/geova330/naruto,
-#  que NAO e a pasta publica. Este script copia os arquivos do clone para o
-#  diretorio que o Apache serve.
-#
 #  ---------------------------------------------------------------------------
-#  CONFIRME A LINHA DEPLOYPATH ABAIXO ANTES DO PRIMEIRO DEPLOY
+#  DEPLOYPATH: a pasta que o Apache serve
 #  ---------------------------------------------------------------------------
-#  O valor atual assume que o jogo responde no dominio principal, servido por
-#  /home2/geova330/public_html.
+#  Neste servidor o site roda a partir de /home2/geova330/naruto, que e o
+#  MESMO diretorio do clone do repositorio (confirmado pelos caminhos no
+#  error_log: /home2/geova330/naruto/chat.php).
 #
-#  Se o jogo estiver em subdominio ou dominio adicional, troque pelo caminho
-#  que o cPanel mostra em "Dominios" -> "Raiz do documento". Exemplos:
-#     export DEPLOYPATH=/home2/geova330/public_html/naruto
-#     export DEPLOYPATH=/home2/geova330/naruto.seudominio.com
+#  Quando clone e pasta publica sao o mesmo lugar, o proprio "git pull" do
+#  cPanel ja atualiza o site, e copiar arquivos seria copiar em cima de si
+#  mesmo. Por isso a copia abaixo so roda se os dois caminhos forem
+#  diferentes.
 #
-#  Um caminho errado publica o jogo na pasta errada; nada e apagado, mas o
-#  site nao muda e parece que o deploy nao funcionou.
+#  Se um dia voce mover o site (dominio principal, subdominio, dominio
+#  adicional), basta trocar esta linha pela "Raiz do documento" que o cPanel
+#  mostra em Dominios -- a copia passa a acontecer sozinha.
 # =============================================================================
 
 deployment:
   tasks:
-    - export DEPLOYPATH=/home2/geova330/public_html
+    - export DEPLOYPATH=/home2/geova330/naruto
 
     # -----------------------------------------------------------------------
-    #  Copia do clone para a pasta publica.
+    #  Copia para a pasta publica, quando ela for diferente do clone.
     # -----------------------------------------------------------------------
     #  Por que rsync e nao "cp -R * $DEPLOYPATH":
     #
     #  1. O glob * NAO pega arquivos que comecam com ponto. Com cp, o
     #     .htaccess (que bloqueia _inc/, vendor/, .env e os .sql) ficaria de
-    #     fora e o servidor subiria sem nenhuma dessas protecoes.
+    #     fora e o site subiria sem nenhuma dessas protecoes.
     #
-    #  2. Precisamos preservar arquivos que existem so no servidor. O "./" no
-    #     final da origem faz o rsync copiar o CONTEUDO do diretorio, dotfiles
-    #     inclusos.
+    #  2. Precisamos preservar arquivos que existem so no servidor: o .env com
+    #     a senha do banco, e as pastas com dados de jogador.
     #
     #  Nao ha --delete de proposito: apagar no destino o que nao existe no
     #  repositorio e arriscado demais em cima de um jogo com dados reais.
     # -----------------------------------------------------------------------
-    - /usr/bin/rsync -a --human-readable
-      --exclude '.git/'
-      --exclude '.gitignore'
-      --exclude '.env'
-      --exclude '_cache/'
-      --exclude 'uploads/'
-      --exclude 'reports/'
-      --exclude 'Dockerfile'
-      --exclude 'docker/'
-      --exclude 'docker-compose.yml'
-      --exclude '.dockerignore'
-      --exclude '.cpanel.yml'
-      --exclude 'composer.phar'
-      ./ $DEPLOYPATH/
+    - if [ "$(readlink -f .)" != "$(readlink -f $DEPLOYPATH)" ]; then /usr/bin/rsync -a --exclude '.git/' --exclude '.gitignore' --exclude '.env' --exclude '_cache/' --exclude 'uploads/' --exclude 'reports/' --exclude 'Dockerfile' --exclude 'docker/' --exclude 'docker-compose.yml' --exclude '.dockerignore' --exclude '.cpanel.yml' --exclude 'composer.phar' ./ $DEPLOYPATH/; else echo "[naruto] clone e pasta publica sao o mesmo diretorio - o git pull ja publicou, nada a copiar."; fi
 
     # -----------------------------------------------------------------------
     #  Diretorios que o jogo grava em runtime.
     # -----------------------------------------------------------------------
-    #  Ficam de fora do rsync acima porque guardam dado de jogador: avatar
-    #  enviado, relatorio de batalha e a trava do instalador. Sao criados aqui
-    #  caso ainda nao existam, e o conteudo existente nunca e tocado.
+    #  Guardam dado de jogador: avatar enviado, relatorio de batalha e a trava
+    #  do instalador. Sao criados se faltarem; o conteudo nunca e tocado.
     - /bin/mkdir -p $DEPLOYPATH/_cache $DEPLOYPATH/uploads $DEPLOYPATH/reports
     - /bin/chmod 755 $DEPLOYPATH/_cache $DEPLOYPATH/uploads $DEPLOYPATH/reports
 
@@ -80,7 +63,7 @@ deployment:
 #
 #     INSTALLER_ENABLED=false     fecha /install/ no site publico
 #     APP_DEBUG=false             nao vaza caminho do servidor em erro
-#     APP_TIMEZONE=America/Sao_Paulo
+#     APP_TIMEZONE=America/Fortaleza
 #     DB_PORT=3306
 #
 #  Se INSTALLER_ENABLED faltar, o instalador ainda assim se fecha sozinho ao

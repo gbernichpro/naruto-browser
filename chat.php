@@ -1,6 +1,52 @@
 <?php
 require_once('_inc/conexao.php');
 
+/**
+ * Nome do jogador logado, como gravado na tabela `usuarios`.
+ *
+ * O chat gravava e lia $_SESSION['username'], que NUNCA era definido em lugar
+ * nenhum do projeto: o login guarda apenas $_SESSION['logado'] com o id. Com
+ * isso o heartbeat consultava `chat.to = ''` para sempre (nenhuma mensagem era
+ * entregue) e cada poll enchia o error_log com "Undefined array key username"
+ * e com o deprecated de passar null para mysql_real_escape_string().
+ *
+ * O login agora popula a chave, e esta funcao resolve pelo id para curar as
+ * sessoes que ja estavam abertas, sem exigir que o jogador entre de novo.
+ *
+ * Importante: o valor vem do banco, e nao do que o jogador digitou no login.
+ * As colunas `chat.from` e `chat.to` usam collation utf8_bin, que diferencia
+ * maiusculas de minusculas; gravar "Fulano" onde o cadastro diz "fulano"
+ * faria a mensagem nunca ser encontrada pelo destinatario.
+ *
+ * @return string  nome do jogador, ou '' se nao houver ninguem logado
+ */
+function chat_username() {
+    if (isset($_SESSION['username']) && $_SESSION['username'] !== '') {
+        return $_SESSION['username'];
+    }
+    if (empty($_SESSION['logado'])) {
+        return '';
+    }
+
+    global $mysqli_link;
+    $nome = '';
+    $stmt = mysqli_prepare($mysqli_link, 'SELECT usuario FROM usuarios WHERE id=?');
+    if ($stmt) {
+        $id = (int)$_SESSION['logado'];
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        if (mysqli_stmt_execute($stmt)) {
+            $res = mysqli_stmt_get_result($stmt);
+            if ($res && ($row = mysqli_fetch_assoc($res))) {
+                $nome = (string)$row['usuario'];
+            }
+        }
+        mysqli_stmt_close($stmt);
+    }
+
+    $_SESSION['username'] = $nome;
+    return $nome;
+}
+
 if (isset($_GET['action']) && $_GET['action'] == "chatheartbeat") { chatHeartbeat(); } 
 if (isset($_GET['action']) && $_GET['action'] == "sendchat") { sendChat(); } 
 if (isset($_GET['action']) && $_GET['action'] == "closechat") { closeChat(); } 
@@ -15,8 +61,18 @@ if (!isset($_SESSION['openChatBoxes'])) {
 }
 
 function chatHeartbeat() {
-	
-	$sql = "select * from chat where (chat.to = '".mysql_real_escape_string($_SESSION['username'])."' AND recd = 0) order by id ASC";
+
+	// Visitante deslogado fica com o JS do chat na tela fazendo poll a cada
+	// poucos segundos. Sem esta saida, cada um desses polls dispara duas
+	// consultas inuteis ao banco.
+	$username = chat_username();
+	if ($username === '') {
+		header('Content-type: application/json');
+		echo '{"items":[]}';
+		exit(0);
+	}
+
+	$sql = "select * from chat where (chat.to = '".mysql_real_escape_string($username)."' AND recd = 0) order by id ASC";
 	$query = mysql_query($sql);
 	$items = '';
 
@@ -87,7 +143,7 @@ EOD;
 	}
 }
 
-	$sql = "update chat set recd = 1 where chat.to = '".mysql_real_escape_string($_SESSION['username'])."' and recd = 0";
+	$sql = "update chat set recd = 1 where chat.to = '".mysql_real_escape_string($username)."' and recd = 0";
 	$query = mysql_query($sql);
 
 	if ($items != '') {
@@ -132,7 +188,7 @@ function startChatSession() {
 header('Content-type: application/json');
 ?>
 {
-		"username": "<?php echo $_SESSION['username'];?>",
+		"username": <?php echo json_encode(chat_username()); ?>,
 		"items": [
 			<?php echo $items;?>
         ]
@@ -145,7 +201,7 @@ header('Content-type: application/json');
 }
 
 function sendChat() {
-	$from = $_SESSION['username'];
+	$from = chat_username();
 	$to = $_POST['to'];
 	$message = $_POST['message'];
 
