@@ -72,11 +72,16 @@
                             success: function(resposta) {
                                 $('#recebeajax').html(resposta);
                                 botao.closest('.action').hide();
+                                if (window.gameToast) {
+                                    var texto = $('<div>').html(resposta).text().trim() || 'Recompensa recebida com sucesso.';
+                                    window.gameToast(texto, 'success');
+                                }
                             },
                             error: function(xhr) {
                                 var mensagem = xhr.responseText || 'Não foi possível receber a recompensa. Tente novamente.';
                                 $('#recebeajax').text(mensagem);
                                 botao.data('carregando', false).text('Recompensa Diária');
+                                if (window.gameToast) window.gameToast($('<div>').html(mensagem).text(), 'error');
                             }
                         });
                         return false;

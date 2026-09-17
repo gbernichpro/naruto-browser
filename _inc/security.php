@@ -35,7 +35,30 @@ function csrf_input() {
     echo '<input type="hidden" name="csrf_token" value="' . get_csrf_token() . '">';
 }
 
+/**
+ * Identifica o acesso local direto usado no ambiente WAMP.
+ *
+ * O Turnstile depende de HTTPS e de uma cadeia de certificados configurada no
+ * PHP. Em localhost ele nao acrescenta protecao e pode impedir completamente
+ * o login quando o cURL do WAMP nao possui um CA bundle configurado.
+ */
+function naruto_is_local_request() {
+    $remoteAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+    if (!in_array($remoteAddress, ['127.0.0.1', '::1'], true)) {
+        return false;
+    }
+
+    $hostHeader = strtolower(trim($_SERVER['HTTP_HOST'] ?? ''));
+    $host = parse_url('http://' . $hostHeader, PHP_URL_HOST);
+
+    return in_array($host, ['localhost', '127.0.0.1', '::1'], true);
+}
+
 function naruto_turnstile_enabled() {
+    if (naruto_is_local_request()) {
+        return false;
+    }
+
     return naruto_env('TURNSTILE_SITE_KEY', '') !== ''
         && naruto_env('TURNSTILE_SECRET_KEY', '') !== '';
 }

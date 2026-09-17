@@ -4,22 +4,17 @@
 <div class="modern-card">
     <div class="modern-card-header">Destaque</div>
     <div class="modern-card-body">
-        <link rel="stylesheet" href="_css/default.css" type="text/css" media="screen"  />
-        <link rel="stylesheet" href="_css/dark.css" type="text/css" media="screen" />
-        <link rel="stylesheet" href="_css/bar.css" type="text/css" media="screen"  />
-        <link rel="stylesheet" href="_css/nivo-slider.css" type="text/css" media="screen"  />
-        <div class="slider-wrapper theme-dark">
-            <div  id="slider" class="nivoSlider">
-                <img src="_img/0.png" data-thumb="_img/1.png" alt="" title="<b>Naruto <?php echo NARUTO_NOME; ?></b> Rpg Online - Jogue diretamente do seu navegador" />
-                <img src="_img/1.png" data-thumb="_img/1.png" alt="" title="<b>Naruto <?php echo NARUTO_NOME; ?></b> Inicie sua aventura" />
+        <div class="welcome-panel">
+            <div>
+                <span class="welcome-kicker">Sua jornada começa aqui</span>
+                <h2>Construa sua própria lenda ninja</h2>
+                <p>Treine seus atributos, aprenda novos jutsus, participe de batalhas e leve sua vila ao topo do ranking.</p>
+            </div>
+            <div class="welcome-actions">
+                <a href="?p=terms" class="modern-btn">Criar conta</a>
+                <a href="?p=faq" class="welcome-secondary">Como jogar</a>
             </div>
         </div>
-        <script type="text/javascript" src="_js/jquery.nivo.slider.js"></script>
-        <script type="text/javascript">
-        $(window).load(function() {
-            $('#slider').nivoSlider();
-        });
-        </script>
     </div>
 </div>
 
@@ -59,7 +54,7 @@ $("#div_rank").load('_ajax/ajax_noticias.php');
 }
 
 </script>
-<div style="display: flex; gap: 20px; margin-top: 20px;">
+<div class="home-dashboard-grid">
     <!-- News Section -->
     <div class="modern-card" style="flex: 1;">
         <div class="modern-card-header">Notícias</div>
@@ -178,14 +173,14 @@ $ii = $count6-$i;
 <div class="modern-card" style="margin-top: 20px;">
     <div class="modern-card-header">População das Vilas</div>
     <div class="modern-card-body">
-        <div style="display: flex; justify-content: space-around; text-align: center; color: var(--text-dim); font-size: 11px;">
-            <div style="flex: 1;"><img onmouseover="Tip('Vila da Folha')" onmouseout="UnTip()" src="_img/vilas/reg_folha.jpg" style="width:40px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 5px;"><br><b style="color: #fff;"><?php echo $count; ?></b><br>Jogadores</div>
-            <div style="flex: 1;"><img onmouseover="Tip('Vila da Areia')" onmouseout="UnTip()" src="_img/vilas/reg_areia.jpg" style="width:40px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 5px;"><br><b style="color: #fff;"><?php echo $count1; ?></b><br>Jogadores</div>
-            <div style="flex: 1;"><img onmouseover="Tip('Vila do Som')" onmouseout="UnTip()" src="_img/vilas/reg_som.jpg" style="width:40px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 5px;"><br><b style="color: #fff;"><?php echo $count2; ?></b><br>Jogadores</div>
-            <div style="flex: 1;"><img onmouseover="Tip('Vila da Chuva')" onmouseout="UnTip()" src="_img/vilas/reg_chuva.jpg" style="width:40px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 5px;"><br><b style="color: #fff;"><?php echo $count3; ?></b><br>Jogadores</div>
-            <div style="flex: 1;"><img onmouseover="Tip('Vila da Nuvem')" onmouseout="UnTip()" src="_img/vilas/reg_nuvem.jpg" style="width:40px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 5px;"><br><b style="color: #fff;"><?php echo $count4; ?></b><br>Jogadores</div>
-            <div style="flex: 1;"><img onmouseover="Tip('Vila da Névoa')" onmouseout="UnTip()" src="_img/vilas/reg_nevoa.jpg" style="width:40px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 5px;"><br><b style="color: #fff;"><?php echo $count5; ?></b><br>Jogadores</div>
-            <div style="flex: 1;"><img onmouseover="Tip('Vila da Pedra')" onmouseout="UnTip()" src="_img/vilas/reg_pedra.jpg" style="width:40px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 5px;"><br><b style="color: #fff;"><?php echo $count6; ?></b><br>Jogadores</div>
+        <div class="village-grid">
+            <div class="village-item"><img loading="lazy" onmouseover="Tip('Vila da Folha')" onmouseout="UnTip()" src="_img/vilas/reg_folha.jpg" alt="Vila da Folha"><b><?php echo $count; ?></b><span>Jogadores</span></div>
+            <div class="village-item"><img loading="lazy" onmouseover="Tip('Vila da Areia')" onmouseout="UnTip()" src="_img/vilas/reg_areia.jpg" alt="Vila da Areia"><b><?php echo $count1; ?></b><span>Jogadores</span></div>
+            <div class="village-item"><img loading="lazy" onmouseover="Tip('Vila do Som')" onmouseout="UnTip()" src="_img/vilas/reg_som.jpg" alt="Vila do Som"><b><?php echo $count2; ?></b><span>Jogadores</span></div>
+            <div class="village-item"><img loading="lazy" onmouseover="Tip('Vila da Chuva')" onmouseout="UnTip()" src="_img/vilas/reg_chuva.jpg" alt="Vila da Chuva"><b><?php echo $count3; ?></b><span>Jogadores</span></div>
+            <div class="village-item"><img loading="lazy" onmouseover="Tip('Vila da Nuvem')" onmouseout="UnTip()" src="_img/vilas/reg_nuvem.jpg" alt="Vila da Nuvem"><b><?php echo $count4; ?></b><span>Jogadores</span></div>
+            <div class="village-item"><img loading="lazy" onmouseover="Tip('Vila da Névoa')" onmouseout="UnTip()" src="_img/vilas/reg_nevoa.jpg" alt="Vila da Nevoa"><b><?php echo $count5; ?></b><span>Jogadores</span></div>
+            <div class="village-item"><img loading="lazy" onmouseover="Tip('Vila da Pedra')" onmouseout="UnTip()" src="_img/vilas/reg_pedra.jpg" alt="Vila da Pedra"><b><?php echo $count6; ?></b><span>Jogadores</span></div>
         </div>
     </div>
 </div>
@@ -200,7 +195,6 @@ $ii = $count6-$i;
 
 
 <script>document.forms[0].login_login.focus()</script>
-
 
 
 
