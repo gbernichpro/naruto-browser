@@ -340,8 +340,9 @@ body::before {
 }
 
 .game-shell {
-    width: min(1180px, calc(100% - 32px)) !important;
+    width: min(1500px, calc(100% - 32px)) !important;
     margin: 24px auto 40px;
+    table-layout: fixed;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 20px;
@@ -489,6 +490,21 @@ body::before {
 
 .sidebar-table {
     width: 100% !important;
+}
+
+/* Mantem titulos e caixas das paginas dentro da coluna principal. */
+.game-shell > tbody > tr > td.modern-card-body {
+    min-width: 0;
+    overflow-x: clip !important;
+}
+
+.game-shell .box_top,
+.game-shell .box2_top,
+.game-shell .box3_top,
+.game-shell .box5_top {
+    max-width: 100%;
+    clear: both !important;
+    overflow-wrap: anywhere;
 }
 
 .sidebar-emblem {
