@@ -481,7 +481,9 @@ body::before {
 }
 
 .sidebar-panel {
-    width: 246px;
+    width: 246px !important;
+    min-width: 246px;
+    max-width: 246px;
     padding: 20px 14px 28px;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     background: linear-gradient(180deg, rgba(21, 23, 29, 0.98), rgba(10, 11, 15, 0.96)) !important;
@@ -1097,6 +1099,9 @@ body::before {
     }
 
     .sidebar-panel {
+        width: 100% !important;
+        min-width: 0;
+        max-width: none;
         padding: 10px !important;
         border-right: 0;
         border-bottom: 1px solid var(--border-subtle);
