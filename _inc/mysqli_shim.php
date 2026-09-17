@@ -119,7 +119,14 @@ if (!function_exists('mysql_connect')) {
 
     function mysql_free_result($result) {
         if ($result instanceof mysqli_result) {
-            return mysqli_free_result($result);
+            // O codigo antigo libera alguns resultados mais de uma vez. No
+            // PHP 8 isso lanca Error; a antiga extensao mysql apenas falhava.
+            try {
+                mysqli_free_result($result);
+                return true;
+            } catch (Throwable $erro) {
+                return false;
+            }
         }
         return false;
     }

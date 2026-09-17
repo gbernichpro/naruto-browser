@@ -1,5 +1,7 @@
 <?php
 require_once(__DIR__ . '/_inc/env.php');
+require_once(__DIR__ . '/vendor/autoload.php');
+Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
 
 // display_errors ligado em producao expoe caminhos do servidor e trechos de
 // query em qualquer warning. Ligue com APP_DEBUG=true so para diagnosticar.
@@ -32,7 +34,7 @@ $c=new C_Encrypt();
 
 function anti_sql_injection ($str) {
     if (!is_numeric($str)) {
-        $str= get_magic_quotes_gpc() ? stripslashes($str) : $str;
+        $str= function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc() ? stripslashes($str) : $str;
         $str= function_exists("mysql_real_escape_string") ? mysql_real_escape_string($str) : mysql_escape_string($str);
     }
     return $str;
@@ -161,7 +163,27 @@ if(isset($_SESSION['logado']) || isset($_COOKIE['logado'])){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!-- <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
+<?php if (naruto_turnstile_enabled()): ?>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script type="text/javascript">
+window.onTurnstileSuccess = function(token) {
+    var campo = document.getElementById('header_turnstile_token');
+    if (campo) campo.value = token;
+};
+</script>
+<?php endif; ?>
+<script type="text/javascript">
+function validateLoginForm() {
+    <?php if (naruto_turnstile_enabled()): ?>
+    var campo = document.getElementById('header_turnstile_token');
+    if (!campo || !campo.value) {
+        alert('Conclua a verificação antirrobô antes de entrar.');
+        return false;
+    }
+    <?php endif; ?>
+    return true;
+}
+</script>
 <title>Naruto <?php echo NARUTO_NOME; ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="_css/naruto.css" rel="stylesheet" type="text/css" />
@@ -311,7 +333,7 @@ horas();
 
 
 <body>
-<script src="_js/wz/wz_tooltip.js" type="text/javascript" language="javascript"></script>
+<script src="_js/wz/wz_tooltip.js?v=20260917" type="text/javascript"></script>
 
    <?php if(isset($_SESSION['logado'])){
 ?>
@@ -335,7 +357,7 @@ $dbr=mysql_fetch_assoc($sqlr);?>
       <table align="center"  cellpadding="0" cellspacing="0" width="1024">
         <!--DWLayoutTable-->
 
-<?php if(isset($_GET['erro'])){
+<?php if(isset($_GET['erro']) && ($_GET['p'] ?? '') !== 'reg'){
 		$erro_msg = '';
 		switch($_GET['erro']){
 			case 'ban': $erro_msg = 'Esta conta esta banida!'; break;
@@ -448,8 +470,7 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
               <tr>
                 <td><img src="template/bottom_menu.png" width="246" height="73" /></td>
               </tr>
-              <?php if(!isset($_SESSION['logado'])): ?>
-              <!--
+              <?php if(!isset($_SESSION['logado']) && naruto_turnstile_enabled()): ?>
               <tr>
                 <td align="center" style="padding: 10px 0;">
                     <div style="background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; border: 1px solid #444; width: 154px;">
@@ -458,7 +479,6 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
                     </div>
                 </td>
               </tr>
-              -->
               <?php endif; ?>
             </table>
           </td>

@@ -35,33 +35,38 @@ function csrf_input() {
     echo '<input type="hidden" name="csrf_token" value="' . get_csrf_token() . '">';
 }
 
+function naruto_turnstile_enabled() {
+    return naruto_env('TURNSTILE_SITE_KEY', '') !== ''
+        && naruto_env('TURNSTILE_SECRET_KEY', '') !== '';
+}
+
 /**
  * Validates a Cloudflare Turnstile token
  * @param string $token The turnstile response token
  * @return bool True if valid, false otherwise
  */
 function validate_turnstile($token) {
-    return true; // FULL EMERGENCY BYPASS - Unblocking registration
-    if (empty($token)) return false;
-    
     $secret = naruto_env('TURNSTILE_SECRET_KEY', 'your_secret_key_here');
-    if ($secret === 'your_secret_key_here' || empty($secret)) return true; // Bypass if not configured or empty
-    
-    // TEMPORARY BYPASS to unlock production while debugging
-    // return true; 
-
+    // Em desenvolvimento o captcha fica desligado enquanto nao houver chave.
+    if (!naruto_turnstile_enabled() || $secret === 'your_secret_key_here') return true;
+    if (empty($token)) return false;
     $url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
     $data = [
         'secret' => $secret,
         'response' => $token,
-        'remoteip' => $_SERVER['REMOTE_ADDR']
+        'remoteip' => $_SERVER['REMOTE_ADDR'] ?? ''
     ];
 
+    if (!function_exists('curl_init')) {
+        error_log('Turnstile nao pode ser validado: extensao cURL ausente.');
+        return false;
+    }
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     $response = curl_exec($ch);
     
     if($response === false) {

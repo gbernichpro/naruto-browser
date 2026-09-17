@@ -84,6 +84,11 @@ function custom_error_handler($errno, $errstr, $errfile, $errline) {
 
 // Handler de exceções não capturadas
 function custom_exception_handler($exception) {
+    error_log((string) $exception);
+    if (!headers_sent()) {
+        http_response_code(500);
+    }
+    echo 'Ocorreu um erro interno. Tente novamente mais tarde.';
     send_error_to_discord(
         'EXCEÇÃO NÃO CAPTURADA',
         $exception->getMessage(),

@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 if($db['orgid']>0){ echo "<script>self.location='?p=myorg'</script>"; exit(); }
 
 if($db['nivel']<1){ // Mantido nivel 1

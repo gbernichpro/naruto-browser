@@ -61,15 +61,31 @@
                 <script type="text/javascript">
                 $(function(){
                     $(".receber").click(function(){
-                        var id = $(this).attr('id');
-                        $('#recebeajax').load("_inc/diario.php", {jogador: id});
+                        var botao = $(this);
+                        if (botao.data('carregando')) return false;
+                        botao.data('carregando', true).text('Recebendo...');
+                        $.ajax({
+                            url: '_ajax/ajax_diario.php',
+                            type: 'POST',
+                            dataType: 'html',
+                            data: {csrf_token: <?php echo json_encode(get_csrf_token()); ?>},
+                            success: function(resposta) {
+                                $('#recebeajax').html(resposta);
+                                botao.closest('.action').hide();
+                            },
+                            error: function(xhr) {
+                                var mensagem = xhr.responseText || 'Não foi possível receber a recompensa. Tente novamente.';
+                                $('#recebeajax').text(mensagem);
+                                botao.data('carregando', false).text('Recompensa Diária');
+                            }
+                        });
                         return false;
                     });
                 });
                 </script>
                 <div id="msg" style="margin-bottom:10px;">
                     <div id="recebeajax"></div>
-                    <div class="action"><a href="javascript:void(0)" class="receber" id="<?php echo $c->encode($db['id'],$chaveuniversal); ?>"><b>Recompensa Diária</b></a></div>
+                    <div class="action"><a href="javascript:void(0)" class="receber"><b>Recompensa Diária</b></a></div>
                 </div>
             <?php }
         } ?>
