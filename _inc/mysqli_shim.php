@@ -76,6 +76,18 @@ if (!function_exists('mysql_connect')) {
         return mysqli_num_rows($result);
     }
 
+    function mysql_num_fields($result) {
+        return mysqli_num_fields($result);
+    }
+
+    function mysql_field_name($result, $field_offset) {
+        if ($field_offset < 0 || $field_offset >= mysqli_num_fields($result)) {
+            return false;
+        }
+        $field = mysqli_fetch_field_direct($result, $field_offset);
+        return $field ? $field->name : false;
+    }
+
     function mysql_fetch_row($result) {
         return mysqli_fetch_row($result);
     }
