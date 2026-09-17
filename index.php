@@ -191,7 +191,7 @@ function validateLoginForm() {
     <link type="text/css" href="_css/menu.css" rel="stylesheet" />
 	<link type="text/css" href="_css/menu3.css" rel="stylesheet" />
     <link type="text/css" href="_css/sidebar_refined.css?v=20260917-2" rel="stylesheet" />
-    <link type="text/css" href="_css/modern_ui.css?v=20260917-8" rel="stylesheet" />
+    <link type="text/css" href="_css/modern_ui.css?v=20260917-9" rel="stylesheet" />
     <script type="text/javascript" src="_js/jquery.min.js"></script>
     <script type="text/javascript" src="_js/modern_ui.js?v=20260917-3" defer></script>
     <script type="text/javascript" src="_js/zebra_dialog.js"></script>
