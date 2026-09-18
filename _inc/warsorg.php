@@ -35,7 +35,7 @@ Desde tempos antigos as guerras vem sendo cada vez mais constantes no mundo ninj
 
 
 
- <?
+ <?php
 $sqlo = mysql_query("SELECT * FROM clas_guerras WHERE (clan_2=".$db['orgid']." or clan_1=".$db['orgid'].") ORDER BY inicio DESC");
 if(mysql_num_rows($sqlo)==0) echo '<table width="100%" cellspacing="0"><tr id="barra3"><td colspan="8"><center><b><div class="aviso">Nenhum relatório de guerra.</div></div></tr></table>';
 while($dbo = mysql_fetch_array($sqlo))
@@ -52,6 +52,12 @@ $claninimigo=$dbo['clan_1'];
 	$sql2=mysql_query("SELECT * FROM organizacoes WHERE id='".$db['orgid']."'");
 	$clan=mysql_fetch_assoc($sql2);
 //*********************************************************************************//
+	// Sem os dois clas carregados nao ha guerra para exibir: seguir adiante
+	// so gera "Undefined variable" e "array offset on null" em cada visita.
+	if (!is_array($clan) || !is_array($clan_inimigo)) {
+		echo '<div class="aviso">Nenhuma guerra de cla em andamento.</div>';
+		return;
+	}
 	?>
 	<table width="100%" cellspacing="0">
 			<tr class="table_dados" style="background:#323232;">
@@ -64,7 +70,7 @@ $claninimigo=$dbo['clan_1'];
 Data de inicio da guerra:<?=$dbo['inicio']?>
 </div>
  <div class='sep'></div>
-	<?
+	<?php
 
 }
 	

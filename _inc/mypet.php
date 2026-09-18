@@ -1,3 +1,25 @@
+<?php
+/**
+ * Loja de invocacoes (Kuchiyose).
+ *
+ * ATENCAO: esta pagina perdeu o bloco que carregava os dados. $dbt (o
+ * contrato oferecido, de `table_pets`) e $dbp (a invocacao atual do jogador)
+ * sao usados abaixo mas nunca sao consultados em lugar nenhum do projeto --
+ * o padrao correto esta em _inc/home_pet.php. Alem disso o botao "Aprender"
+ * aponta para ?p=kuchiyose, que nao existe como rota.
+ *
+ * Enquanto a consulta nao for reescrita, a pagina mostra um aviso em vez de
+ * despejar dezenas de warnings no log a cada visita.
+ */
+if (!isset($dbt) || !is_array($dbt)) {
+    echo '<div class="box_top">Kuchiyose no Jutsu</div>'
+       . '<div class="box_middle" style="padding:15px;text-align:center;">'
+       . 'A loja de invocacoes esta temporariamente indisponivel.<br /><br />'
+       . '<a href="?p=home" style="color:#f44;">Voltar ao inicio</a></div>'
+       . '<div class="box_bottom"></div>';
+    return;
+}
+?>
 <div class="box_top">Kuchiyose no Jutsu</div>
 <div class="box_middle">
 	<div class="sep"></div>
