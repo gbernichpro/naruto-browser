@@ -318,8 +318,9 @@ function tt_Init()
 	// the user if they've forgotten to set the TagsToTip config flag
 	if(TagsToTip || tt_Debug)
 		tt_SetOnloadFnc();
-	// Ensure the tip be hidden when the page unloads
-	tt_AddEvtFnc(window, "unload", tt_Hide);
+	// "unload" e bloqueado pela Permissions Policy nos navegadores modernos.
+	// pagehide cobre navegacao, recarga e o cache de voltar/avancar.
+	tt_AddEvtFnc(window, "pagehide", tt_Hide);
 }
 // Creates command names by translating config variable names to upper case
 function tt_MkCmdEnum()

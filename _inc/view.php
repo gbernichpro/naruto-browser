@@ -31,9 +31,9 @@ document.getElementById("Click").innerHTML="Exibir Medalhas";
 </script>
 <div class="box_top">Atributos de <?php echo ucfirst($_GET['view']); ?></div>
 <?php if($db['tipodeconta']=='admin') {
-  echo '<div class="box_middle" ><div class="apresentacao" style="width:400px; margin:auto; text-align:center "><img src="/_img/star.png" width="" height="" alt="" border="0">Este usuario é Administrador.';
+  echo '<div class="box_middle" ><div class="apresentacao" style="width:400px; margin:auto; text-align:center "><img src="_img/star.png" width="" height="" alt="" border="0">Este usuario é Administrador.</div></div>';
 } else {
-?></div></div>
+?>
 <div class="box_middle">Atributos de combate, nível e experiência de <?php echo ucfirst($_GET['view']); ?>.<div class="sep"></div>
 	<?php
 		if($db['renegado']=='sim'){
@@ -303,4 +303,5 @@ document.getElementById("Click").innerHTML="Exibir Medalhas";
 <?php if(($db['config_twitter']<>'')&&($db['config_oktwitter']=='sim')) require_once('view_twitter.php'); ?>
 <?php
 @mysql_free_result($sqlf);
+}
 ?>

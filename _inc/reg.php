@@ -9,28 +9,38 @@ $vagas=45000;
 if($dbc['conta']>=$vagas){ echo "<script>self.location='?p=login'</script>"; return; }
 if(isset($_POST['reg_submit'])){
 	$erro=0;
-    if(!validate_csrf_token(@$_POST['csrf_token'])) $erro=17; // New error code for CSRF
-    // if($erro==0 && !validate_turnstile(@$_POST['cf-turnstile-response'])) $erro=18; // Turnstile failure
-	if(@$_POST['reg_termos']=='') $erro=11;
-	if(!isset($_POST['reg_termos'])) $erro=8;
-	if($_POST['reg_senha']<>$_POST['reg_senha2']) $erro=7;
-	if($_POST['reg_vila']=='') $erro=6;
-	if($_POST['reg_personagem']=='') $erro=5;
-	if($_POST['reg_email']=='') $erro=4;
-	if($_POST['reg_senha2']=='') $erro=3;
-	if($_POST['reg_senha']=='') $erro=2;
-	if($_POST['reg_usuario']=='') $erro=1;
+	if (!validate_csrf_token($_POST['csrf_token'] ?? '')) $erro=17;
+	if ($erro===0 && !validate_turnstile($_POST['cf-turnstile-response'] ?? '')) $erro=18;
+	if ($erro===0 && empty($_POST['reg_termos'])) $erro=8;
+	if ($erro===0 && ($_POST['reg_senha'] ?? '') !== ($_POST['reg_senha2'] ?? '')) $erro=7;
+	if ($erro===0 && empty($_POST['reg_vila'])) $erro=6;
+	if ($erro===0 && empty($_POST['reg_personagem'])) $erro=5;
+	if ($erro===0 && !filter_var($_POST['reg_email'] ?? '', FILTER_VALIDATE_EMAIL)) $erro=4;
+	if ($erro===0 && empty($_POST['reg_senha2'])) $erro=3;
+	if ($erro===0 && strlen($_POST['reg_senha'] ?? '') < 8) $erro=2;
+	if ($erro===0 && strlen($_POST['reg_usuario'] ?? '') < 4) $erro=1;
 	$admin = "";
-	$personagem=$c->decode($_POST['reg_personagem'],$chaveuniversal);
-	$vila=$c->decode($_POST['reg_vila'],$chaveuniversal);
-	$usuario=str_replace(array(' ','&nbsp;'),'_',$_POST['reg_usuario']);
+	$personagem=$c->decode($_POST['reg_personagem'] ?? '',$chaveuniversal);
+	$vila=$c->decode($_POST['reg_vila'] ?? '',$chaveuniversal);
+	$usuario=str_replace(array(' ','&nbsp;'),'_',$_POST['reg_usuario'] ?? '');
 	$usuario=str_replace(' ','_',$usuario);
 	$usuario=ucfirst(strtolower(str_replace(array('/','^','[','-',']','+','$','(',')','?','\'','|','°','ª','#','@','.','?','!'),'',$usuario)));
 	$pattern = "([_ _-_,_._>_`_´_<_~_^\/_?_°_\_:_;_§_|_!_¹_²_³_£_¢_¬_§_º_@_#_%_¨_&_*_+_{_}_*_])" ;
-if(preg_match('/' . $pattern . '/', $_POST['reg_usuario']))
-{
-die("<script>self.location='?p=reg&erro=16'</script>");
-}
+	if($erro===0 && preg_match('/' . $pattern . '/', $_POST['reg_usuario'] ?? '')) $erro=16;
+
+	$redirecionarCadastro = static function ($codigo, $personagem, $vila) {
+		$parametros = [
+			'p' => 'reg',
+			'user' => $_POST['reg_usuario'] ?? '',
+			'mail' => $_POST['reg_email'] ?? '',
+			'char' => $personagem,
+			'village' => $vila,
+			'erro' => $codigo,
+		];
+		if (!empty($_POST['reg_nlink'])) $parametros['nlink'] = $_POST['reg_nlink'];
+		echo '<script>self.location=' . json_encode('?' . http_build_query($parametros)) . '</script>';
+	};
+	if($erro>0){ $redirecionarCadastro($erro, $personagem, $vila); return; }
 
 	// Modernized counts and checks with Prepared Statements
 	$stmt_c = mysqli_prepare($mysqli_link, "SELECT count(id) conta FROM usuarios WHERE usuario=?");
@@ -57,9 +67,7 @@ die("<script>self.location='?p=reg&erro=16'</script>");
 		if($dbv['conta']==0) $erro=13;
 	}
 
-	// Password check modernization removed as we handle Bcrypt now
-	if(isset($_POST['nlink'])) $link='&nlink='.$_POST['nlink']; else $link='';
-	if($erro>0){ echo "<script>self.location='?p=reg&user=".$_POST['reg_usuario']."&mail=".$_POST['reg_email']."&char=".$personagem."&village=".$vila."&erro=".$erro.$link."'</script>"; return; }
+	if($erro>0){ $redirecionarCadastro($erro, $personagem, $vila); return; }
 	else {
 	    $novocodigo=rand(99999,99999999);
 		if(isset($_POST['reg_akatsuki'])) $renegado='sim'; else $renegado='nao';
@@ -69,16 +77,6 @@ die("<script>self.location='?p=reg&erro=16'</script>");
         $vipadd=$fim;
 		$usuario=ucfirst(strtolower(str_replace(array(' ','/','^','[','-',']','+','$','(',')','?','\'','|','°','ª','#','@','.','?','!'),'',$_POST['reg_usuario'])));
 		
-        // DEBUGGING REGISTRATION
-        restore_error_handler();
-        restore_exception_handler();
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-        echo "Debug: Iniciando registro...<br>";
-        
         // Secure Registration INSERT with Prepared Statements
         $senha_hash = password_hash($_POST['reg_senha'], PASSWORD_DEFAULT);
         
@@ -179,6 +177,30 @@ $txtkakashi='<b>Nome:</b> Hatake Kakashi<br /><b>Vila:</b> Vila da Folha<br /><b
 $sqlc=mysql_query("SELECT count(id) conta FROM usuarios");
 $dbc=mysql_fetch_assoc($sqlc);
 ?>
+<?php
+if (isset($_GET['erro'])) {
+    $mensagensCadastro = [
+        1 => 'O nome de usuário deve ter pelo menos 4 caracteres.',
+        2 => 'A senha deve ter pelo menos 8 caracteres.',
+        3 => 'Confirme a senha.',
+        4 => 'Informe um e-mail válido.',
+        5 => 'Escolha um personagem.',
+        6 => 'Escolha uma vila.',
+        7 => 'As senhas digitadas não são iguais.',
+        8 => 'Você precisa aceitar os termos para criar a conta.',
+        11 => 'Você precisa aceitar os termos para criar a conta.',
+        12 => 'Esse usuário ou e-mail já está cadastrado.',
+        13 => 'O jogador indicado não foi encontrado.',
+        16 => 'Use apenas letras e números no nome de usuário.',
+        17 => 'A página expirou. Atualize e tente novamente.',
+        18 => 'A verificação antirrobô não foi concluída.',
+    ];
+    $codigoErro = (int) $_GET['erro'];
+    if (isset($mensagensCadastro[$codigoErro])) {
+        echo '<div class="aviso">' . htmlspecialchars($mensagensCadastro[$codigoErro], ENT_QUOTES, 'UTF-8') . '</div><div class="sep"></div>';
+    }
+}
+?>
 <div class="box_top">Registrar</div><div class="box_middle"><div style="background: url(../_img/_detalhes/base2.PNG);width: 720px;height: 250px;">
 <table cellpadding="0" cellspacing="0" width="712" height="230"><tbody><tr><td width="150">
 <img width="142" style="" src="_img/_detalhes/msg/1.png"></td><td valign="top"><br><br><br>
@@ -198,11 +220,11 @@ obrigatórios, sem exceção.</br>
 <div align="left">
 
 <input type="hidden" id="reg_submit" name="reg_submit" value="1" />
-<input type="hidden" id="reg_nlink" name="reg_nlink" value="<?php if(isset($_GET['nlink'])) echo $_GET['nlink']; ?>" />
+<input type="hidden" id="reg_nlink" name="reg_nlink" value="<?php if(isset($_GET['nlink'])) echo htmlspecialchars($_GET['nlink'], ENT_QUOTES, 'UTF-8'); ?>" />
 <fieldset>
 	<legend>Dados da Conta</legend>
     <span class="destaque">Nome de Usuário:</span><br />
-    <input type="text" id="reg_usuario" name="reg_usuario" maxlength="15" onfocus="className='input'" onblur="className=''" <?php if(isset($_GET['user'])) echo 'value="'.$_GET['user'].'"'; ?>/><br />
+    <input type="text" id="reg_usuario" name="reg_usuario" maxlength="15" onfocus="className='input'" onblur="className=''" <?php if(isset($_GET['user'])) echo 'value="'.htmlspecialchars($_GET['user'], ENT_QUOTES, 'UTF-8').'"'; ?>/><br />
     <span class="sub2"><small>Minimo. 4 e Máximo. 20 caracteres. (letras e números).</small></span><br /><br />
 
     <span class="destaque">Senha:</span><br />
@@ -214,7 +236,7 @@ obrigatórios, sem exceção.</br>
     <span class="sub2"><small>Repita novamente a senha.</small></span><br /><br />
 
     <span class="destaque">Email:</span><br />
-    <input type="text" id="reg_email" name="reg_email" maxlength="250" onfocus="className='input'" onblur="className=''" <?php if(isset($_GET['mail'])) echo 'value="'.$_GET['mail'].'"'; ?>/><br />
+    <input type="text" id="reg_email" name="reg_email" maxlength="250" onfocus="className='input'" onblur="className=''" <?php if(isset($_GET['mail'])) echo 'value="'.htmlspecialchars($_GET['mail'], ENT_QUOTES, 'UTF-8').'"'; ?>/><br />
     <span class="sub2"><small>Informe um e-mail válido! Você receberá o link de ativação neste e-mail.</small></span>
 </fieldset>
 <fieldset>
@@ -306,7 +328,9 @@ function Cvila(obj){
     <input type="checkbox" id="reg_termos" name="reg_termos" /> Declaro que <b>li</b> e <b>aceito</b> os termos propostos, e que estou ciente das regras do jogo.
     <div class="sep"></div>
     <div align="center">
-        <!-- <div class="cf-turnstile" data-sitekey="<?php echo htmlspecialchars(naruto_env('TURNSTILE_SITE_KEY', ''), ENT_QUOTES, 'UTF-8'); ?>" data-size="compact"></div> -->
+        <?php if (naruto_turnstile_enabled()): ?>
+            <div class="cf-turnstile" data-sitekey="<?php echo htmlspecialchars(naruto_env('TURNSTILE_SITE_KEY', ''), ENT_QUOTES, 'UTF-8'); ?>" data-size="compact"></div>
+        <?php endif; ?>
         <input type="submit" class="botao" id="subm" name="subm" value="Registrar" />
     </div>
 </fieldset>

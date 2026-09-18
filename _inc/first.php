@@ -6,15 +6,6 @@ if(isset($_POST['fir_avatar'])){
 	$avatar = $c->decode($_POST['fir_avatar'], $chaveuniversal);
 	vn($avatar);
 
-    // Modernized update using MySQLi Prepared Statement
-    $stmt_up = mysqli_prepare($mysqli_link, "UPDATE usuarios SET avatar=?, personagem=? WHERE id=?");
-    // Getting personagem name from avatar ID isn't direct here, but the original code
-    // didn't change 'personagem' column, only 'avatar'. 
-    // Wait, the original code had: mysql_query("INSERT INTO personagens (usuarioid) VALUES (".$db['id'].")");
-    // And: mysql_query("UPDATE usuarios SET avatar='".antiinjection($avatar)."' WHERE id=".$db['id']);
-    
-    // Let's stick to the original logic but secure it.
-    
     $stmt = mysqli_prepare($mysqli_link, "UPDATE usuarios SET avatar=? WHERE id=?");
     mysqli_stmt_bind_param($stmt, "ii", $avatar, $db['id']);
     if (!mysqli_stmt_execute($stmt)) {

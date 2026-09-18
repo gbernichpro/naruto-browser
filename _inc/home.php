@@ -21,16 +21,12 @@ require_once('funcoes.php');
 <?php if($db['missao']>0) require_once('busymission.php'); ?>
 
 <?php
-$max=250;
-$src="_img/bars/center_bar_tai.png";
-$src1="_img/bars/center_bar_nin.png";
-$src2="_img/bars/center_bar_gen.png";
-$src3="_img/bars/center_bar_en.png";
-$src4="_img/bars/center_bar_exp.png";
-$array=array("t"=>$db['taijutsu'],"n"=>$db['ninjutsu'],"g"=>$db['genjutsu']);
-rsort($array);
-$array2=array("t"=>$db['taijutsu'],"n"=>$db['ninjutsu'],"g"=>$db['genjutsu']);
-arsort($array2);
+$attributeMax = max(1, (int)$db['taijutsu'], (int)$db['ninjutsu'], (int)$db['genjutsu']);
+$taiPercent = min(100, max(0, ((int)$db['taijutsu'] / $attributeMax) * 100));
+$ninPercent = min(100, max(0, ((int)$db['ninjutsu'] / $attributeMax) * 100));
+$genPercent = min(100, max(0, ((int)$db['genjutsu'] / $attributeMax) * 100));
+$energyPercent = min(100, max(0, ((int)$db['energia'] / max(1, (int)$db['energiamax'])) * 100));
+$expPercent = min(100, max(0, ((int)$db['exp'] / max(1, (int)$db['expmax'])) * 100));
 ?>
 <div class="box_top">Meus Atributos</div>
 <div class="box_middle">Seus atributos de combate, yens atuais, nível e experiência.<div class="sep"></div>
@@ -55,20 +51,7 @@ arsort($array2);
 		  	} else $nivel=rankNinja($db['nivel']);
 		}
 		?>
-	<table width="100%" cellpadding="0" cellspacing="0"<?php if($dbx['id']==$db['id']){
-		echo ' style="background:url(_img/kage/kage';
-		if($db['renegado']=='sim') echo '1'; else
-		switch($db['vila']){
-			case 1: echo '1'; break;
-			case 2: echo '2'; break;
-			case 3: echo '1'; break;
-			case 4: echo '1'; break;
-			case 5: echo '5'; break;
-			case 6: echo '6'; break;
-			case 8: echo '1'; break;
-			case 9: echo '1'; break;
-		}
-		echo '.jpg) no-repeat right top;"'; } ?>>
+	<table width="100%" cellpadding="0" cellspacing="0" class="character-overview">
 
 		    <?php
 $id=$_SESSION['logado'];
@@ -106,48 +89,30 @@ $dbgrupos=@mysql_fetch_assoc($sqlgrupos);
         <tr>
         	<td colspan="3"><div class="sep"></div></td>
         </tr>
-        <tr>
-		<td width="13%" align="right" style="padding-right:10px;"><div align="right"><img src="template/ico_tai.png" width="16" height="16"></div></td>
-
-          <td align="left"><img src="_img/bars/left_bar_tai.png" /><?php
-			if($array[0]==$array2["t"]) echo '<img src="'.$src.'" width="'.($max*$array[0])/$array[0].'" height="19" />'; else
-			if($array[1]==$array2["t"]) echo '<img src="'.$src.'" width="'.($max*$array[1])/$array[0].'" height="19" />'; else
-			if($array[2]==$array2["t"]) echo '<img src="'.$src.'" width="'.($max*$array[2])/$array[0].'" height="19" />';
-			?><img src="_img/bars/right_bar_tai.png" /></td>
-            <td width="25%" align="left"><b>| <?php echo $db['taijutsu']; ?> |</b>&nbsp;&nbsp;&nbsp;<span id="atrtai"><?php echo $db['orgnivel']; ?></span><?php if($dbgrupos['cla_taijutsu']==0){echo "";} else{echo "|+".$dbgrupos['cla_taijutsu']."|";} ?></td>
-        <tr>
-        	<td align="right" style="padding-right:10px;"><div align="right"><img src="template/ico_nin.png" width="16" height="16"></div></td>
-          <td align="left"><img src="_img/bars/left_bar_nin.png" /><?php
-			if($array[0]==$array2["n"]) echo '<img src="'.$src1.'" width="'.($max*$array[0])/$array[0].'" height="19" />'; else
-			if($array[1]==$array2["n"]) echo '<img src="'.$src1.'" width="'.($max*$array[1])/$array[0].'" height="19" />'; else
-			if($array[2]==$array2["n"]) echo '<img src="'.$src1.'" width="'.($max*$array[2])/$array[0].'" height="19" />';
-			?><img src="_img/bars/right_bar_nin.png" />
-          </td>
-            <td align="left"><b>| <?php echo $db['ninjutsu']; ?> |</b>&nbsp;&nbsp;&nbsp;<span id="atrnin"><?php echo $db['orgnivel']; ?></span> <?php if($dbgrupos['cla_ninjutsu']==0){echo "";} else{echo "|+".$dbgrupos['cla_ninjutsu']."|";} ?></td>
+        <tr class="stat-row stat-tai">
+            <td class="stat-label">TAI</td>
+            <td><div class="stat-track"><span style="--progress: <?php echo round($taiPercent, 2); ?>%"></span></div></td>
+            <td class="stat-value"><b><?php echo $db['taijutsu']; ?></b> <span id="atrtai"><?php echo $db['orgnivel']; ?></span><?php if($dbgrupos['cla_taijutsu']!=0) echo ' +'.$dbgrupos['cla_taijutsu']; ?></td>
         </tr>
-        <tr>
-        	<td align="right" style="padding-right:10px;"><div align="right"><img src="template/ico_gen.png" width="17" height="17"></div></td>
-          <td align="left"><img src="_img/bars/left_bar_gen.png" /><?php
-			if($array[0]==$array2["g"]) echo '<img src="'.$src2.'" width="'.($max*$array[0])/$array[0].'" height="19" />'; else
-			if($array[1]==$array2["g"]) echo '<img src="'.$src2.'" width="'.($max*$array[1])/$array[0].'" height="19" />'; else
-			if($array[2]==$array2["g"]) echo '<img src="'.$src2.'" width="'.($max*$array[2])/$array[0].'" height="19" />';
-			?><img src="_img/bars/right_bar_gen.png" />
-          </td>
-            <td align="left"><b>| <?php echo $db['genjutsu']; ?> |</b>&nbsp;&nbsp;&nbsp;<span id="atrgen"><?php echo $db['orgnivel']; ?></span>|<?php if($dbgrupos['cla_genjutsu']==0){echo "-";} else{echo $dbgrupos['cla_genjutsu'];} ?>|</td>
+        <tr class="stat-row stat-nin">
+            <td class="stat-label">NIN</td>
+            <td><div class="stat-track"><span style="--progress: <?php echo round($ninPercent, 2); ?>%"></span></div></td>
+            <td class="stat-value"><b><?php echo $db['ninjutsu']; ?></b> <span id="atrnin"><?php echo $db['orgnivel']; ?></span><?php if($dbgrupos['cla_ninjutsu']!=0) echo ' +'.$dbgrupos['cla_ninjutsu']; ?></td>
         </tr>
-        <tr>
-        	<td colspan="3"><div class="sep"></div></td>
+        <tr class="stat-row stat-gen">
+            <td class="stat-label">GEN</td>
+            <td><div class="stat-track"><span style="--progress: <?php echo round($genPercent, 2); ?>%"></span></div></td>
+            <td class="stat-value"><b><?php echo $db['genjutsu']; ?></b> <span id="atrgen"><?php echo $db['orgnivel']; ?></span><?php if($dbgrupos['cla_genjutsu']!=0) echo ' +'.$dbgrupos['cla_genjutsu']; ?></td>
         </tr>
-        <tr>
-        	<td align="right" style="padding-right:10px;"><div align="right"><img src="template/ico_hp.png" width="16" height="16"></div></td>
-          <td align="left"><img src="_img/bars/left_bar_en.png" /><img src="<?php echo $src3; ?>" width="<?php echo (($db['energia']*$max)/$db['energiamax']); ?>" height="19" /><img src="_img/bars/right_bar_en.png" /></td>
-            <td align="left"><b><small>| <?php echo $db['energia']; ?> / <?php echo $db['energiamax']; ?> |</small></b></td>
+        <tr class="stat-row stat-energy">
+            <td class="stat-label">HP</td>
+            <td><div class="stat-track"><span style="--progress: <?php echo round($energyPercent, 2); ?>%"></span></div></td>
+            <td class="stat-value"><b><?php echo $db['energia']; ?></b> / <?php echo $db['energiamax']; ?></td>
         </tr>
-		<td colspan="5"><div class="sep"></div></td>
-        <tr>
-        	<td align="right" style="padding-right:10px;"><div align="right"><img src="template/ico_exp.png" width="17" height="17"></div></td>
-          <td align="left" style="background:url(_img/bars/bar_empty.jpg) no-repeat;"><?php if($db['exp']==0) echo '&nbsp;'; else { ?><img src="_img/bars/left_bar_exp.png" /><img src="<?php echo $src4; ?>" width="<?php echo (($db['exp']*$max)/$db['expmax']); ?>" height="19" /><img src="_img/bars/right_bar_exp.png" /><?php } ?></td>
-            <td align="left"><b><small>| <?php echo $db['exp']; ?> / <?php echo $db['expmax']; ?> |</small></b></td>
+        <tr class="stat-row stat-exp">
+            <td class="stat-label">EXP</td>
+            <td><div class="stat-track"><span style="--progress: <?php echo round($expPercent, 2); ?>%"></span></div></td>
+            <td class="stat-value"><b><?php echo $db['exp']; ?></b> / <?php echo $db['expmax']; ?></td>
         </tr>
     </table>
     <?php if(($db['hunt']==0)&&($db['missao']==0)&&($db['treino']==0)){ ?>

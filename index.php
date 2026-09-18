@@ -1,5 +1,7 @@
 <?php
 require_once(__DIR__ . '/_inc/env.php');
+require_once(__DIR__ . '/vendor/autoload.php');
+Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
 
 // display_errors ligado em producao expoe caminhos do servidor e trechos de
 // query em qualquer warning. Ligue com APP_DEBUG=true so para diagnosticar.
@@ -32,7 +34,7 @@ $c=new C_Encrypt();
 
 function anti_sql_injection ($str) {
     if (!is_numeric($str)) {
-        $str= get_magic_quotes_gpc() ? stripslashes($str) : $str;
+        $str= function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc() ? stripslashes($str) : $str;
         $str= function_exists("mysql_real_escape_string") ? mysql_real_escape_string($str) : mysql_escape_string($str);
     }
     return $str;
@@ -161,16 +163,37 @@ if(isset($_SESSION['logado']) || isset($_COOKIE['logado'])){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!-- <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
+<?php if (naruto_turnstile_enabled()): ?>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script type="text/javascript">
+window.onTurnstileSuccess = function(token) {
+    var campo = document.getElementById('header_turnstile_token');
+    if (campo) campo.value = token;
+};
+</script>
+<?php endif; ?>
+<script type="text/javascript">
+function validateLoginForm() {
+    <?php if (naruto_turnstile_enabled()): ?>
+    var campo = document.getElementById('header_turnstile_token');
+    if (!campo || !campo.value) {
+        alert('Conclua a verificação antirrobô antes de entrar.');
+        return false;
+    }
+    <?php endif; ?>
+    return true;
+}
+</script>
 <title>Naruto <?php echo NARUTO_NOME; ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="_css/naruto.css" rel="stylesheet" type="text/css" />
  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <link type="text/css" href="_css/menu.css" rel="stylesheet" />
 	<link type="text/css" href="_css/menu3.css" rel="stylesheet" />
-    <link type="text/css" href="_css/sidebar_refined.css" rel="stylesheet" />
-    <link type="text/css" href="_css/modern_ui.css" rel="stylesheet" />
+    <link type="text/css" href="_css/sidebar_refined.css?v=20260917-2" rel="stylesheet" />
+    <link type="text/css" href="_css/modern_ui.css?v=20260917-9" rel="stylesheet" />
     <script type="text/javascript" src="_js/jquery.min.js"></script>
+    <script type="text/javascript" src="_js/modern_ui.js?v=20260917-3" defer></script>
     <script type="text/javascript" src="_js/zebra_dialog.js"></script>
     <link rel="stylesheet" href="_css/zebra_dialog.css" type="text/css">
 <!--
@@ -311,7 +334,7 @@ horas();
 
 
 <body>
-<script src="_js/wz/wz_tooltip.js" type="text/javascript" language="javascript"></script>
+<script src="_js/wz/wz_tooltip.js?v=20260917" type="text/javascript"></script>
 
    <?php if(isset($_SESSION['logado'])){
 ?>
@@ -332,16 +355,19 @@ $dbr=mysql_fetch_assoc($sqlr);?>
      include '_inc/medalhas_status.php';
 } ?>
                       
-      <table align="center"  cellpadding="0" cellspacing="0" width="1024">
+      <table align="center" cellpadding="0" cellspacing="0" width="1024" class="game-shell">
         <!--DWLayoutTable-->
 
-<?php if(isset($_GET['erro'])){
+<?php if(isset($_GET['erro']) && ($_GET['p'] ?? '') !== 'reg'){
 		$erro_msg = '';
 		switch($_GET['erro']){
 			case 'ban': $erro_msg = 'Esta conta esta banida!'; break;
+			case 'ativar': $erro_msg = 'Esta conta ainda nao foi ativada.'; break;
 		    case 1: $erro_msg = 'Digite uma senha valida!'; break;
 			case 2: $erro_msg = 'Login ou senha erradas!'; break;
 			case 3: $erro_msg = 'Senha digitada errada!'; break;
+			case 98: $erro_msg = 'Nao foi possivel concluir a verificacao antirrobo. Atualize a pagina e tente novamente.'; break;
+			case 99: $erro_msg = 'Sua sessao expirou. Atualize a pagina e tente novamente.'; break;
 			case 4: 
 				if(isset($_GET['date'])){ 
 					$data_raw = $c->decode($_GET['date'], $chaveuniversal); 
@@ -354,7 +380,7 @@ $dbr=mysql_fetch_assoc($sqlr);?>
 				break;
 		}
 		if($erro_msg) {
-			echo "<script>$(function(){ top.$.prompt(" . json_encode($erro_msg) . "); });</script>";
+			echo "<script>window.addEventListener('DOMContentLoaded', function(){ if (window.gameToast) window.gameToast(" . json_encode(strip_tags($erro_msg)) . ", 'error'); });</script>";
 		}
 	} ?>
     <?php if(isset($_GET['reason'])) echo '<div class="aviso">Você foi deslogado pois outro usuário acessou sua conta.</div><div class="sep"></div>'; ?>
@@ -377,7 +403,12 @@ $random = rand(1,1);
 		  <td height="365" colspan="2" valign="top" class="modern-header"><form id="login" name="login" method="post" action="#" onsubmit="return validateLoginForm()">
                 <input type="hidden" name="csrf_token" value="' . get_csrf_token() . '">
                 <input type="hidden" name="cf-turnstile-response" id="header_turnstile_token">
-                <div style="padding: 40px 0 0 50px;">
+                <div class="hero-copy">
+                    <span class="hero-kicker">RPG ninja online</span>
+                    <h1>Naruto <strong>' . htmlspecialchars(NARUTO_NOME, ENT_QUOTES, 'UTF-8') . '</strong></h1>
+                    <p>Escolha seu caminho, fortaleça seu ninja e conquiste seu lugar entre as grandes vilas.</p>
+                </div>
+                <div class="hero-login-area">
                     <div class="modern-login-container">
                         <div class="modern-login-fields">
                             <label class="modern-login-row" for="login_login">
@@ -415,7 +446,12 @@ else if ($hr >= 12 && $hr <18 ) { $livre = 'Boa Tarde';
 }
 else { $livre = 'Boa Noite'; }
 echo '<td height="365" colspan="2" valign="top" class="modern-header">
-                <div style="padding: 40px 0 0 50px;">
+                <div class="hero-copy">
+                    <span class="hero-kicker">Painel ninja</span>
+                    <h1>Naruto <strong>'.htmlspecialchars(NARUTO_NOME, ENT_QUOTES, 'UTF-8').'</strong></h1>
+                    <p>Continue sua jornada e acompanhe o progresso do seu personagem.</p>
+                </div>
+                <div class="hero-login-area hero-session">
                     <div class="modern-login-container" style="color: #fff; font-family: var(--font-heading);">
                         <div style="font-size: 16px;">
                             <span style="color: var(--primary-red); font-weight: bold;">'.$livre.',</span> '.$nickname.'
@@ -437,13 +473,15 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
         
         
         <tr>
-          <td width="246" rowspan="3" valign="top" background="template/bg_menu.png"><img src="template/top_menu.png" width="246" height="140" />
-            <table width="246" border="0" cellpadding="0" cellspacing="0">
+          <td width="246" rowspan="3" valign="top" class="sidebar-panel">
+            <button type="button" class="mobile-menu-toggle" aria-expanded="false" aria-controls="game-sidebar-table"><span>Menu do jogo</span><b aria-hidden="true">☰</b></button>
+            <div class="sidebar-emblem" aria-hidden="true"><span>忍</span><small>Vila Shinobi</small></div>
+            <table width="246" border="0" cellpadding="0" cellspacing="0" class="sidebar-table" id="game-sidebar-table">
               <tr>
-                <td width="209"><img src="template/top_bg_home.png" width="246" height="14" /></td>
+                <td width="209"><div class="sidebar-rule"></div></td>
               </tr>
               <tr>
-                <td height="18" valign="top" background="template/bg_home_menu.png"><table width="227" height="18" border="0" align="right" cellpadding="0" cellspacing="0">
+                <td height="18" valign="top"><table width="227" height="18" border="0" align="right" cellpadding="0" cellspacing="0">
                   <tr>
                                   
 <td width="200" valign="top"><?php if(!isset($_SESSION['logado'])) require_once('_inc/menu_off.php'); else require_once('_inc/menu_on.php'); ?></td>                    <td width="16">&nbsp;</td>
@@ -452,10 +490,9 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
                 </table></td>
               </tr>
               <tr>
-                <td><img src="template/bottom_menu.png" width="246" height="73" /></td>
+                <td><div class="sidebar-foot"><span></span><span></span><span></span></div></td>
               </tr>
-              <?php if(!isset($_SESSION['logado'])): ?>
-              <!--
+              <?php if(!isset($_SESSION['logado']) && naruto_turnstile_enabled()): ?>
               <tr>
                 <td align="center" style="padding: 10px 0;">
                     <div style="background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px; border: 1px solid #444; width: 154px;">
@@ -464,7 +501,6 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
                     </div>
                 </td>
               </tr>
-              -->
               <?php endif; ?>
             </table>
           </td>
@@ -504,7 +540,7 @@ text-shadow:none;
 }
 </style>
 
-          <td width="778" height="56" valign="top" background="template/msgs.png" style="background-repeat:no-repeat"><table cellspacing="10">
+          <td width="778" height="56" valign="top" class="announcement-bar"><table cellspacing="10">
             <tr><td width="18" height="22">&nbsp;</td>
               <td width="677">
 
@@ -727,8 +763,8 @@ if(isset($_SESSION['logado'])) {
 <tr>
           <td colspan="2" class="modern-footer" align="center">
             <div style="max-width: 800px; margin: 0 auto;">
-                <p>Copyright 2014 © Todos Os Direitos Reservados a Naruto <b><?php echo NARUTO_NOME; ?></b> E Empresariais a <strong>(<?php echo NARUTO_NOME; ?> Games)</strong></p>
-                <p style="opacity: 0.6; margin-top: 10px;">Copyright 2014 © Direitos do <strong>Anime e Imagens</strong> Reservados a <strong>Masashi Kishimoto</strong></p>
+                <p>Copyright 2014–<?php echo date('Y'); ?> © Todos os direitos reservados a Naruto <b><?php echo NARUTO_NOME; ?></b> e <strong><?php echo NARUTO_NOME; ?> Games</strong></p>
+                <p style="opacity: 0.6; margin-top: 10px;">Direitos do <strong>anime e das imagens</strong> reservados a <strong>Masashi Kishimoto</strong></p>
                 <div style="margin-top: 20px; height: 1px; background: var(--border-subtle); width: 100px; margin-inline: auto;"></div>
                 <p style="margin-top: 15px; font-size: 10px; color: var(--primary-red); letter-spacing: 2px;">NARUTO SHIBUYA RPG</p>
             </div>

@@ -14,11 +14,14 @@ diversão.</br>
 <?php
 if(isset($_POST['char'])){
 	if($db['config_personagem']=='sim'){ echo "<script>self.location='?p=config&type=char&msg=2'</script>"; return; }
-	$char=$_POST['char_personagem'];
+	$char=$_POST['char_personagem'] ?? '';
+	if(!is_string($char) || !preg_match('/^[a-z]+$/D', $char)){
+		echo "<script>self.location='?p=config&type=char'</script>"; return;
+	}
 	if(($char<>'naruto')&&($char<>'sakura')&&($char<>'sasuke')&&($char<>'kakashi')){
-		$sqlv=mysql_query("SELECT ".$char." FROM personagens WHERE usuarioid=".$db['id']);
+		$sqlv=mysql_query("SELECT * FROM personagens WHERE usuarioid=".$db['id']);
 		$dbv=mysql_fetch_assoc($sqlv);
-		if($dbv[$char]==0){ echo "<script>self.location='?p=home'</script>"; return; }
+		if(!isset($dbv[$char]) || $dbv[$char]!=1){ echo "<script>self.location='?p=home'</script>"; return; }
 	}
 	if(date('Y-m-d H:i:s')<$db['vip']) $config="config_personagem='nao'"; else $config="config_personagem='sim'";
 	mysql_query("UPDATE usuarios SET personagem='$char', avatar=1, ".$config." WHERE id=".$db['id']);
@@ -35,7 +38,7 @@ $sqlp=mysql_query("SELECT * FROM personagens WHERE usuarioid=".$db['id']);
 $dbp=mysql_fetch_assoc($sqlp);
 require_once('funcoes.php');
 ?>
-<form method="post" action="?p=config_char&amp;en=ok" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
+<form method="post" action="?p=config&amp;type=char" onsubmit="var b=this.querySelector('input[type=submit]'); if(b) { b.value='Carregando...'; b.disabled=true; }">
 <input type="hidden" id="char" name="char" value="1" />
 <fieldset><legend>Alterar Personagem</legend>
 	<div align="center">

@@ -50,7 +50,3 @@ require_once('funcoes.php');
 @mysql_free_result($sqlp);
 @mysql_free_result($sqls); 
 ?>
-<?php
-@mysql_free_result($sqlp);
-@mysql_free_result($sqls);
-?>

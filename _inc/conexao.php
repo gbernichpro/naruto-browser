@@ -90,6 +90,11 @@ if (naruto_env_bool('APP_DEBUG', false)) {
     @ini_set('display_errors', '0');
 }
 define("NARUTO_NOME", naruto_env('GAME_NAME', naruto_env('NARUTO_NOME', "Fight")));
+// Nome usado em dezenas de telas do codigo legado. A implementacao original
+// desapareceu durante a migracao para PHP 8, fazendo essas paginas falharem.
+function antiinjection($valor){
+    return mysql_real_escape_string($valor === null ? '' : (string) $valor);
+}
 function antiinjection2($sql){
 $sql = addslashes($sql);
 $sql = str_replace("<","</",$sql);

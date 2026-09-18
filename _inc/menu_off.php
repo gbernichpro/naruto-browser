@@ -1,16 +1,8 @@
 
-                   <td width="170"><div style="width:200px;">
-<div style="width:40px;">
-<div class="alinhar" style="width:172px;">
-<div class="titulo">Principal</div>
-<div class="shur"></div> <a href="?p=login">Inicio</a>
-<div class="box3_bottom"></div>
-<div class="shur"></div> <a href="?p=terms">Registrar</a>
-<div class="box3_bottom"></div>
-<div class="shur"></div> <a href="?p=recover">Nova Senha</a>
-<div class="box3_bottom"></div>
-<div class="shur"></div> <a href="?p=faq">Faq</a>
-<div class="box3_bottom"></div>
-</div>
-
+<div class="sidebar-container public-sidebar">
+    <div class="sidebar-title">Principal</div>
+    <div class="sidebar-link-container"><a href="?p=login" class="sidebar-link"><span class="sidebar-icon"></span>Início</a></div>
+    <div class="sidebar-link-container"><a href="?p=terms" class="sidebar-link"><span class="sidebar-icon"></span>Registrar</a></div>
+    <div class="sidebar-link-container"><a href="?p=recover" class="sidebar-link"><span class="sidebar-icon"></span>Nova senha</a></div>
+    <div class="sidebar-link-container"><a href="?p=faq" class="sidebar-link"><span class="sidebar-icon"></span>FAQ</a></div>
 </div>
