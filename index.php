@@ -379,10 +379,16 @@ $random = rand(1,1);
                 <input type="hidden" name="cf-turnstile-response" id="header_turnstile_token">
                 <div style="padding: 40px 0 0 50px;">
                     <div class="modern-login-container">
-                        <span class="modern-label">Login:</span>
-                        <input id="login_login" name="login_login" type="text" placeholder="Usuário" />
-                        <span class="modern-label">Senha:</span>
-                        <input id="login_senha" name="login_senha" type="password" placeholder="Senha" />
+                        <div class="modern-login-fields">
+                            <label class="modern-login-row" for="login_login">
+                                <span class="modern-label">Login</span>
+                                <input id="login_login" name="login_login" type="text" placeholder="Usuário" autocomplete="username" />
+                            </label>
+                            <label class="modern-login-row" for="login_senha">
+                                <span class="modern-label">Senha</span>
+                                <input id="login_senha" name="login_senha" type="password" placeholder="Senha" autocomplete="current-password" />
+                            </label>
+                        </div>
                         <input type="submit" name="Submit" value="Entrar" class="Button_Login modern-btn-login"/>
                     </div>
                 </div>
@@ -556,10 +562,18 @@ if(isset($_SESSION['logado'])) {
 
 
  if(!isset($_GET['p'])) require_once('_inc/home.php'); else {
+		// Algumas rotas apontam para arquivos que nao existem mais no projeto.
+		// Sem esta guarda, o require_once emite um warning do PHP e a pagina
+		// renderiza pela metade; o jogador ve um buraco sem explicacao.
+		$naruto_pagina_sumiu = '<div class="box_top">Pagina indisponivel</div>'
+			. '<div class="box_middle" style="padding:15px;text-align:center;">'
+			. 'Esta secao nao esta disponivel no momento.<br /><br />'
+			. '<a href="?p=home" style="color:#f44;">Voltar ao inicio</a></div>';
+
 		switch($_GET['p']){
    	          	        case 'login': require_once('_inc/login.php'); break;
 			case 'terms': require_once('_inc/terms.php'); break;
-			case 'iniciarguerra': require_once('_inc/iniciarguerra.php'); break;
+			case 'iniciarguerra': if(is_file('_inc/iniciarguerra.php')) require_once('_inc/iniciarguerra.php'); else echo $naruto_pagina_sumiu; break;
 			case 'guerra': require_once('_inc/guerradevila.php'); break;
 			case 'reg': require_once('_inc/reg.php'); break;
 			case 'reg2': require_once('_inc/reg2.php'); break;
@@ -580,9 +594,9 @@ if(isset($_SESSION['logado'])) {
 			case 'shoppet': require_once('_inc/shoppet.php'); break;
             case 'myshoppet': require_once('_inc/myshoppet.php'); break;
 			case 'portoes': require_once('_inc/shopportao.php'); break;
-			case 'credshopup2': require_once('_inc/credshopup2.php'); break;
+			case 'credshopup2': if(is_file('_inc/credshopup2.php')) require_once('_inc/credshopup2.php'); else echo $naruto_pagina_sumiu; break;
 			case 'portao': require_once('_inc/portoes.php'); break;
-			case 'uparanimal': require_once('_inc/uparanimal.php'); break;
+			case 'uparanimal': if(is_file('_inc/uparanimal.php')) require_once('_inc/uparanimal.php'); else echo $naruto_pagina_sumiu; break;
 			case 'warorg': require_once('_inc/warorg.php'); break;
 			case 'rewardmission': require_once('_inc/rewardmission.php'); break;
 			case 'rewardtrain': require_once('_inc/rewardtrain.php'); break;
@@ -602,7 +616,7 @@ if(isset($_SESSION['logado'])) {
 			case 'animais': require_once('_inc/animais.php'); break;
 			case 'credshopvl': require_once('_inc/credshopvl.php'); break;
 			case 'credshopup': require_once('_inc/credshopup.php'); break;
-			case 'credshopbi': require_once('_inc/credshopbi.php'); break;
+			case 'credshopbi': if(is_file('_inc/credshopbi.php')) require_once('_inc/credshopbi.php'); else echo $naruto_pagina_sumiu; break;
 			case 'credshopyn': require_once('_inc/credshopyn.php'); break;
             case 'credshopit': require_once('_inc/credshopit.php'); break;
             case 'room': require_once('_inc/room.php'); break;
@@ -610,13 +624,13 @@ if(isset($_SESSION['logado'])) {
             case 'bolsas': require_once('_inc/bolsas.php'); break;
             case 'shops': require_once('_inc/shops.php'); break;
             case 'myshop': require_once('_inc/myshop.php'); break;
-            case 'enviar': require_once('_inc/enviar.php'); break;
+            case 'enviar': if(is_file('_inc/enviar.php')) require_once('_inc/enviar.php'); else echo $naruto_pagina_sumiu; break;
            	case 'credshopch': require_once('_inc/credshopch.php'); break;
 			case 'invo': require_once('_inc/mypet.php'); break;
 			case 'vip': require_once('_inc/vip.php'); break;
 			case 'vip1': require_once('_inc/vip1.php'); break;
 			case 'mypet': require_once('_inc/mypet.php'); break;
-			case 'vipfinish': require_once('vipfinish.php'); break;
+			case 'vipfinish': if(is_file('vipfinish.php')) require_once('vipfinish.php'); else echo $naruto_pagina_sumiu; break;
 			case 'comprando': require_once('_inc/doacao.php'); break;
 			case 'elements': require_once('_inc/elements.php'); break;
 			case 'credshopnatu': require_once('_inc/credshopnatu.php'); break;
@@ -630,13 +644,13 @@ if(isset($_SESSION['logado'])) {
 			case 'shopselos': require_once('_inc/shopselos.php'); break;
 			case 'pratice': require_once('_inc/pratice.php'); break;
 			case 'tarefas': require_once('_inc/tarefas.php'); break;
-			case 'doujutsu': require_once('doujutsu.php'); break;
+			case 'doujutsu': if(is_file('doujutsu.php')) require_once('doujutsu.php'); else echo $naruto_pagina_sumiu; break;
 			case 'pie3D': require_once('inc/pie3D.php'); break;
-			case 'newdoujutsu': require_once('newdoujutsu.php'); break;
+			case 'newdoujutsu': require_once('_inc/newdoujutsu.php'); break;
 			case 'schooltrain': require_once('_inc/schooltrain.php'); break;
 			case 'donateorg': require_once('_inc/donateorg.php'); break;
 			case 'busymission': require_once('_inc/busymission.php'); break;
-			case 'aprimoraranimal': require_once('_inc/aprimoraranimal.php'); break;
+			case 'aprimoraranimal': if(is_file('_inc/aprimoraranimal.php')) require_once('_inc/aprimoraranimal.php'); else echo $naruto_pagina_sumiu; break;
 			case 'abrirconta': require_once('_inc/abrirconta.php'); break;
 			case 'busytrain': require_once('_inc/busytrain.php'); break;
 			case 'updates': require_once('_inc/updates.php'); break;
@@ -679,20 +693,20 @@ if(isset($_SESSION['logado'])) {
 			case 'faq': require_once('_inc/faq.php'); break;
             case 'spam': require_once('_inc/spam.php'); break;
 			case 'discover': require_once('_inc/discover.php'); break;
-			case 'radio': require_once('_inc/radio.php'); break;
+			case 'radio': if(is_file('_inc/radio.php')) require_once('_inc/radio.php'); else echo $naruto_pagina_sumiu; break;
 			case 'pedra': require_once('_inc/pedra.php'); break;
-			case 'ads': require_once('_inc/ads.php'); break;
+			case 'ads': if(is_file('_inc/ads.php')) require_once('_inc/ads.php'); else echo $naruto_pagina_sumiu; break;
 			case 'changedoujutsu': require_once('_inc/changedoujutsu.php'); break;
 			case 'stats': require_once('_inc/stats.php'); break;
 			case 'book': require_once('_inc/book.php'); break;
-			case 'onlinechat': require_once('_inc/onlinechat.php'); break;
+			case 'onlinechat': if(is_file('_inc/onlinechat.php')) require_once('_inc/onlinechat.php'); else echo $naruto_pagina_sumiu; break;
 			case 'addbook': require_once('_inc/addbook.php'); break;
 			case 'addmy': require_once('_inc/addmy.php'); break;
             case 'viewshop': require_once('_inc/viewshop.php'); break;
 			case 'blacksmith': require_once('_inc/blacksmith.php'); break;
 			case 'parchments': require_once('_inc/parchments.php'); break;
 			case 'quests': require_once('_inc/quests.php'); break;
-			case 'credshop2': require_once('_inc/credshop2.php'); break;
+			case 'credshop2': if(is_file('_inc/credshop2.php')) require_once('_inc/credshop2.php'); else echo $naruto_pagina_sumiu; break;
 			case 'msgvip': require_once('_inc/msgvip.php'); break;
 			case 'blocklogin': require_once('_inc/blocklogin.php'); break;
 			case 'akatsuki': require_once('_inc/akatsuki.php'); break;
