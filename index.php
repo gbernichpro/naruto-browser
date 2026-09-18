@@ -190,8 +190,8 @@ function validateLoginForm() {
  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <link type="text/css" href="_css/menu.css" rel="stylesheet" />
 	<link type="text/css" href="_css/menu3.css" rel="stylesheet" />
-    <link type="text/css" href="_css/sidebar_refined.css?v=20260917-2" rel="stylesheet" />
-    <link type="text/css" href="_css/modern_ui.css?v=20260917-9" rel="stylesheet" />
+    <link type="text/css" href="_css/sidebar_refined.css?v=20260917-3" rel="stylesheet" />
+    <link type="text/css" href="_css/modern_ui.css?v=20260917-10" rel="stylesheet" />
     <script type="text/javascript" src="_js/jquery.min.js"></script>
     <script type="text/javascript" src="_js/modern_ui.js?v=20260917-3" defer></script>
     <script type="text/javascript" src="_js/zebra_dialog.js"></script>
@@ -473,18 +473,18 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
         
         
         <tr>
-          <td width="246" rowspan="3" valign="top" class="sidebar-panel">
+          <td width="220" rowspan="3" valign="top" class="sidebar-panel">
             <button type="button" class="mobile-menu-toggle" aria-expanded="false" aria-controls="game-sidebar-table"><span>Menu do jogo</span><b aria-hidden="true">☰</b></button>
             <div class="sidebar-emblem" aria-hidden="true"><span>忍</span><small>Vila Shinobi</small></div>
-            <table width="246" border="0" cellpadding="0" cellspacing="0" class="sidebar-table" id="game-sidebar-table">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="sidebar-table" id="game-sidebar-table">
               <tr>
                 <td width="209"><div class="sidebar-rule"></div></td>
               </tr>
               <tr>
-                <td height="18" valign="top"><table width="227" height="18" border="0" align="right" cellpadding="0" cellspacing="0">
+                <td height="18" valign="top"><table width="100%" height="18" border="0" cellpadding="0" cellspacing="0">
                   <tr>
                                   
-<td width="200" valign="top"><?php if(!isset($_SESSION['logado'])) require_once('_inc/menu_off.php'); else require_once('_inc/menu_on.php'); ?></td>                    <td width="16">&nbsp;</td>
+<td valign="top"><?php if(!isset($_SESSION['logado'])) require_once('_inc/menu_off.php'); else require_once('_inc/menu_on.php'); ?></td>
                   </tr>
 
                 </table></td>
@@ -782,3 +782,4 @@ if(isset($_SESSION['logado'])) {
 
 </body>
 </html>
+
