@@ -122,7 +122,7 @@
     <div class="sidebar-link-container"><a href="?p=cassa" class="sidebar-link"><span class="sidebar-icon"></span>Cassino Ninja</a></div>
     <div class="sidebar-link-container"><a href="?p=doarbanco" class="sidebar-link"><span class="sidebar-icon"></span>Banco yens</a></div>
     <div class="sidebar-link-container"><a href="?p=akatsuki" class="sidebar-link"><span class="sidebar-icon"></span>Akatsuki</a></div>
-    <div class="sidebar-link-container"><a href="#" class="sidebar-link"><span class="sidebar-icon"></span>Chat</a></div>
+    <div class="sidebar-link-container"><a href="?p=chat" class="sidebar-link"><span class="sidebar-icon"></span>Chat</a></div>
 
     <div class="sidebar-title">Especiais</div>
     <div class="sidebar-link-container"><a href="?p=invasao" class="sidebar-link"><span class="sidebar-icon"></span>Invasão</a></div>
