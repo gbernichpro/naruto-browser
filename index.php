@@ -681,7 +681,7 @@ if(isset($_SESSION['logado'])) {
 			case 'pratice': require_once('_inc/pratice.php'); break;
 			case 'tarefas': require_once('_inc/tarefas.php'); break;
 			case 'doujutsu': if(is_file('doujutsu.php')) require_once('doujutsu.php'); else echo $naruto_pagina_sumiu; break;
-			case 'pie3D': require_once('inc/pie3D.php'); break;
+			case 'pie3D': if(is_file('inc/pie3D.php')) require_once('inc/pie3D.php'); else echo $naruto_pagina_sumiu; break;
 			case 'newdoujutsu': require_once('_inc/newdoujutsu.php'); break;
 			case 'schooltrain': require_once('_inc/schooltrain.php'); break;
 			case 'donateorg': require_once('_inc/donateorg.php'); break;
