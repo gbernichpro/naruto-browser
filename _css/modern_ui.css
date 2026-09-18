@@ -190,48 +190,6 @@ input:focus {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
 }
 
-.modern-login-container {
-    padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(5px);
-    border-radius: 8px;
-    border: 1px solid var(--border-subtle);
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-}
-
-/* Login e senha empilhados, um abaixo do outro. */
-.modern-login-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.modern-login-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-/* Rotulos com a mesma largura para os dois campos alinharem. */
-.modern-login-row .modern-label {
-    width: 42px;
-    text-align: right;
-    flex: 0 0 auto;
-}
-
-/* Os campos herdavam padding 10px da regra generica de input, o que os
-   deixava com 34px de altura. Aqui ficam compactos e do tamanho certo
-   para caber na barra do topo. */
-.modern-login-container .modern-login-row input {
-    width: 150px;
-    padding: 5px 8px;
-    font-size: 12px;
-    height: auto;
-}
-
 .modern-label {
     font-family: var(--font-heading);
     font-weight: 600;
@@ -488,41 +446,76 @@ body::before {
 }
 
 .modern-login-container {
-    width: 100%;
-    padding: 15px 18px;
+    display: inline-flex;
+    width: auto;
+    max-width: 320px;
+    margin-left: auto;
+    padding: 12px 14px;
+    align-items: center;
+    gap: 12px;
     border-color: rgba(255, 255, 255, 0.13);
+    border-style: solid;
+    border-width: 1px;
     border-radius: 12px;
     background: rgba(7, 8, 11, 0.78);
+    backdrop-filter: blur(5px);
     box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
 }
 
-.modern-login-container input[type="text"],
-.modern-login-container input[type="password"] {
+.modern-login-fields {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.modern-login-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.modern-login-row .modern-label {
+    width: 42px;
+    flex: 0 0 42px;
+    text-align: right;
+}
+
+.modern-login-container .modern-login-row input[type="text"],
+.modern-login-container .modern-login-row input[type="password"] {
+    box-sizing: border-box;
+    width: 160px;
     min-width: 0;
-    flex: 1 1 180px;
-    height: 40px;
+    height: 32px;
+    flex: 0 0 160px;
+    padding: 5px 9px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.055);
+    font-size: 12px;
 }
 
 .Button_Login.modern-btn-login,
 .Button_Logout.modern-btn-login {
-    min-height: 40px;
-    padding: 8px 24px;
+    min-height: 34px;
+    padding: 7px 18px;
     border-radius: 8px;
 }
 
 .sidebar-panel {
-    width: 246px !important;
-    min-width: 246px;
-    max-width: 246px;
-    padding: 20px 14px 28px;
+    box-sizing: border-box;
+    width: 220px !important;
+    min-width: 220px;
+    max-width: 220px;
+    padding: 18px 10px 26px;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     background: linear-gradient(180deg, rgba(21, 23, 29, 0.98), rgba(10, 11, 15, 0.96)) !important;
 }
 
+.sidebar-panel table,
 .sidebar-table {
     width: 100% !important;
+    max-width: 100%;
 }
 
 /* Mantem titulos e caixas das paginas dentro da coluna principal. */
@@ -538,6 +531,26 @@ body::before {
     max-width: 100%;
     clear: both !important;
     overflow-wrap: anywhere;
+}
+
+/* Os cabecalhos ilustrados antigos usam largura fixa e margem negativa.
+   Estas regras os mantem dentro da coluna de conteudo em todas as paginas. */
+.game-shell > tbody > tr > td.modern-card-body [style*="width: 720px"],
+.game-shell > tbody > tr > td.modern-card-body [style*="width:720px"] {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 720px;
+}
+
+.game-shell > tbody > tr > td.modern-card-body [style*="width: 720px"] table,
+.game-shell > tbody > tr > td.modern-card-body [style*="width:720px"] table {
+    width: 100% !important;
+    max-width: 100%;
+}
+
+.game-shell > tbody > tr > td.modern-card-body [style*="margin-left: -345px"],
+.game-shell > tbody > tr > td.modern-card-body [style*="margin-left:-345px"] {
+    margin-left: 0 !important;
 }
 
 .sidebar-emblem {
@@ -1068,17 +1081,7 @@ body::before {
 
 @media (max-width: 1000px) {
     .modern-login-container {
-        flex-wrap: wrap;
-        gap: 9px;
-    }
-
-    .modern-login-container .modern-label {
-        display: none;
-    }
-
-    .modern-login-container input[type="text"],
-    .modern-login-container input[type="password"] {
-        flex: 1 1 220px;
+        max-width: 300px;
     }
 
     .home-dashboard-grid {
@@ -1117,17 +1120,27 @@ body::before {
     }
 
     .modern-login-container {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
         flex-wrap: wrap;
         gap: 8px;
     }
 
-    .modern-login-container .modern-label {
-        display: none;
+    .modern-login-fields,
+    .modern-login-row {
+        width: 100%;
     }
 
-    .modern-login-container input[type="text"],
-    .modern-login-container input[type="password"] {
-        flex-basis: calc(50% - 6px);
+    .modern-login-container .modern-login-row input[type="text"],
+    .modern-login-container .modern-login-row input[type="password"] {
+        width: auto;
+        flex: 1 1 auto;
+    }
+
+    .Button_Login.modern-btn-login {
+        width: 100%;
     }
 
     .sidebar-panel {
@@ -1234,3 +1247,4 @@ body::before {
         transition-duration: 0.01ms !important;
     }
 }
+
