@@ -191,7 +191,7 @@ function validateLoginForm() {
     <link type="text/css" href="_css/menu.css" rel="stylesheet" />
 	<link type="text/css" href="_css/menu3.css" rel="stylesheet" />
     <link type="text/css" href="_css/sidebar_refined.css?v=20260917-3" rel="stylesheet" />
-    <link type="text/css" href="_css/modern_ui.css?v=20260917-10" rel="stylesheet" />
+    <link type="text/css" href="_css/modern_ui.css?v=20260917-11" rel="stylesheet" />
     <script type="text/javascript" src="_js/jquery.min.js"></script>
     <script type="text/javascript" src="_js/modern_ui.js?v=20260917-3" defer></script>
     <script type="text/javascript" src="_js/zebra_dialog.js"></script>
@@ -453,18 +453,18 @@ echo '<td height="365" colspan="2" valign="top" class="modern-header">
                 </div>
                 <div class="hero-login-area hero-session">
                     <div class="modern-login-container" style="color: #fff; font-family: var(--font-heading);">
-                        <div style="font-size: 16px;">
+                        <div class="modern-session-item modern-session-greeting">
                             <span style="color: var(--primary-red); font-weight: bold;">'.$livre.',</span> '.$nickname.'
                         </div>
-                        <div style="width: 1px; height: 30px; background: var(--border-subtle);"></div>
-                        <div style="font-size: 14px;">
+                        <div class="modern-session-divider" aria-hidden="true"></div>
+                        <div class="modern-session-item modern-session-time">
                             <span id="clock"></span><script>setTimeout("horas()",1000);</script>
                         </div>
-                        <div style="width: 1px; height: 30px; background: var(--border-subtle);"></div>
-                        <div style="font-size: 12px; color: var(--text-dim);">
+                        <div class="modern-session-divider" aria-hidden="true"></div>
+                        <div class="modern-session-item modern-session-online">
                             <b style="color: #0f0;">'.$ok.'</b> Ninjas Online
                         </div>
-                        <div style="width: 1px; height: 30px; background: var(--border-subtle);"></div>
+                        <div class="modern-session-divider" aria-hidden="true"></div>
                         <input type="button" value="Sair" class="Button_Logout modern-btn-login" style="background: #333;" onclick="location.href=\'?p=logout&csrf_token='.get_csrf_token().'\'" />
                     </div>
                 </div>
